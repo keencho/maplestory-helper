@@ -1,0 +1,37 @@
+{
+  "name": "maplestory-homework",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^4.7.0",
+    "@types/antd": "^1.0.0",
+    "antd": "^4.24.1",
+    "react": "^18.2.0",
+    "react-css-theme-switcher": "^0.3.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.4.3",
+    "recoil": "^0.7.6"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.9",
+    "@types/react": "^18.0.24",
+    "@types/react-dom": "^18.0.8",
+    "@vitejs/plugin-react": "^2.2.0",
+    "autoprefixer": "^10.4.13",
+    "gulp": "^4.0.2",
+    "gulp-csso": "^4.0.1",
+    "gulp-debug": "^4.0.0",
+    "gulp-less": "^5.0.0",
+    "gulp-postcss": "^9.0.1",
+    "less-plugin-npm-import": "^2.1.0",
+    "sass": "^1.56.0",
+    "typescript": "^4.6.4",
+    "vite": "^3.2.3"
+  }
+}
