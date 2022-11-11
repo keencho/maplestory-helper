@@ -1,90 +1,35 @@
-import {Col, Row, Space, Table, Tag} from 'antd';
-import React from 'react';
+import {Col, Row} from 'antd';
+import React, {useEffect} from 'react';
 import DateTimeUtils from '../../util/DateTimeUtils';
-import type {ColumnsType} from 'antd/es/table';
+import HomeworkTable from '../component/HomeworkTable';
+import styled from 'styled-components';
 
-interface DataType {
-	key: string;
-	name: string;
-	age: number;
-	address: string;
-	tags: string[];
-}
-
-const columns: ColumnsType<DataType> = [
-	{
-		title: 'Name',
-		dataIndex: 'name',
-		key: 'name',
-		render: text => <a>{text}</a>,
-	},
-	{
-		title: 'Age',
-		dataIndex: 'age',
-		key: 'age',
-	},
-	{
-		title: 'Address',
-		dataIndex: 'address',
-		key: 'address',
-	},
-	{
-		title: 'Tags',
-		key: 'tags',
-		dataIndex: 'tags',
-		render: (_, { tags }) => (
-			<>
-				{tags.map(tag => {
-					let color = tag.length > 5 ? 'geekblue' : 'green';
-					if (tag === 'loser') {
-						color = 'volcano';
-					}
-					return (
-						<Tag color={color} key={tag}>
-							{tag.toUpperCase()}
-						</Tag>
-					);
-				})}
-			</>
-		),
-	},
-	{
-		title: 'Action',
-		key: 'action',
-		render: (_, record) => (
-			<Space size="middle">
-				<a>Invite {record.name}</a>
-				<a>Delete</a>
-			</Space>
-		),
-	},
-];
-
-const data: DataType[] = [
-	{
-		key: '1',
-		name: 'John Brown',
-		age: 32,
-		address: 'New York No. 1 Lake Park',
-		tags: ['nice', 'developer'],
-	},
-	{
-		key: '2',
-		name: 'Jim Green',
-		age: 42,
-		address: 'London No. 1 Lake Park',
-		tags: ['loser'],
-	},
-	{
-		key: '3',
-		name: 'Joe Black',
-		age: 32,
-		address: 'Sidney No. 1 Lake Park',
-		tags: ['cool', 'teacher'],
-	},
-];
+const Divider = styled.div`
+	height: 16px;
+`
 
 const HomeworkContainer = () => {
+	
+	const getFileName = (path: string) => {
+		const split = path.split('/');
+		return split[split.length - 1];
+	}
+	
+	const symbolData = Object.keys(import.meta.glob('../../assets/icon/symbol/*.png', { eager: true }))
+		.sort((a, b) => {
+			const aIdx = Number(getFileName(a).split('-')[0]);
+			const bIdx = Number(getFileName(b).split('-')[0]);
+			
+			return aIdx > bIdx ? 1 : -1;
+		})
+		.map((path: string) => {
+			const fileName = getFileName(path);
+			
+			return {
+				src: new URL(path, import.meta.url).href,
+				name: fileName.split('.')[0].split('-')[1]
+			}
+	})
 
 	return (
 		<>
@@ -96,7 +41,9 @@ const HomeworkContainer = () => {
 					{DateTimeUtils.getTodayDate()}
 				</Col>
 				<Col span={15}>
-					<Table columns={columns} dataSource={data} />
+					<HomeworkTable title={'심볼 일퀘'} data={symbolData} />
+					<Divider />
+					<HomeworkTable title={'심볼 일퀘'} data={symbolData} />
 				</Col>
 			</Row>
 		</>
