@@ -1,7 +1,8 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
 import {ResetButton} from './element/ResetButton';
 import {Button, Progress} from 'antd';
+import Color from '../../model/color.model';
 
 const Table = styled.table`
 	border-collapse: collapse;
@@ -92,14 +93,14 @@ const HomeworkTable = (props: Props) => {
 				case 'use':
 					if (dt.use) {
 						return (
-							<td style={{ backgroundColor: '#6BBE66' }} key={idx}>
+							<td style={{ backgroundColor: Color.BLUE }} key={idx}>
 								<ResetButton fullWidth={true} onClick={() => check('use', idx)}>O</ResetButton>
 							</td>
 						)
 					}
 					
 					return (
-						<td style={{ backgroundColor: '#FF4141' }} key={idx}>
+						<td style={{ backgroundColor: Color.RED }} key={idx}>
 							<ResetButton fullWidth={true} onClick={() => check('use', idx)}>X</ResetButton>
 						</td>
 					)
@@ -112,7 +113,7 @@ const HomeworkTable = (props: Props) => {
 					}
 					
 					return (
-						<td key={idx} style={{ backgroundColor: dt.doWork ? '#5B9FD4' : 'inherit' }}>
+						<td key={idx} style={{ backgroundColor: dt.doWork ? Color.BLUE : 'inherit' }}>
 							<ResetButton fullWidth={true} onClick={() => check('doWork', idx)}>
 								<img src={dt.src} alt={dt.name} />
 							</ResetButton>
@@ -145,7 +146,7 @@ const HomeworkTable = (props: Props) => {
 				<thead>
 					<tr>
 						<td colSpan={data && data.length - 1}><h3>{props.title}</h3></td>
-						<td style={{ textAlign: 'right' }}><Button type="primary" size={'small'} onClick={reset}>초기화</Button></td>
+						<td style={{ textAlign: 'right' }}><Button size={'small'} type={'primary'} danger onClick={reset}>초기화</Button></td>
 					</tr>
 				</thead>
 				<tbody>
@@ -161,7 +162,7 @@ const HomeworkTable = (props: Props) => {
 					<TrRate>
 						<td colSpan={1}>달성률</td>
 						<td colSpan={data && data.length - 1} style={{ padding: '0 16px' }}>
-							<Progress percent={calculateRate()}  />
+							<Progress percent={calculateRate()} strokeColor={Color.BLUE} status={'normal'} />
 						</td>
 					</TrRate>
 				</tbody>
