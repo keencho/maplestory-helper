@@ -1,8 +1,9 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import {ResetButton} from './element/ResetButton';
 import {Button, Progress} from 'antd';
 import Color from '../../model/color.model';
+import DateTimeUtils from '../../util/DateTimeUtils';
 
 const Table = styled.table`
 	border-collapse: collapse;
@@ -39,6 +40,7 @@ interface Data {
 interface Props {
 	title: string
 	data: Data[]
+	type: 'daily' | 'weekly'
 }
 
 type Properties = {
@@ -48,18 +50,66 @@ type Properties = {
 	doWork: boolean
 }
 
+interface LocalStorageSavedForm {
+	title: string
+	date: string,
+	data: Properties[]
+}
+
+const HOMEWORK_DAILY_KEY = "HOMEWORK_DAILY"
+const TODAY = DateTimeUtils.getTodayDate();
+
 const HomeworkTable = (props: Props) => {
 	
+	const dailyItem = window.localStorage.getItem(HOMEWORK_DAILY_KEY);
+	const parsedDailyItem: LocalStorageSavedForm[] = dailyItem === null ? [] : JSON.parse(dailyItem) as LocalStorageSavedForm[];
+	
+	// 일자 지난 데일리 일퀘 현황들은 지워버린다.
+	if (parsedDailyItem.some(item => item.date !== TODAY)) {
+		window.localStorage.setItem(HOMEWORK_DAILY_KEY, JSON.stringify(parsedDailyItem.filter(item => item.date !== TODAY)));
+	}
+	
+	const matchedDailyItem = parsedDailyItem.find(item => item.date === TODAY && item.title === props.title);
+	
 	const [data, setData] = useState<Properties[]>(
-		props.data.map((prop: Data) => {
-			return {
-				use: true,
-				src: prop.src,
-				name: prop.name,
-				doWork: false
-			}
-		})
+		matchedDailyItem === undefined
+		?
+			props.data.map((prop: Data) => {
+				return {
+					use: true,
+					src: prop.src,
+					name: prop.name,
+					doWork: false
+				}
+			})
+		:
+			matchedDailyItem.data
 	);
+	
+	useEffect(() => {
+		if (props.type === 'daily') {
+			const item = window.localStorage.getItem(HOMEWORK_DAILY_KEY);
+			if (item === null) {
+				window.localStorage.setItem(HOMEWORK_DAILY_KEY, JSON.stringify([{
+					date: TODAY,
+					title: props.title,
+					data: data
+				} as LocalStorageSavedForm ]))
+				return;
+			}
+			
+			let parsedItem = JSON.parse(item);
+			parsedItem = parsedItem.filter((item: LocalStorageSavedForm) => item.title !== props.title);
+			
+			parsedItem.push({
+				date: TODAY,
+				title: props.title,
+				data: data
+			})
+			
+			window.localStorage.setItem(HOMEWORK_DAILY_KEY, JSON.stringify(parsedItem));
+		}
+	}, [data])
 	
 	const check = (key: 'use' | 'doWork', idx: number) => {
 		setData((pv) => pv.map((p: Properties, idx2: number) => {

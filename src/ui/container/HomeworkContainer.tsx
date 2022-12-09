@@ -47,9 +47,9 @@ const HomeworkContainer = () => {
 					{DateTimeUtils.getTodayDate()}
 				</Col>
 				<Col span={15}>
-					<HomeworkTable title={'심볼 일퀘'} data={symbolData} />
+					<HomeworkTable title={'심볼 일퀘'} data={symbolData} type={'daily'} />
 					<Spacer />
-					<HomeworkTable title={'아케인리버 일퀘'} data={arcaneRiverData} />
+					<HomeworkTable title={'아케인리버 일퀘'} data={arcaneRiverData} type={'daily'} />
 				</Col>
 			</Row>
 		</>

@@ -9,7 +9,7 @@ import Header from './ui/component/Header';
 import ThemeProvider from './core/ThemeProvider';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <RecoilRoot>
       <ThemeProvider>
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -23,5 +23,5 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         </div>
       </ThemeProvider>
     </RecoilRoot>
-  </React.StrictMode>
+  // </React.StrictMode>
 )
