@@ -17,19 +17,12 @@ const Table = styled.table`
 	
 	td {
 		width: 80px;
+		
+		img {
+			width: 33px;
+			height: 33px;
+		}
 	}
-`
-
-const TrCheckUse = styled.tr`
-`
-
-const TrName = styled.tr`
-`
-
-const TrImage = styled.tr`
-`
-
-const TrRate = styled.tr`
 `
 
 interface Data {
@@ -53,23 +46,39 @@ type Properties = {
 interface LocalStorageSavedForm {
 	title: string
 	date: string,
+	type: 'daily' | 'weekly'
 	data: Properties[]
 }
 
-const HOMEWORK_DAILY_KEY = "HOMEWORK_DAILY"
+export const HOMEWORK_KEY = "HOMEWORK"
 const TODAY = DateTimeUtils.getTodayDate();
 
-const HomeworkTable = (props: Props) => {
+export const HomeworkTable = (props: Props) => {
 	
-	const dailyItem = window.localStorage.getItem(HOMEWORK_DAILY_KEY);
-	const parsedDailyItem: LocalStorageSavedForm[] = dailyItem === null ? [] : JSON.parse(dailyItem) as LocalStorageSavedForm[];
+	const item = window.localStorage.getItem(HOMEWORK_KEY);
+	let parsedItem: LocalStorageSavedForm[] = item === null ? [] : JSON.parse(item) as LocalStorageSavedForm[];
 	
-	// 일자 지난 데일리 일퀘 현황들은 지워버린다.
-	if (parsedDailyItem.some(item => item.date !== TODAY)) {
-		window.localStorage.setItem(HOMEWORK_DAILY_KEY, JSON.stringify(parsedDailyItem.filter(item => item.date !== TODAY)));
+	// 오늘날짜가 아닌 데일리 숙제가 있다면
+	if (parsedItem.some(item => item.date !== TODAY && item.type === 'daily')) {
+		window.localStorage.setItem(HOMEWORK_KEY, JSON.stringify(parsedItem.filter(item => item.date !== TODAY && item.type === 'daily')));
+		
+		// 날짜는 오늘날짜로 바꾸고 사용여부는 기존의것 사용, 달성여부는 false
+		parsedItem = parsedItem.map((item: LocalStorageSavedForm) => {
+			return {
+				...item,
+				date: TODAY,
+				data: item.data.map((data: Properties) => {
+					return {
+						...data,
+						use: data.use,
+						doWork: false
+					}
+				})
+			};
+		})
 	}
 	
-	const matchedDailyItem = parsedDailyItem.find(item => item.date === TODAY && item.title === props.title);
+	const matchedDailyItem = parsedItem.find(item => item.date === TODAY && item.title === props.title);
 	
 	const [data, setData] = useState<Properties[]>(
 		matchedDailyItem === undefined
@@ -88,12 +97,13 @@ const HomeworkTable = (props: Props) => {
 	
 	useEffect(() => {
 		if (props.type === 'daily') {
-			const item = window.localStorage.getItem(HOMEWORK_DAILY_KEY);
+			const item = window.localStorage.getItem(HOMEWORK_KEY);
 			if (item === null) {
-				window.localStorage.setItem(HOMEWORK_DAILY_KEY, JSON.stringify([{
+				window.localStorage.setItem(HOMEWORK_KEY, JSON.stringify([{
 					date: TODAY,
 					title: props.title,
-					data: data
+					data: data,
+					type: props.type
 				} as LocalStorageSavedForm ]))
 				return;
 			}
@@ -104,10 +114,11 @@ const HomeworkTable = (props: Props) => {
 			parsedItem.push({
 				date: TODAY,
 				title: props.title,
-				data: data
+				data: data,
+				type: props.type
 			})
 			
-			window.localStorage.setItem(HOMEWORK_DAILY_KEY, JSON.stringify(parsedItem));
+			window.localStorage.setItem(HOMEWORK_KEY, JSON.stringify(parsedItem));
 		}
 	}, [data])
 	
@@ -200,25 +211,23 @@ const HomeworkTable = (props: Props) => {
 					</tr>
 				</thead>
 				<tbody>
-					<TrCheckUse>
+					<tr>
 						{getDataByKey('use')}
-					</TrCheckUse>
-					<TrName>
+					</tr>
+					<tr>
 						{getDataByKey('name')}
-					</TrName>
-					<TrImage>
+					</tr>
+					<tr>
 						{getDataByKey('src')}
-					</TrImage>
-					<TrRate>
+					</tr>
+					<tr>
 						<td colSpan={1}>달성률</td>
 						<td colSpan={data && data.length - 1} style={{ padding: '0 16px' }}>
 							<Progress percent={calculateRate()} strokeColor={Color.BLUE} status={'normal'} />
 						</td>
-					</TrRate>
+					</tr>
 				</tbody>
 			</Table>
 		</>
 	)
 }
-
-export default HomeworkTable

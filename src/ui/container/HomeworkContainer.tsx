@@ -1,7 +1,7 @@
 import {Col, Row} from 'antd';
-import React, {useEffect} from 'react';
+import React from 'react';
 import DateTimeUtils from '../../util/DateTimeUtils';
-import HomeworkTable from '../component/HomeworkTable';
+import {HOMEWORK_KEY, HomeworkTable} from '../component/HomeworkTable';
 import styled from 'styled-components';
 
 const Spacer = styled.div`
@@ -33,9 +33,9 @@ const HomeworkContainer = () => {
 			})
 	}
 	
-	const symbolData = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/symbol/*.png', { eager: true })))
-	
-	const arcaneRiverData = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/arcane-river/*.png', { eager: true })))
+	const symbolData = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/homework/symbol/*.png', { eager: true })))
+	const arcaneRiverData = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/homework/arcane-river/*.png', { eager: true })))
+	const dailyBossData = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/homework/daily-boss/*.png', { eager: true })))
 	
 	return (
 		<>
@@ -47,9 +47,20 @@ const HomeworkContainer = () => {
 					{DateTimeUtils.getTodayDate()}
 				</Col>
 				<Col span={15}>
+					<button
+						style={{ border: '1px solid blue', backgroundColor: 'inherit', padding: '1rem', cursor: 'pointer', marginBottom: '1rem' }}
+						onClick={() => {
+							window.localStorage.removeItem(HOMEWORK_KEY);
+							location.reload();
+						}}
+					>
+						로컬스토리지 비우고 리로드
+					</button>
 					<HomeworkTable title={'심볼 일퀘'} data={symbolData} type={'daily'} />
 					<Spacer />
 					<HomeworkTable title={'아케인리버 일퀘'} data={arcaneRiverData} type={'daily'} />
+					<Spacer />
+					<HomeworkTable title={'일일 보스'} data={dailyBossData} type={'daily'} />
 				</Col>
 			</Row>
 		</>
