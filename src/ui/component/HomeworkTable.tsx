@@ -4,6 +4,9 @@ import {ResetButton} from './element/ResetButton';
 import {Button, Progress} from 'antd';
 import Color from '../../model/color.model';
 import DateTimeUtils from '../../util/DateTimeUtils';
+import moment from 'moment';
+import it from 'node:test';
+import {match} from 'assert';
 
 const Table = styled.table`
 	border-collapse: collapse;
@@ -34,6 +37,7 @@ interface Props {
 	title: string
 	data: Data[]
 	type: 'daily' | 'weekly'
+	resetDay?: 'thu' | 'mon'
 }
 
 type Properties = {
@@ -45,9 +49,10 @@ type Properties = {
 
 interface LocalStorageSavedForm {
 	title: string
-	date: string,
+	date: string
 	type: 'daily' | 'weekly'
 	data: Properties[]
+	weeklyResetDate?: string
 }
 
 export const HOMEWORK_KEY = "HOMEWORK"
@@ -58,12 +63,38 @@ export const HomeworkTable = (props: Props) => {
 	const item = window.localStorage.getItem(HOMEWORK_KEY);
 	let parsedItem: LocalStorageSavedForm[] = item === null ? [] : JSON.parse(item) as LocalStorageSavedForm[];
 	
-	// 오늘날짜가 아닌 데일리 숙제가 있다면
-	if (parsedItem.some(item => item.date !== TODAY && item.type === 'daily')) {
-		window.localStorage.setItem(HOMEWORK_KEY, JSON.stringify(parsedItem.filter(item => item.date !== TODAY && item.type === 'daily')));
-		
-		// 날짜는 오늘날짜로 바꾸고 사용여부는 기존의것 사용, 달성여부는 false
+	// 오늘날짜가 아닌 숙제가 있다면
+	if (parsedItem.some(item => item.date !== TODAY)) {
 		parsedItem = parsedItem.map((item: LocalStorageSavedForm) => {
+			// 이럴일은 없지만 날짜가 오늘이라면 그냥 그대로 리턴함.
+			if (item.date === TODAY) {
+				return item;
+			}
+			
+			// 일일 숙제의 경우 날짜는 오늘날짜로 바꾸고 사용여부는 기존의것 사용, 달성여부는 false
+			if (item.type === 'daily') {
+				return {
+					...item,
+					date: TODAY,
+					data: item.data.map((data: Properties) => {
+						return {
+							...data,
+							use: data.use,
+							doWork: false
+						}
+					})
+				};
+			}
+			
+			// 주간 숙제
+			// 리셋날짜 이전이라면 모든 프로퍼티를 그대로 가저감
+			if (moment(TODAY).isBefore(item.weeklyResetDate)) {
+				return {
+					...item,
+					date: TODAY
+				}
+			}
+			// 리셋날짜 당일 or 리셋날짜 이후라면 사용여부는 기존것 사용, 달성여부는 false
 			return {
 				...item,
 				date: TODAY,
@@ -74,14 +105,14 @@ export const HomeworkTable = (props: Props) => {
 						doWork: false
 					}
 				})
-			};
+			}
 		})
 	}
 	
-	const matchedDailyItem = parsedItem.find(item => item.date === TODAY && item.title === props.title);
+	const matchedItem = parsedItem.find(item => item.title === props.title);
 	
 	const [data, setData] = useState<Properties[]>(
-		matchedDailyItem === undefined
+		matchedItem === undefined
 		?
 			props.data.map((prop: Data) => {
 				return {
@@ -92,34 +123,45 @@ export const HomeworkTable = (props: Props) => {
 				}
 			})
 		:
-			matchedDailyItem.data
+			matchedItem.data
 	);
 	
 	useEffect(() => {
-		if (props.type === 'daily') {
-			const item = window.localStorage.getItem(HOMEWORK_KEY);
-			if (item === null) {
-				window.localStorage.setItem(HOMEWORK_KEY, JSON.stringify([{
-					date: TODAY,
-					title: props.title,
-					data: data,
-					type: props.type
-				} as LocalStorageSavedForm ]))
-				return;
+		const item = window.localStorage.getItem(HOMEWORK_KEY);
+		
+		let arr: LocalStorageSavedForm[] = [];
+		if (item !== null) {
+			arr = JSON.parse(item).filter((item: LocalStorageSavedForm) => item.title !== props.title);
+		}
+		
+		let form: LocalStorageSavedForm = {
+			date: TODAY,
+			title: props.title,
+			data: data,
+			type: props.type
+		}
+		
+		// 주간 숙제의 경우 다른 로직 적용
+		if (props.type === 'weekly' && props.resetDay) {
+			const dayNeed = props.resetDay === 'thu' ? 4 : 1;
+			const today = moment().isoWeekday();
+			
+			// 오늘의 요일이 초기화 요일 이전이라면
+			let momentDay;
+			if (today < dayNeed) {
+				momentDay = moment().isoWeekday(dayNeed);
+			}
+			// 오늘이 초기화 날짜이거나 그 이후 요일이라면
+			else {
+				momentDay = moment().add(1, 'weeks').isoWeekday(dayNeed);
 			}
 			
-			let parsedItem = JSON.parse(item);
-			parsedItem = parsedItem.filter((item: LocalStorageSavedForm) => item.title !== props.title);
-			
-			parsedItem.push({
-				date: TODAY,
-				title: props.title,
-				data: data,
-				type: props.type
-			})
-			
-			window.localStorage.setItem(HOMEWORK_KEY, JSON.stringify(parsedItem));
+			form.weeklyResetDate = momentDay.format('YYYY-MM-DD');
 		}
+		
+		arr.push(form)
+		
+		window.localStorage.setItem(HOMEWORK_KEY, JSON.stringify(arr));
 	}, [data])
 	
 	const check = (key: 'use' | 'doWork', idx: number) => {

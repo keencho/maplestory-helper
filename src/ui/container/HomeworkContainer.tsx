@@ -36,6 +36,8 @@ const HomeworkContainer = () => {
 	const symbolData = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/homework/symbol/*.png', { eager: true })))
 	const arcaneRiverData = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/homework/arcane-river/*.png', { eager: true })))
 	const dailyBossData = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/homework/daily-boss/*.png', { eager: true })))
+	const weeklyBossData1 = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/homework/weekly-boss-1/*.png', { eager: true })))
+	const weeklyBossData2 = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/homework/weekly-boss-2/*.png', { eager: true })))
 	
 	return (
 		<>
@@ -61,6 +63,10 @@ const HomeworkContainer = () => {
 					<HomeworkTable title={'아케인리버 일퀘'} data={arcaneRiverData} type={'daily'} />
 					<Spacer />
 					<HomeworkTable title={'일일 보스'} data={dailyBossData} type={'daily'} />
+					<Spacer />
+					<HomeworkTable title={'주간 보스1'} data={weeklyBossData1} type={'weekly'} resetDay={'thu'} />
+					<Spacer />
+					<HomeworkTable title={'주간 보스2'} data={weeklyBossData2} type={'weekly'} resetDay={'thu'} />
 				</Col>
 			</Row>
 		</>
