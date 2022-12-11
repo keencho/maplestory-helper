@@ -1,14 +1,23 @@
-import {Col, Row} from 'antd';
-import React from 'react';
-import DateTimeUtils from '../../util/DateTimeUtils';
-import {HOMEWORK_KEY, HomeworkTable} from '../component/HomeworkTable';
+import {Button, Col, Row} from 'antd';
+import React, {useState} from 'react';
+import {HomeworkTable} from '../component/HomeworkTable';
 import styled from 'styled-components';
+import Textarea from '../component/element/Textarea';
 
 const Spacer = styled.div`
-	height: 16px;
+  height: 16px;
 `
 
+const MY_ROUTINE_KEY = 'MY_ROUTINE';
+
 const HomeworkContainer = () => {
+	
+	const savedMyRoutine = localStorage.getItem(MY_ROUTINE_KEY);
+	const [myRoutine, setMyRoutine] = useState<string>(savedMyRoutine === null ? '' : savedMyRoutine);
+	
+	const saveMyRoutine = () => {
+		localStorage.setItem(MY_ROUTINE_KEY, myRoutine);
+	}
 	
 	const getFileName = (path: string) => {
 		const split = path.split('/');
@@ -33,9 +42,11 @@ const HomeworkContainer = () => {
 			})
 	}
 	
+	const dailyHomework = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/homework/daily-homework/*.png', { eager: true })))
 	const symbolData = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/homework/symbol/*.png', { eager: true })))
 	const arcaneRiverData = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/homework/arcane-river/*.png', { eager: true })))
 	const dailyBossData = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/homework/daily-boss/*.png', { eager: true })))
+	const weeklyHomework = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/homework/weekly-homework/*.png', { eager: true })))
 	const weeklyBossData1 = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/homework/weekly-boss-1/*.png', { eager: true })))
 	const weeklyBossData2 = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/homework/weekly-boss-2/*.png', { eager: true })))
 	
@@ -44,25 +55,30 @@ const HomeworkContainer = () => {
 			<h1>
 				숙제표
 			</h1>
-			<Row>
+			<Row gutter={32}>
 				<Col span={9}>
-					{DateTimeUtils.getTodayDate()}
+					<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+						<h2>나만의 루틴</h2>
+						<Button size={'small'} type={'primary'} onClick={saveMyRoutine}>저장</Button>
+					</div>
+					<Textarea
+						value={myRoutine}
+						setValue={setMyRoutine}
+						fullWidth={true}
+						resize={'none'}
+						height={300}
+					/>
 				</Col>
 				<Col span={15}>
-					<button
-						style={{ border: '1px solid blue', backgroundColor: 'inherit', padding: '1rem', cursor: 'pointer', marginBottom: '1rem' }}
-						onClick={() => {
-							window.localStorage.removeItem(HOMEWORK_KEY);
-							location.reload();
-						}}
-					>
-						로컬스토리지 비우고 리로드
-					</button>
+					<HomeworkTable title={'일일 숙제'} data={dailyHomework} type={'daily'} />
+					<Spacer />
 					<HomeworkTable title={'심볼 일퀘'} data={symbolData} type={'daily'} />
 					<Spacer />
 					<HomeworkTable title={'아케인리버 일퀘'} data={arcaneRiverData} type={'daily'} />
 					<Spacer />
 					<HomeworkTable title={'일일 보스'} data={dailyBossData} type={'daily'} />
+					<Spacer />
+					<HomeworkTable title={'주간 숙제'} data={weeklyHomework} type={'weekly'} resetDay={'mon'} />
 					<Spacer />
 					<HomeworkTable title={'주간 보스1'} data={weeklyBossData1} type={'weekly'} resetDay={'thu'} />
 					<Spacer />
