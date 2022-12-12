@@ -141,7 +141,7 @@ export const HomeworkTable = (props: Props) => {
 			type: props.type
 		}
 		
-		// 주간 숙제의 경우 다른 로직 적용
+		// 주간 숙제의 경우 리셋날자 지정
 		if (props.type === 'weekly' && props.resetDay) {
 			const dayNeed = props.resetDay === 'thu' ? 4 : 1;
 			const today = moment().isoWeekday();

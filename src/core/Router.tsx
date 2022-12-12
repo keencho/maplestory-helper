@@ -10,7 +10,7 @@ const Router = () => {
 		<BrowserRouter>
 			<div style={{ display: 'flex', flexGrow: 1, overflowY: 'auto' }}>
 				<LeftMenu />
-				<div style={{ padding: '24px', flexGrow: '1', overflowY: 'auto', overflowWrap: 'break-word' }}>
+				<div style={{ padding: '24px', flexGrow: '1', overflowY: 'auto', display: 'flex', flexDirection: 'column', overflowWrap: 'break-word' }}>
 					<Routes>
 						<Route path={Path.INDEX} element={<HomeworkContainer />} />
 						<Route path={Path.HOMEWORK} element={<HomeworkContainer />} />

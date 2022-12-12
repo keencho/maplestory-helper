@@ -59,7 +59,7 @@ const HomeworkContainer = () => {
 			<h1>
 				숙제표
 			</h1>
-			<Row gutter={32}>
+			<Row gutter={32} style={{ border: '1px solid red', flexGrow: 1 }}>
 				<Col span={9}>
 					<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
 						<h2>나만의 루틴</h2>
@@ -73,20 +73,20 @@ const HomeworkContainer = () => {
 						height={300}
 					/>
 				</Col>
-				<Col span={15}>
-					<HomeworkTable title={'일일 숙제'} data={dailyHomework} type={'daily'} />
-					<Spacer />
-					<HomeworkTable title={'심볼 일퀘'} data={symbolData} type={'daily'} />
-					<Spacer />
-					<HomeworkTable title={'아케인리버 일퀘'} data={arcaneRiverData} type={'daily'} />
-					<Spacer />
-					<HomeworkTable title={'일일 보스'} data={dailyBossData} type={'daily'} />
-					<Spacer />
-					<HomeworkTable title={'주간 숙제'} data={weeklyHomework} type={'weekly'} resetDay={'mon'} />
-					<Spacer />
-					<HomeworkTable title={'주간 보스1'} data={weeklyBossData1} type={'weekly'} resetDay={'thu'} />
-					<Spacer />
-					<HomeworkTable title={'주간 보스2'} data={weeklyBossData2} type={'weekly'} resetDay={'thu'} />
+				<Col span={15} style={{ border: '1px solid blue', overflow: 'hidden' }}>
+					{/*<HomeworkTable title={'일일 숙제'} data={dailyHomework} type={'daily'} />*/}
+					{/*<Spacer />*/}
+					{/*<HomeworkTable title={'심볼 일퀘'} data={symbolData} type={'daily'} />*/}
+					{/*<Spacer />*/}
+					{/*<HomeworkTable title={'아케인리버 일퀘'} data={arcaneRiverData} type={'daily'} />*/}
+					{/*<Spacer />*/}
+					{/*<HomeworkTable title={'일일 보스'} data={dailyBossData} type={'daily'} />*/}
+					{/*<Spacer />*/}
+					{/*<HomeworkTable title={'주간 숙제'} data={weeklyHomework} type={'weekly'} resetDay={'mon'} />*/}
+					{/*<Spacer />*/}
+					{/*<HomeworkTable title={'주간 보스1'} data={weeklyBossData1} type={'weekly'} resetDay={'thu'} />*/}
+					{/*<Spacer />*/}
+					{/*<HomeworkTable title={'주간 보스2'} data={weeklyBossData2} type={'weekly'} resetDay={'thu'} />*/}
 				</Col>
 			</Row>
 		</>
