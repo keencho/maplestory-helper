@@ -17,14 +17,16 @@ const HomeworkContainer = () => {
 	
 	const saveMyRoutine = () => {
 		localStorage.setItem(MY_ROUTINE_KEY, myRoutine);
-	}
-	
-	const getFileName = (path: string) => {
-		const split = path.split('/');
-		return split[split.length - 1];
+		alert('저장되었습니다.')
 	}
 	
 	const resourcesMapper = (paths: string[]) => {
+		
+		const getFileName = (path: string) => {
+			const split = path.split('/');
+			return split[split.length - 1];
+		}
+		
 		return paths
 			.sort((a, b) => {
 				const aIdx = Number(getFileName(a).split('-')[0]);
@@ -42,6 +44,8 @@ const HomeworkContainer = () => {
 			})
 	}
 	
+	// import.meta.glob... 표현식은 glob 자리에 변수를 사용할 수 없음. 즉, 아래처럼 경로를 다이렉트로 지정해줘야함
+	// resourceMapper 함수에 경로만 넘기는것 안된다는 의미임.
 	const dailyHomework = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/homework/daily-homework/*.png', { eager: true })))
 	const symbolData = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/homework/symbol/*.png', { eager: true })))
 	const arcaneRiverData = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/homework/arcane-river/*.png', { eager: true })))

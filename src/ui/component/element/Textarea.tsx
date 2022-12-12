@@ -7,7 +7,7 @@ interface StyledProps {
 	height?: number
 }
 
-interface Props extends StyledProps{
+interface Props extends StyledProps {
 	value?: string
 	setValue?: Dispatch<string>
 }

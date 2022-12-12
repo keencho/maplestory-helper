@@ -3,3 +3,7 @@
   - *-theme.less --> *.theme.css 로 변경하는 작업
   - public 폴더 내에 파일이 존재해야 함.
   - ci / cd 도구에 맞게 설정 필요할듯
+
+- ant 4.x -> 5.x migration
+  - npm install --save antd@5.x
+  - npx -p @ant-design/codemod-v5 antd5-codemod src
