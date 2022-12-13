@@ -1,5 +1,17 @@
 export enum Difficulty {
-	EASY, NORMAL, HARD, CHAOS, EXTREME
+	EASY,
+	NORMAL,
+	HARD,
+	CHAOS,
+	EXTREME
+}
+
+export const DifficultyKor = {
+	0: '이지',
+	1: '노말',
+	2: '하드',
+	3: '카오스',
+	4: '익스트림'
 }
 
 export enum Boss {
@@ -15,6 +27,7 @@ export interface BossInformation {
 	boss: Boss,
 	difficulty: Difficulty | Difficulty[],
 	crystalPrice: number | number[]
+	resettable?: boolean
 }
 
 export const DailyBossMap: BossInformation[] = [
@@ -34,15 +47,15 @@ export const DailyBossMap: BossInformation[] = [
 ]
 
 export const WeeklyBossMap: BossInformation[] = [
-	{ boss: Boss.시그너스, difficulty: [ Difficulty.EASY, Difficulty.NORMAL ], crystalPrice: [ 5496394, 9039130 ] },
+	{ boss: Boss.시그너스, difficulty: [ Difficulty.EASY, Difficulty.NORMAL ], crystalPrice: [ 5496394, 9039130 ], resettable: true },
 	{ boss: Boss.힐라, difficulty: Difficulty.HARD, crystalPrice: 6936489 },
 	{ boss: Boss.핑크빈, difficulty: Difficulty.CHAOS, crystalPrice: 7923110 },
 	{ boss: Boss.자쿰, difficulty: Difficulty.CHAOS, crystalPrice: 9741285 },
-	{ boss: Boss.블러디퀸, difficulty: Difficulty.CHAOS, crystalPrice: 9806780 },
-	{ boss: Boss.반반, difficulty: Difficulty.CHAOS, crystalPrice: 9818154 },
-	{ boss: Boss.피에르, difficulty: Difficulty.CHAOS, crystalPrice: 9838932 },
-	{ boss: Boss.매그너스, difficulty: Difficulty.HARD, crystalPrice: 11579023 },
-	{ boss: Boss.벨룸, difficulty: Difficulty.CHAOS, crystalPrice: 12590202 },
+	{ boss: Boss.블러디퀸, difficulty: Difficulty.CHAOS, crystalPrice: 9806780, resettable: true },
+	{ boss: Boss.반반, difficulty: Difficulty.CHAOS, crystalPrice: 9818154, resettable: true },
+	{ boss: Boss.피에르, difficulty: Difficulty.CHAOS, crystalPrice: 9838932, resettable: true },
+	{ boss: Boss.매그너스, difficulty: Difficulty.HARD, crystalPrice: 11579023, resettable: true },
+	{ boss: Boss.벨룸, difficulty: Difficulty.CHAOS, crystalPrice: 12590202, resettable: true },
 	{ boss: Boss.파풀라투스, difficulty: Difficulty.CHAOS, crystalPrice: 26725937 },
 	{ boss: Boss.스우, difficulty: [ Difficulty.NORMAL, Difficulty.HARD ], crystalPrice: [ 33942566, 118294192 ] },
 	{ boss: Boss.데미안, difficulty: [ Difficulty.NORMAL, Difficulty.HARD ], crystalPrice: [ 35517853, 112480613] },
@@ -54,8 +67,5 @@ export const WeeklyBossMap: BossInformation[] = [
 	{ boss: Boss['진 힐라'], difficulty: [ Difficulty.NORMAL, Difficulty.HARD ], crystalPrice: [ 148112376, 190159452 ] },
 	{ boss: Boss['선택받은 세렌'], difficulty: [ Difficulty.NORMAL, Difficulty.HARD, Difficulty.EXTREME ], crystalPrice: [ 196904752, 300000000, 1071302484 ] },
 	{ boss: Boss['감시자 칼로스'], difficulty: Difficulty.CHAOS, crystalPrice: 300000000 },
-]
-
-export const MonthlyBossMap: BossInformation[] = [
 	{ boss: Boss['검은 마법사'], difficulty: [ Difficulty.HARD, Difficulty.EXTREME ], crystalPrice: [ 1418809857, 5675239428 ] },
 ]
