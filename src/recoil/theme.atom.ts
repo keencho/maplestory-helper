@@ -6,8 +6,8 @@ const getDefault = (): 'light' | 'dark' => {
 	const savedMode: any = window.localStorage.getItem(THEME_MODE_KEY);
 	
 	if (!savedMode) {
-		window.localStorage.setItem(THEME_MODE_KEY, 'light');
-		return 'light';
+		window.localStorage.setItem(THEME_MODE_KEY, 'dark');
+		return 'dark';
 	}
 	
 	return savedMode;

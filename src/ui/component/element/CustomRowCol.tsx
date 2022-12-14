@@ -23,7 +23,7 @@ interface ColProps {
 
 export const CustomCol = (props: ColProps) => {
 	return (
-		<Col span={props.span} style={{ height: '100%', overflow: 'auto' }}>
+		<Col span={props.span} style={{ height: '100%', overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
 			{props.children}
 		</Col>
 	)

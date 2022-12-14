@@ -1,9 +1,10 @@
-import {Button, Col, Row} from 'antd';
+import {Button, Col, Row, message, notification} from 'antd';
 import React, {useState} from 'react';
 import {HomeworkTable} from '../component/HomeworkTable';
 import styled from 'styled-components';
 import Textarea from '../component/element/Textarea';
-import {CustomCol, CustomRow} from '../component/CustomRowCol';
+import {CustomCol, CustomRow} from '../component/element/CustomRowCol';
+import NotificationUtil from '../../util/NotificationUtil';
 
 const Spacer = styled.div`
   height: 16px;
@@ -18,7 +19,8 @@ const HomeworkContainer = () => {
 	
 	const saveMyRoutine = () => {
 		localStorage.setItem(MY_ROUTINE_KEY, myRoutine);
-		alert('저장되었습니다.')
+		
+		NotificationUtil.fire('success', '저장 완료', '나만의 루틴이 저장되었습니다.');
 	}
 	
 	const resourcesMapper = (paths: string[]) => {

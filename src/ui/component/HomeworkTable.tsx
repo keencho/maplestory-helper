@@ -244,7 +244,7 @@ export const HomeworkTable = (props: Props) => {
 	}
 	
 	return (
-		<>
+		<div>
 			<Table>
 				<thead>
 					<tr>
@@ -270,6 +270,6 @@ export const HomeworkTable = (props: Props) => {
 					</tr>
 				</tbody>
 			</Table>
-		</>
+		</div>
 	)
 }

@@ -65,7 +65,38 @@ export const WeeklyBossMap: BossInformation[] = [
 	{ boss: Boss.더스크, difficulty: [ Difficulty.NORMAL, Difficulty.CHAOS ], crystalPrice: [ 71054562, 160173752 ] },
 	{ boss: Boss.듄켈, difficulty: [ Difficulty.NORMAL, Difficulty.HARD ], crystalPrice: [ 76601412, 160173752 ] },
 	{ boss: Boss['진 힐라'], difficulty: [ Difficulty.NORMAL, Difficulty.HARD ], crystalPrice: [ 148112376, 190159452 ] },
-	{ boss: Boss['선택받은 세렌'], difficulty: [ Difficulty.NORMAL, Difficulty.HARD, Difficulty.EXTREME ], crystalPrice: [ 196904752, 300000000, 1071302484 ] },
+	{ boss: Boss['선택받은 세렌'], difficulty: [ Difficulty.NORMAL, Difficulty.HARD, Difficulty.EXTREME ], crystalPrice: [ 196904752, 267825621, 1071302484 ] },
 	{ boss: Boss['감시자 칼로스'], difficulty: Difficulty.CHAOS, crystalPrice: 300000000 },
 	{ boss: Boss['검은 마법사'], difficulty: [ Difficulty.HARD, Difficulty.EXTREME ], crystalPrice: [ 1418809857, 5675239428 ] },
 ]
+
+export const getBossPriceTable = () => {
+	
+	const table: any[] = [];
+	
+	const loop = (info: BossInformation[]) => {
+		info.forEach((boss: BossInformation) => {
+			if (Array.isArray(boss.difficulty) && Array.isArray(boss.crystalPrice)) {
+				const crystalPrice: number[] = boss.crystalPrice;
+				boss.difficulty.forEach((diff: Difficulty, idx) => {
+					table.push({
+						...boss,
+						key: `${Boss[boss.boss]}-${Difficulty[diff]}`,
+						difficulty: diff,
+						crystalPrice: crystalPrice[idx]
+					})
+				})
+			} else {
+				table.push({ ...boss, key: `${Boss[boss.boss]}-${Difficulty[boss.difficulty as Difficulty]}` });
+			}
+		})
+	}
+	
+	loop(DailyBossMap);
+	loop(WeeklyBossMap);
+	
+	table.sort((a, b) => (a.crystalPrice as number) - (b.crystalPrice as number));
+	
+	return table;
+}
+
