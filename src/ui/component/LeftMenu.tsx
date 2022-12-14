@@ -40,6 +40,14 @@ const LeftMenu = () => {
 		setCollapsed(!collapsed);
 	};
 	
+	const getActiveKey = () => {
+		if (location.pathname === '/') {
+			return Path.HOMEWORK;
+		}
+		
+		return location.pathname;
+	}
+	
 	return (
 		<div style={{ overflowY: 'auto', minWidth: 256, maxWidth: 256 }}>
 			<Menu
@@ -47,7 +55,7 @@ const LeftMenu = () => {
 				defaultOpenKeys={['sub1']}
 				mode="inline"
 				inlineCollapsed={collapsed}
-				activeKey={location.pathname}
+				activeKey={getActiveKey()}
 				onClick={(e) => navigate(e.key)}
 				items={items}
 				style={{

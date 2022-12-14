@@ -26,18 +26,18 @@ interface BossColumn extends BossInformation {
 	colDefeatCount: number
 }
 
-const bossImages = Object.keys(import.meta.glob('../../assets/icon/boss/*.png', { eager: true }));
-
 const getImageSrcByBoss = (boss: Boss) => {
-	const bossImage = bossImages.find(path => {
-		const arr = path.split('/');
-		const fileName = arr[arr.length - 1];
-		const pureName = fileName.split('.')[0];
-		
-		return pureName === Boss[boss];
-	});
+	// const bossImage = bossImages.find(path => {
+	// 	const arr = path.split('/');
+	// 	const fileName = arr[arr.length - 1];
+	// 	const pureName = fileName.split('.')[0];
+	//
+	// 	return pureName === Boss[boss];
+	// });
 	
-	return new URL(bossImage!, import.meta.url).href;
+	// HomeworkContainer 에 똑같이 이미지 불러오는곳 주석 참조.
+	// 뭔가 이상해서 절대경로 불러오듯이 함.
+	return new URL(`../../assets/icon/boss/${Boss[boss]}.png`, import.meta.url).href;
 }
 
 const mappingBoss = (data: BossInformation): BossColumn => {
