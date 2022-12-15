@@ -7,14 +7,23 @@ import DateTimeUtils from '../../../util/DateTimeUtils';
 import moment from 'moment';
 import it from 'node:test';
 import {match} from 'assert';
+import NoMarginHeading from '../common/element/NoMarginHeading';
 
 const Table = styled.table`
 	border-collapse: collapse;
 	
 	tbody {
 		text-align: center;
+		
 		th, tr, td {
 			border: 1px solid;
+		}
+		
+		&:before {
+			line-height: .25em;
+			content: "\\00a0";
+			color: inherit; /* bacground color */
+			display:block;
 		}
 	}
 	
@@ -263,7 +272,9 @@ export const HomeworkTable = (props: Props) => {
 			<Table>
 				<thead>
 					<tr>
-						<td colSpan={data && data.length - 1}><h3>{props.title}</h3></td>
+						<td colSpan={data && data.length - 1}>
+							<NoMarginHeading size={3}>{props.title}</NoMarginHeading>
+						</td>
 						<td style={{ textAlign: 'right' }}><Button size={'small'} type={'primary'} danger onClick={reset}>초기화</Button></td>
 					</tr>
 				</thead>

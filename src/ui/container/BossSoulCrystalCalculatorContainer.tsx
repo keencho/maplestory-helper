@@ -1,7 +1,9 @@
-import {Dispatch, SetStateAction, useState} from 'react';
-import {Descriptions, Select, Table, Tag, Typography, Tabs, notification, Button} from 'antd';
+import * as React from 'react';
+import {useEffect, useState} from 'react';
+import {Button, Descriptions, Switch, Table, Tabs, Tag, Typography} from 'antd';
 import {
 	Boss,
+	BossColumn,
 	BossInformation,
 	DailyBossMap,
 	Difficulty,
@@ -10,48 +12,14 @@ import {
 	WeeklyBossMap
 } from '../../model/boss.model';
 import {CustomCol, CustomRow} from '../component/common/element/CustomRowCol';
-import * as React from 'react';
 import NotificationUtil from '../../util/NotificationUtil';
+import PageTitle from '../component/common/PageTitle';
+import useModal from '../../hooks/useModal';
+import BossTable from '../component/boss-soul-crystal-calculator/BossTable';
+import BossSoulCrystalCalculatorHelp from '../component/boss-soul-crystal-calculator/BossSoulCrystalCalculatorHelp';
 
 const { Title } = Typography;
 const { Column } = Table;
-
-interface BossColumn extends BossInformation {
-	key: any
-	colSrc: string
-	colName: string
-	colDifficulty: Difficulty
-	colNumberOfPeople: number
-	colPrice: number
-	colDefeatCount: number
-}
-
-const getImageSrcByBoss = (boss: Boss) => {
-	// const bossImage = bossImages.find(path => {
-	// 	const arr = path.split('/');
-	// 	const fileName = arr[arr.length - 1];
-	// 	const pureName = fileName.split('.')[0];
-	//
-	// 	return pureName === Boss[boss];
-	// });
-	
-	// HomeworkContainer 에 똑같이 이미지 불러오는곳 주석 참조.
-	// 뭔가 이상해서 절대경로 불러오듯이 함.
-	return new URL(`../../assets/icon/boss/${Boss[boss]}.png`, import.meta.url).href;
-}
-
-const mappingBoss = (data: BossInformation): BossColumn => {
-	return {
-		...data,
-		key: data.boss,
-		colName: Boss[data.boss],
-		colDifficulty: Array.isArray(data.difficulty) ? data.difficulty[0] : data.difficulty,
-		colSrc: getImageSrcByBoss(data.boss),
-		colNumberOfPeople: 0,
-		colPrice: 0,
-		colDefeatCount: 1
-	}
-}
 
 interface TabData {
 	label: string,
@@ -60,76 +28,39 @@ interface TabData {
 	weeklyBossData: BossColumn[]
 }
 
-const BossTable = ({ data, type, onChange }: { data: BossColumn[], type: 'daily' | 'weekly', onChange: (column: BossColumn, key: 'difficulty' | 'numberOfPeople' | 'defeatCount', value: any) => void }): JSX.Element => {
-	return (
-		<Table dataSource={data} pagination={false} sticky={true} size={'small'}>
-			<Column
-				align={'center'}
-				title={type === 'daily' ? '일일보스' : '주간보스'}
-				width={'10%'}
-				render={(_, record: BossColumn) => <img src={record.colSrc} alt={record.colName} style={{ width: '40px', height: '40px' }} />}
-			/>
-			<Column
-				title={'이름'}
-				dataIndex={'colName'}
-			/>
-			<Column
-				title={'난이도'}
-				render={(_, record: BossColumn) => {
-					if (Array.isArray(record.difficulty)) {
-						return <Select
-							onChange={(value) => onChange(record, 'difficulty', value)}
-							value={record.colDifficulty}
-							style={{ width: '100%' }}
-							options={record.difficulty.map(value => { return { value: value, label: DifficultyKor[value] } })}
-						/>
-					}
-					
-					return DifficultyKor[record.colDifficulty]
-				}}
-			/>
-			<Column
-				title={'인원수'}
-				render={(_, record: BossColumn) => {
-					return <Select
-						onChange={(value) => onChange(record, 'numberOfPeople', value)}
-						value={record.colNumberOfPeople}
-						style={{ width: '100%' }}
-						options={[0, 1, 2, 3, 4, 5, 6].map(value => { return { value: value, label: `${value}명` } })}
-					/>
-				}}
-			/>
-			<Column
-				title={'격파 횟수'}
-				render={(_, record: BossColumn) => {
-					if (type === 'weekly') {
-						if (record.resettable !== true) {
-							return '1회'
-						}
-					}
-					
-					let arr = type === 'daily' ? [1, 2, 3, 4, 5, 6, 7] : [1, 2];
-					
-					return <Select
-						onChange={(value) => onChange(record, 'defeatCount', value)}
-						value={record.colDefeatCount}
-						style={{ width: '100%' }}
-						options={arr.map(value => { return { value: value, label: `${value}회` } })}
-					/>
-				}}
-			/>
-			<Column
-				title={'가격'}
-				render={(_, record: BossColumn) => record.colPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-			/>
-		</Table>
-	)
-}
+const AUTO_SAVE_KEY = 'BOSS_CALCULATOR_AUTO_SAVE';
+const TAB_DATA_KEY = 'BOSS_CALCULATOR_TAB_DATA';
 
 const BossSoulCrystalCalculatorContainer = () => {
 	
+	const getImageSrcByBoss = (boss: Boss) => {
+		return new URL(`../../assets/icon/boss/${Boss[boss]}.png`, import.meta.url).href;
+	}
+	
+	const mappingBoss = (data: BossInformation): BossColumn => {
+		return {
+			...data,
+			key: data.boss,
+			colName: Boss[data.boss],
+			colDifficulty: Array.isArray(data.difficulty) ? data.difficulty[0] : data.difficulty,
+			colSrc: getImageSrcByBoss(data.boss),
+			colNumberOfPeople: 0,
+			colPrice: 0,
+			colDefeatCount: 1
+		}
+	}
+	
+	const localStorageAutoSave = window.localStorage.getItem(AUTO_SAVE_KEY);
+	const localStorageTabData = window.localStorage.getItem(TAB_DATA_KEY);
+	
 	const [activeTabKey, setActiveTabKey] = useState<string>('1');
-	const [tabData, setTabData] = useState<TabData[]>([{ label: '캐릭터1', key: '1', dailyBossData: DailyBossMap.map(mappingBoss), weeklyBossData: WeeklyBossMap.map(mappingBoss) }]);
+	const [autoSave, setAutoSave] = useState<boolean>(localStorageAutoSave !== null && (localStorageAutoSave === 'true' || localStorageAutoSave === 'false') ? localStorageAutoSave === 'true' : true);
+	const [tabData, setTabData] = useState<TabData[]>(
+		(autoSave && localStorageTabData !== null)
+		? JSON.parse(localStorageTabData)
+		: [{ label: '캐릭터1', key: '1', dailyBossData: DailyBossMap.map(mappingBoss), weeklyBossData: WeeklyBossMap.map(mappingBoss) }]
+	);
+	const [showModal] = useModal();
 	
 	const onChange = (tabKey: string, type: 'daily' | 'weekly', column: BossColumn, key: 'difficulty' | 'numberOfPeople' | 'defeatCount', value: any) => {
 		setTabData((pv: TabData[]) => pv.map((td: TabData) => {
@@ -266,9 +197,53 @@ const BossSoulCrystalCalculatorContainer = () => {
 		}
 	}
 	
+	const saveTabData = () => {
+		window.localStorage.setItem(TAB_DATA_KEY, JSON.stringify(tabData));
+	}
+	
+	const clearTabData = () => {
+		window.localStorage.removeItem(TAB_DATA_KEY);
+	}
+	
+	const openHelpModal = () => {
+		showModal({
+			title: '도움말',
+			size: 'middle',
+			contents: <BossSoulCrystalCalculatorHelp />
+		})
+	}
+	
+	useEffect(() => {
+	 if (autoSave) {
+		 saveTabData();
+	 }
+	}, [tabData])
+	
+	useEffect(() => {
+		if (autoSave) {
+			saveTabData();
+		} else {
+			clearTabData();
+		}
+		
+		window.localStorage.setItem(AUTO_SAVE_KEY, String(autoSave));
+	}, [autoSave])
+	
 	return (
 		<>
-			<Title level={3}>결정석 수입 계산기</Title>
+			<PageTitle
+				title={'결정석 수입 계산기'}
+				marginBottom={'.5rem'}
+				extraContents={
+				<div style={{ display: 'flex', gap: '.5rem' }}>
+					<div style={{ display: 'flex', alignItems: 'center', gap: '.5rem'}}>
+						<span style={{ fontSize: '14px', fontWeight: 600 }}>자동저장</span>
+						<Switch checked={autoSave} onChange={setAutoSave} />
+					</div>
+					<Button type={'primary'} onClick={openHelpModal}>도움말</Button>
+				</div>
+				}
+			/>
 			<CustomRow gutter={32}>
 				<CustomCol span={12}>
 					<Tabs
@@ -276,7 +251,7 @@ const BossSoulCrystalCalculatorContainer = () => {
 						onChange={setActiveTabKey}
 						type={'editable-card'}
 						onEdit={onEdit}
-						tabBarExtraContent={<Button size={'middle'} type={'primary'} onClick={resetCurrentTab}>현재 탭 초기화</Button>}
+						tabBarExtraContent={<Button type={'primary'} onClick={resetCurrentTab}>현재 탭 초기화</Button>}
 						items={tabData.map((data: TabData) => {
 							return {
 								...data,
@@ -320,7 +295,6 @@ const BossSoulCrystalCalculatorContainer = () => {
 						<Column
 							title={'난이도'}
 							render={(_, record: BossInformation) => {
-								
 								let color;
 								switch (record.difficulty as Difficulty) {
 									case Difficulty.EASY:

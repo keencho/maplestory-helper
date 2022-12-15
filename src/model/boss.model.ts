@@ -30,6 +30,16 @@ export interface BossInformation {
 	resettable?: boolean
 }
 
+export interface BossColumn extends BossInformation {
+	key: any
+	colSrc: string
+	colName: string
+	colDifficulty: Difficulty
+	colNumberOfPeople: number
+	colPrice: number
+	colDefeatCount: number
+}
+
 export const DailyBossMap: BossInformation[] = [
 	{ boss: Boss.자쿰, difficulty: [ Difficulty.EASY, Difficulty.NORMAL ], crystalPrice: [ 119835, 366997 ] },
 	{ boss: Boss.파풀라투스, difficulty: [ Difficulty.EASY, Difficulty.NORMAL ], crystalPrice: [ 410135, 1596506 ] },
