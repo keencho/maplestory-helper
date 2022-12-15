@@ -4,6 +4,6 @@
   - public 폴더 내에 파일이 존재해야 함.
   - ci / cd 도구에 맞게 설정 필요할듯
 
-- ant 4.x -> 5.x migration
-  - npm install --save antd@5.x
-  - npx -p @ant-design/codemod-v5 antd5-codemod src
+## 개선
+- 결정석 수입 계산기 캐릭터 2개 이상일 경우 각 캐릭터별 정산표 보여주기  
+- 유니온 스킬, 스탯 정리

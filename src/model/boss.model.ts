@@ -45,7 +45,7 @@ export const DailyBossMap: BossInformation[] = [
 	{ boss: Boss.파풀라투스, difficulty: [ Difficulty.EASY, Difficulty.NORMAL ], crystalPrice: [ 410135, 1596506 ] },
 	{ boss: Boss.매그너스,  difficulty: [ Difficulty.EASY, Difficulty.NORMAL ], crystalPrice: [ 432605, 1553066 ] },
 	{ boss: Boss.힐라, difficulty: Difficulty.NORMAL, crystalPrice: 479343 },
-	{ boss: Boss.혼테일, difficulty: [ Difficulty.EASY, Difficulty.NORMAL, Difficulty.HARD ], crystalPrice: [ 528474, 606666, 810086 ] },
+	{ boss: Boss.혼테일, difficulty: [ Difficulty.EASY, Difficulty.NORMAL, Difficulty.CHAOS ], crystalPrice: [ 528474, 606666, 810086 ] },
 	{ boss: Boss.블러디퀸, difficulty: Difficulty.NORMAL, crystalPrice: 580003 },
 	{ boss: Boss.반반, difficulty: Difficulty.NORMAL, crystalPrice: 580003 },
 	{ boss: Boss.피에르, difficulty: Difficulty.NORMAL, crystalPrice: 580003 },
