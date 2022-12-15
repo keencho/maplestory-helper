@@ -2,7 +2,7 @@ import {AppstoreOutlined, DollarCircleOutlined, HomeOutlined, UsergroupAddOutlin
 import type {MenuProps} from 'antd';
 import {Menu} from 'antd';
 import React, {useEffect, useState} from 'react';
-import Path from '../../model/path.model';
+import Path from '../../../model/path.model';
 import {useLocation, useNavigate} from 'react-router-dom';
 
 type MenuItem = Required<MenuProps>['items'][number];

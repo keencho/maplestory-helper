@@ -1,14 +1,11 @@
-import {Button, Col, Row, message, notification} from 'antd';
+import {Button} from 'antd';
 import React, {useState} from 'react';
-import {HomeworkTable} from '../component/HomeworkTable';
-import styled from 'styled-components';
-import Textarea from '../component/element/Textarea';
-import {CustomCol, CustomRow} from '../component/element/CustomRowCol';
+import {HomeworkTable} from '../component/homework/HomeworkTable';
+import Textarea from '../component/common/element/Textarea';
+import {CustomCol, CustomRow} from '../component/common/element/CustomRowCol';
 import NotificationUtil from '../../util/NotificationUtil';
-
-const Spacer = styled.div`
-  height: 16px;
-`
+import useModal from '../../hooks/useModal';
+import HomeworkHelp from '../component/homework/HomeworkHelp';
 
 const MY_ROUTINE_KEY = 'MY_ROUTINE';
 
@@ -51,13 +48,11 @@ const weeklyHomework = resourcesMapper(Object.keys(import.meta.glob('../../asset
 const weeklyBossData1 = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/homework/weekly-boss-1/*.png', { eager: true })))
 const weeklyBossData2 = resourcesMapper(Object.keys(import.meta.glob('../../assets/icon/homework/weekly-boss-2/*.png', { eager: true })))
 
-// let arr: any[] = [];
-// arr.push({ src: new URL(`../../assets/icon/homework/weekly-boss-2/${'1-스우'}.png`, import.meta.url).href, name: 'df' });
-
 const HomeworkContainer = () => {
 	
 	const savedMyRoutine = localStorage.getItem(MY_ROUTINE_KEY);
 	const [myRoutine, setMyRoutine] = useState<string>(savedMyRoutine === null ? '' : savedMyRoutine);
+	const [showModal] = useModal();
 	
 	const saveMyRoutine = () => {
 		localStorage.setItem(MY_ROUTINE_KEY, myRoutine);
@@ -65,11 +60,22 @@ const HomeworkContainer = () => {
 		NotificationUtil.fire('success', '저장 완료', '나만의 루틴이 저장되었습니다.');
 	}
 	
+	const openHelpModal = () => {
+		showModal({
+			title: '도움말',
+			size: 'middle',
+			contents: <HomeworkHelp />
+		})
+	}
+	
 	return (
 		<>
-			<h1>
-				숙제표
-			</h1>
+			<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+				<h1>
+					숙제표
+				</h1>
+				<Button size={'large'} type={'primary'} onClick={openHelpModal}>도움말</Button>
+			</div>
 			<CustomRow gutter={32}>
 				<CustomCol span={9}>
 					<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -86,18 +92,12 @@ const HomeworkContainer = () => {
 				</CustomCol>
 				<CustomCol span={15}>
 					<HomeworkTable title={'일일 숙제'} data={dailyHomework} type={'daily'} />
-					<Spacer />
 					<HomeworkTable title={'심볼 일퀘'} data={symbolData} type={'daily'} />
-					<Spacer />
 					<HomeworkTable title={'아케인리버 일퀘'} data={arcaneRiverData} type={'daily'} />
-					<Spacer />
 					<HomeworkTable title={'일일 보스'} data={dailyBossData} type={'daily'} />
-					<Spacer />
 					<HomeworkTable title={'주간 숙제'} data={weeklyHomework} type={'weekly'} resetDay={'mon'} />
-					<Spacer />
 					<HomeworkTable title={'주간 보스1'} data={weeklyBossData1} type={'weekly'} resetDay={'thu'} />
-					<Spacer />
-					<HomeworkTable title={'주간 보스2'} data={weeklyBossData2} type={'weekly'} resetDay={'thu'} />
+					<HomeworkTable title={'주간 보스2'} data={weeklyBossData2} type={'weekly'} resetDay={'thu'} lastItem={true} />
 				</CustomCol>
 			</CustomRow>
 		</>

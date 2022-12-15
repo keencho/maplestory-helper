@@ -9,7 +9,7 @@ import {
 	getBossPriceTable,
 	WeeklyBossMap
 } from '../../model/boss.model';
-import {CustomCol, CustomRow} from '../component/element/CustomRowCol';
+import {CustomCol, CustomRow} from '../component/common/element/CustomRowCol';
 import * as React from 'react';
 import NotificationUtil from '../../util/NotificationUtil';
 
