@@ -1,7 +1,7 @@
 import {PageHeader, Switch} from 'antd';
 import React from 'react';
 import {useRecoilState} from 'recoil';
-import {THEME_MODE_KEY, ThemeAtom} from '../../recoil/theme.atom';
+import {THEME_MODE_KEY, ThemeAtom} from '../../../recoil/theme.atom';
 
 const Header = () => {
 	const [theme, setTheme] = useRecoilState(ThemeAtom);

@@ -1,20 +1,29 @@
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
-import {ResetButton} from './element/ResetButton';
+import {ResetButton} from '../common/element/ResetButton';
 import {Button, Progress} from 'antd';
-import Color from '../../model/color.model';
-import DateTimeUtils from '../../util/DateTimeUtils';
+import Color from '../../../model/color.model';
+import DateTimeUtils from '../../../util/DateTimeUtils';
 import moment from 'moment';
 import it from 'node:test';
 import {match} from 'assert';
+import NoMarginHeading from '../common/element/NoMarginHeading';
 
 const Table = styled.table`
 	border-collapse: collapse;
 	
 	tbody {
 		text-align: center;
+		
 		th, tr, td {
 			border: 1px solid;
+		}
+		
+		&:before {
+			line-height: .25em;
+			content: "\\00a0";
+			color: inherit; /* bacground color */
+			display:block;
 		}
 	}
 	
@@ -38,6 +47,7 @@ interface Props {
 	data: Data[]
 	type: 'daily' | 'weekly'
 	resetDay?: 'thu' | 'mon'
+	lastItem?: boolean
 }
 
 type Properties = {
@@ -61,11 +71,11 @@ const TODAY = DateTimeUtils.getTodayDate();
 export const HomeworkTable = (props: Props) => {
 	
 	const item = window.localStorage.getItem(HOMEWORK_KEY);
-	let parsedItem: LocalStorageSavedForm[] = item === null ? [] : JSON.parse(item) as LocalStorageSavedForm[];
+	let localStorageSavedItems: LocalStorageSavedForm[] = item === null ? [] : JSON.parse(item) as LocalStorageSavedForm[];
 	
 	// 오늘날짜가 아닌 숙제가 있다면
-	if (parsedItem.some(item => item.date !== TODAY)) {
-		parsedItem = parsedItem.map((item: LocalStorageSavedForm) => {
+	if (localStorageSavedItems.some(item => item.date !== TODAY)) {
+		localStorageSavedItems = localStorageSavedItems.map((item: LocalStorageSavedForm) => {
 			// 이럴일은 없지만 날짜가 오늘이라면 그냥 그대로 리턴함.
 			if (item.date === TODAY) {
 				return item;
@@ -94,6 +104,7 @@ export const HomeworkTable = (props: Props) => {
 					date: TODAY
 				}
 			}
+			
 			// 리셋날짜 당일 or 리셋날짜 이후라면 사용여부는 기존것 사용, 달성여부는 false
 			return {
 				...item,
@@ -109,22 +120,35 @@ export const HomeworkTable = (props: Props) => {
 		})
 	}
 	
-	const matchedItem = parsedItem.find(item => item.title === props.title);
+	const matchedItem = localStorageSavedItems.find(item => item.title === props.title);
 	
 	const [data, setData] = useState<Properties[]>(
-		matchedItem === undefined
-		?
-			props.data.map((prop: Data) => {
-				return {
-					use: true,
-					src: prop.src,
-					name: prop.name,
-					doWork: false
+		props.data.map((prop: Data) => {
+			// 로컬스토리지에 저장된 아이템이 있다면
+			if (matchedItem) {
+				// 이름으로 검색하여 기존의 프로퍼티들을 사용한다. (이미지 빼고)
+				// 개발시점에 새롭게 추가된 아이템은 여기서 검색되지 않고 아래로 내려가 초기화 상태의 프로피터들을 사용하게 될 것이다.
+				const searchedItem = matchedItem.data.find((item: Properties) => item.name === prop.name);
+				
+				if (searchedItem) {
+					return {
+						use: searchedItem.use,
+						name: prop.name,
+						src: prop.src,
+						doWork: searchedItem.doWork
+					}
 				}
-			})
-		:
-			matchedItem.data
-	);
+			}
+			
+			// 저장된 아이템이 없다면 프로퍼티들을 초기화하여 사용한다.
+			return {
+				use: true,
+				src: prop.src,
+				name: prop.name,
+				doWork: false
+			};
+		})
+	)
 	
 	useEffect(() => {
 		const item = window.localStorage.getItem(HOMEWORK_KEY);
@@ -244,11 +268,13 @@ export const HomeworkTable = (props: Props) => {
 	}
 	
 	return (
-		<div>
+		<div style={{ marginBottom: props.lastItem !== true ? '16px' : 0 }}>
 			<Table>
 				<thead>
 					<tr>
-						<td colSpan={data && data.length - 1}><h3>{props.title}</h3></td>
+						<td colSpan={data && data.length - 1}>
+							<NoMarginHeading size={3}>{props.title}</NoMarginHeading>
+						</td>
 						<td style={{ textAlign: 'right' }}><Button size={'small'} type={'primary'} danger onClick={reset}>초기화</Button></td>
 					</tr>
 				</thead>
