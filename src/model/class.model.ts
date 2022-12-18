@@ -48,4 +48,42 @@ export const ClassMap: ClassModel[] = [
 	{ class: Class.바이퍼, classLine: ClassLine.모험가, jobLine: JobLine.해적 },
 	{ class: Class.캡틴, classLine: ClassLine.모험가, jobLine: JobLine.해적 },
 	{ class: Class.캐논슈터, classLine: ClassLine.모험가, jobLine: JobLine.해적 },
+	
+	{ class: Class.소울마스터, classLine: ClassLine['시그너스 기사단'], jobLine: JobLine.전사 },
+	{ class: Class.플레임위자드, classLine: ClassLine['시그너스 기사단'], jobLine: JobLine.마법사 },
+	{ class: Class.윈드브레이커, classLine: ClassLine['시그너스 기사단'], jobLine: JobLine.궁수 },
+	{ class: Class.나이트워커, classLine: ClassLine['시그너스 기사단'], jobLine: JobLine.도적 },
+	{ class: Class.스트라이커, classLine: ClassLine['시그너스 기사단'], jobLine: JobLine.해적 },
+	{ class: Class.미하일, classLine: ClassLine['시그너스 기사단'], jobLine: JobLine.전사 },
+	
+	{ class: Class.블래스터, classLine: ClassLine.레지스탕스, jobLine: JobLine.전사 },
+	{ class: Class.배틀메이지, classLine: ClassLine.레지스탕스, jobLine: JobLine.마법사 },
+	{ class: Class.와일드헌터, classLine: ClassLine.레지스탕스, jobLine: JobLine.궁수 },
+	{ class: Class.메카닉, classLine: ClassLine.레지스탕스, jobLine: JobLine.해적 },
+	{ class: Class.제논, classLine: ClassLine.레지스탕스, jobLine: JobLine.하이브리드 },
+	{ class: Class.데몬슬레이어, classLine: ClassLine.레지스탕스, jobLine: JobLine.전사 },
+	{ class: Class.데몬어벤져, classLine: ClassLine.레지스탕스, jobLine: JobLine.전사 },
+	
+	{ class: Class.아란, classLine: ClassLine.영웅, jobLine: JobLine.전사 },
+	{ class: Class.에반, classLine: ClassLine.영웅, jobLine: JobLine.마법사 },
+	{ class: Class.루미너스, classLine: ClassLine.영웅, jobLine: JobLine.마법사 },
+	{ class: Class.메르세데스, classLine: ClassLine.영웅, jobLine: JobLine.궁수 },
+	{ class: Class.팬텀, classLine: ClassLine.영웅, jobLine: JobLine.도적 },
+	{ class: Class.은월, classLine: ClassLine.영웅, jobLine: JobLine.해적 },
+	
+	{ class: Class.카이저, classLine: ClassLine.노바, jobLine: JobLine.전사 },
+	{ class: Class.카인, classLine: ClassLine.노바, jobLine: JobLine.궁수 },
+	{ class: Class.카데나, classLine: ClassLine.노바, jobLine: JobLine.도적 },
+	{ class: Class.엔젤릭버스터, classLine: ClassLine.노바, jobLine: JobLine.해적 },
+	
+	{ class: Class.아델, classLine: ClassLine.레프, jobLine: JobLine.전사 },
+	{ class: Class.일리움, classLine: ClassLine.레프, jobLine: JobLine.마법사 },
+	{ class: Class.칼리, classLine: ClassLine.레프, jobLine: JobLine.도적 },
+	{ class: Class.아크, classLine: ClassLine.레프, jobLine: JobLine.전사 },
+	
+	{ class: Class.라라, classLine: ClassLine.아니마, jobLine: JobLine.마법사 },
+	{ class: Class.호영, classLine: ClassLine.아니마, jobLine: JobLine.도적 },
+	
+	{ class: Class.제로, classLine: ClassLine.제로, jobLine: JobLine.전사 },
+	{ class: Class.키네시스, classLine: ClassLine.키네시스, jobLine: JobLine.마법사 },
 ]
