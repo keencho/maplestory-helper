@@ -22,10 +22,10 @@ const Router = () => {
 							{
 								Menu.map((data: MenuType) => {
 									if (data.redirect) {
-										return <Route path={data.path} element={<Navigate to={data.redirect} replace />} />
+										return <Route path={data.path} element={<Navigate to={data.redirect} replace />} key={data.path} />
 									}
 									
-									return <Route path={data.path} element={data.element} />
+									return <Route path={data.path} element={data.element} key={data.path} />
 								})
 							}
 						</Routes>

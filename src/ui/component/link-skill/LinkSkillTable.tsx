@@ -6,6 +6,7 @@ import {Class} from '../../../model/class.model';
 import NoMarginHeading from '../common/element/NoMarginHeading';
 
 export interface LinkSkillTableDisplayDataLinkType {
+	key: string
 	displayClassName: string
 	skillName: string,
 	effect: string
@@ -24,8 +25,8 @@ export const LinkSkillTable = (props: LinkSkillTableProps) => {
 	return (
 		<>
 			{
-				props.data.map((dt: LinkSkillTableDisplayData, idx: number) =>
-					<Table dataSource={dt.link} pagination={false} size={'small'} key={`${dt.key}-${idx}`}>
+				props.data.map((dt: LinkSkillTableDisplayData) =>
+					<Table dataSource={dt.link} pagination={false} size={'small'} key={dt.key}>
 						<Column
 							align={'center'}
 							width={'3%'}
