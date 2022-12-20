@@ -1,8 +1,6 @@
 import Column from 'antd/lib/table/Column';
 import {Table} from 'antd';
 import React from 'react';
-import {LinkModel} from '../../../model/link.model';
-import {Class} from '../../../model/class.model';
 import NoMarginHeading from '../common/element/NoMarginHeading';
 
 export interface LinkSkillTableDisplayDataLinkType {
@@ -26,10 +24,11 @@ export const LinkSkillTable = (props: LinkSkillTableProps) => {
 		<>
 			{
 				props.data.map((dt: LinkSkillTableDisplayData) =>
-					<Table dataSource={dt.link} pagination={false} size={'small'} key={dt.key}>
+					<Table dataSource={dt.link} pagination={false} size={'small'} key={dt.key} sticky={true}>
 						<Column
 							align={'center'}
-							width={'3%'}
+							title={dt.key}
+							width={'5%'}
 							render={(_, record: LinkSkillTableDisplayDataLinkType) => {
 								return <img src={new URL(`../../../assets/icon/link/${record.skillName}.png`, import.meta.url).href} alt={record.skillName} />
 							}}
@@ -38,7 +37,9 @@ export const LinkSkillTable = (props: LinkSkillTableProps) => {
 							align={'center'}
 							title={'직업'}
 							width={'10%'}
-							dataIndex={'displayClassName'}
+							render={(_, record: LinkSkillTableDisplayDataLinkType) => {
+								return record.displayClassName.split('\n').map((item, idx) => <div key={idx}>{item}</div>)
+							}}
 						/>
 						<Column
 							align={'center'}
