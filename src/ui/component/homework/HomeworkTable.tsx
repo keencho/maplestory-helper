@@ -5,8 +5,6 @@ import {Button, Progress} from 'antd';
 import Color from '../../../model/color.model';
 import DateTimeUtils from '../../../util/DateTimeUtils';
 import moment from 'moment';
-import it from 'node:test';
-import {match} from 'assert';
 import NoMarginHeading from '../common/element/NoMarginHeading';
 
 const Table = styled.table`

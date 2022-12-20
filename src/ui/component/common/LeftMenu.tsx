@@ -1,9 +1,10 @@
-import {AppstoreOutlined, DollarCircleOutlined, HomeOutlined, UsergroupAddOutlined,} from '@ant-design/icons';
+import {DollarCircleOutlined, HomeOutlined, LinkOutlined,} from '@ant-design/icons';
 import type {MenuProps} from 'antd';
 import {Menu} from 'antd';
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import Path from '../../../model/path.model';
 import {useLocation, useNavigate} from 'react-router-dom';
+import { Menu as AppMenu, MenuType } from '../../../model/menu.model'
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -23,13 +24,11 @@ function getItem(
 	} as MenuItem;
 }
 
-const items: MenuItem[] = [
-	getItem('숙제표', Path.HOMEWORK, <HomeOutlined />),
-	getItem('결정석 수입 계산기', Path.BOSS_SOUL_CRYSTAL_CALCULATOR, <DollarCircleOutlined /> ),
-	// getItem('길드', '3',  <UsergroupAddOutlined />, [
-	// 	getItem('기여도 보스표', '3-1'),
-	// ])
-];
+const items: MenuItem[] = AppMenu
+	.filter((data: MenuType) => data.redirect === undefined)
+	.map((data: MenuType) => {
+		return getItem(data.label, data.path, data.menuIcon)
+	});
 
 const LeftMenu = () => {
 	const location = useLocation();
@@ -40,14 +39,6 @@ const LeftMenu = () => {
 		setCollapsed(!collapsed);
 	};
 	
-	const getActiveKey = () => {
-		if (location.pathname === '/') {
-			return Path.HOMEWORK;
-		}
-		
-		return location.pathname;
-	}
-	
 	return (
 		<div style={{ overflowY: 'auto', minWidth: 256, maxWidth: 256 }}>
 			<Menu
@@ -55,7 +46,7 @@ const LeftMenu = () => {
 				defaultOpenKeys={['sub1']}
 				mode="inline"
 				inlineCollapsed={collapsed}
-				activeKey={getActiveKey()}
+				activeKey={location.pathname}
 				onClick={(e) => navigate(e.key)}
 				items={items}
 				style={{
