@@ -3,4 +3,5 @@ export default class Path {
 	static HOMEWORK = '/homework'
 	static BOSS_SOUL_CRYSTAL_CALCULATOR = '/bossSoulCrystalCalculator'
 	static LINK_SKILL = '/linkSkill'
+	static COORDINATION_SIMULATOR = '/coordinationSimulator'
 }

@@ -1,6 +1,12 @@
-import {DollarCircleOutlined, HomeOutlined, LinkOutlined,} from '@ant-design/icons';
+import {
+	DollarCircleOutlined,
+	HomeOutlined,
+	LinkOutlined,
+	MenuFoldOutlined,
+	MenuUnfoldOutlined,
+} from '@ant-design/icons';
 import type {MenuProps} from 'antd';
-import {Menu} from 'antd';
+import {Button, Menu} from 'antd';
 import React, {useState} from 'react';
 import Path from '../../../model/path.model';
 import {useLocation, useNavigate} from 'react-router-dom';
@@ -40,11 +46,14 @@ const LeftMenu = () => {
 	};
 	
 	return (
-		<div style={{ overflowY: 'auto', minWidth: 256, maxWidth: 256 }}>
+		<div style={{ minWidth: collapsed ? 'inherit' : 256, display: 'flex', flexDirection: 'column', alignItems: collapsed ? 'center' : 'flex-start' }}>
+			<Button type="primary" onClick={toggleCollapsed} style={{ marginBottom: '.5rem', width: 'inherit', marginLeft: collapsed ? 'inherit' : '1rem' }}>
+				{collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+			</Button>
 			<Menu
-				defaultSelectedKeys={['1']}
-				defaultOpenKeys={['sub1']}
-				mode="inline"
+				// defaultSelectedKeys={['1']}
+				// defaultOpenKeys={['sub1']}
+				mode='inline'
 				inlineCollapsed={collapsed}
 				activeKey={location.pathname}
 				onClick={(e) => navigate(e.key)}

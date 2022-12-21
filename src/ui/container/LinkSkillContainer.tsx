@@ -21,8 +21,7 @@ const LinkSkillContainer = () => {
 		LinkMap.forEach((link: LinkModel) => {
 			const targetClass: Class = Array.isArray(link.class) ? link.class[0] : link.class;
 			const pureClass = ClassMap.find((cl: ClassModel) => cl.class === targetClass)!;
-			
-			let displayClassName = Array.isArray(link.class) ? link.class.map(dt => Class[dt]).join('\n') : Class[link.class];
+			const displayClassName = Array.isArray(link.class) ? link.class.map(dt => Class[dt]).join('\n') : Class[link.class];
 			
 			if (searchByClass === true && searchValue && !displayClassName.includes(searchValue)) {
 				return;
@@ -80,7 +79,7 @@ const LinkSkillContainer = () => {
 				title={'링크스킬'}
 				marginBottom={'.5rem'}
 			/>
-			<div style={{ display: 'flex', justifyContent: 'space-between' }}>
+			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
 				<Radio.Group onChange={(e) => setType(e.target.value)} value={type} style={{ flex: 2 }}>
 					<Radio value={'TYPE'}>타입별 구분</Radio>
 					<Radio value={'CLASS_LINE'}>직업 계열별 구분</Radio>
