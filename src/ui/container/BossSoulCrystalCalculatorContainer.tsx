@@ -166,6 +166,24 @@ const BossSoulCrystalCalculatorContainer = () => {
 		NotificationUtil.fire('success', '초기화 완료', '현재 탭이 초기화 되었습니다.')
 	}
 	
+	const copyCurrentTab = () => {
+		if (tabData.length >= 5) {
+			NotificationUtil.fire('error', '복사 실패', '최대 5개의 캐릭터 탭을 만들 수 있습니다.');
+			return;
+		}
+		
+		const activeKey = (Math.max(...tabData.map(v => Number(v.key))) + 1).toString();
+		const currentActiveData = tabData.find(data => data.key === activeTabKey)!;
+		
+		setTabData((pv: TabData[]) => [ ...pv, {
+			key: (Math.max(...tabData.map(v => Number(v.key))) + 1).toString(),
+			label: `캐릭터${pv.length + 1}`,
+			dailyBossData: currentActiveData.dailyBossData,
+			weeklyBossData: currentActiveData.weeklyBossData
+		}])
+		setActiveTabKey(activeKey)
+	}
+	
 	const calculateData = (): { crystalTotal: number, priceTotal: number } => {
 		
 		let crystalTotal = 0;
@@ -251,7 +269,12 @@ const BossSoulCrystalCalculatorContainer = () => {
 						onChange={setActiveTabKey}
 						type={'editable-card'}
 						onEdit={onEdit}
-						tabBarExtraContent={<Button type={'primary'} onClick={resetCurrentTab}>현재 탭 초기화</Button>}
+						tabBarExtraContent={
+						<div style={{ display: 'flex', gap: '.5rem' }}>
+							<Button type={'primary'} onClick={copyCurrentTab}>현재 탭 복사</Button>
+							<Button type={'primary'} onClick={resetCurrentTab}>현재 탭 초기화</Button>
+						</div>
+						}
 						items={tabData.map((data: TabData) => {
 							return {
 								...data,

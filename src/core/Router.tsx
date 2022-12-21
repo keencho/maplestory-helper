@@ -1,13 +1,10 @@
 import {BrowserRouter, Navigate, Route, Routes} from 'react-router-dom';
-import HomeworkContainer from '../ui/container/HomeworkContainer';
-import Path from '../model/path.model';
-import BossSoulCrystalCalculatorContainer from '../ui/container/BossSoulCrystalCalculatorContainer';
 import LeftMenu from '../ui/component/common/LeftMenu';
 import React from 'react';
 import Header from '../ui/component/common/Header';
 import Modal from '../ui/component/common/Modal';
-import LinkSkillContainer from '../ui/container/LinkSkillContainer';
 import {Menu, MenuType} from '../model/menu.model';
+import {isMobile} from 'react-device-detect'
 
 const Router = () => {
 	return (
