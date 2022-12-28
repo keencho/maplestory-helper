@@ -268,19 +268,21 @@ const BossSoulCrystalCalculatorContainer = () => {
 						activeKey={activeTabKey}
 						onChange={setActiveTabKey}
 						type={'editable-card'}
+						className={'full-height'}
 						onEdit={onEdit}
 						tabBarExtraContent={
-						<div style={{ display: 'flex', gap: '.5rem' }}>
-							<Button type={'primary'} onClick={copyCurrentTab}>현재 탭 복사</Button>
-							<Button type={'primary'} onClick={resetCurrentTab}>현재 탭 초기화</Button>
-						</div>
+							<div style={{ display: 'flex', gap: '.5rem' }}>
+								<Button type={'primary'} onClick={copyCurrentTab}>현재 탭 복사</Button>
+								<Button type={'primary'} onClick={resetCurrentTab}>현재 탭 초기화</Button>
+							</div>
 						}
 						items={tabData.map((data: TabData) => {
 							return {
 								...data,
 								closable: tabData.length !== 1,
+								className: 'full-height',
 								children:
-									<React.Fragment key={data.key}>
+									<div key={data.key} className={'full-height overflow-auto'}>
 										<BossTable
 											data={data.dailyBossData}
 											type={'daily'}
@@ -291,7 +293,7 @@ const BossSoulCrystalCalculatorContainer = () => {
 											type={'weekly'}
 											onChange={(column: BossColumn, key: 'difficulty' | 'numberOfPeople' | 'defeatCount', value: any) => onChange(data.key, 'weekly', column, key, value)}
 										/>
-									</React.Fragment>
+									</div>
 							}
 						})}
 					/>
