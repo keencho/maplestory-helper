@@ -81,8 +81,8 @@ const HomeworkContainer = () => {
 				<CustomCol span={15}>
 					<HomeworkTable title={'일일 숙제'} data={imageMapper('daily-homework')} type={'daily'} />
 					<HomeworkTable title={'심볼 일퀘'} data={imageMapper('symbol')} type={'daily'} />
-					<HomeworkTable title={'아케인리버 일퀘'} data={imageMapper('arcane-river')} type={'daily'} />
 					<HomeworkTable title={'일일 보스'} data={imageMapper('daily-boss')} type={'daily'} />
+					<HomeworkTable title={'주간 아케인리버 퀘스트'} data={imageMapper('arcane-river')} type={'weekly'} resetDay={'mon'} />
 					<HomeworkTable title={'주간 숙제'} data={imageMapper('weekly-homework')} type={'weekly'} resetDay={'mon'} />
 					<HomeworkTable title={'주간 보스1'} data={imageMapper('weekly-boss-1')} type={'weekly'} resetDay={'thu'} />
 					<HomeworkTable title={'주간 보스2'} data={imageMapper('weekly-boss-2')} type={'weekly'} resetDay={'thu'} lastItem={true} />
