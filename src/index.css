@@ -8,3 +8,18 @@ html, body, #root {
   width: 100%;
   height: 100%;
 }
+
+.full-height {
+  height: 100%;
+}
+
+.overflow-auto {
+  overflow: auto;
+}
+
+/* ant design*/
+
+/* 탭바에 스크롤바 생기는 현상 막기 위함 */
+.ant-tabs-content {
+  height: 100%;
+}
