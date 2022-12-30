@@ -21,9 +21,9 @@ import BossSoulCrystalCalculatorHelp from '../component/boss-soul-crystal-calcul
 const { Title } = Typography;
 const { Column } = Table;
 
-interface TabData {
-	label: string,
-	key: string,
+export interface BossSoulCrystalCalculatorTabData {
+	key: string
+	label: string
 	dailyBossData: BossColumn[]
 	weeklyBossData: BossColumn[]
 }
@@ -31,7 +31,7 @@ interface TabData {
 const AUTO_SAVE_KEY = 'BOSS_CALCULATOR_AUTO_SAVE';
 const TAB_DATA_KEY = 'BOSS_CALCULATOR_TAB_DATA';
 
-const BossSoulCrystalCalculatorContainer = () => {
+export const BossSoulCrystalCalculatorContainer = () => {
 	
 	const getImageSrcByBoss = (boss: Boss) => {
 		return new URL(`../../assets/icon/boss/${Boss[boss]}.png`, import.meta.url).href;
@@ -55,7 +55,7 @@ const BossSoulCrystalCalculatorContainer = () => {
 	
 	const [activeTabKey, setActiveTabKey] = useState<string>('1');
 	const [autoSave, setAutoSave] = useState<boolean>(localStorageAutoSave !== null && (localStorageAutoSave === 'true' || localStorageAutoSave === 'false') ? localStorageAutoSave === 'true' : true);
-	const [tabData, setTabData] = useState<TabData[]>(
+	const [tabData, setTabData] = useState<BossSoulCrystalCalculatorTabData[]>(
 		(autoSave && localStorageTabData !== null)
 		? JSON.parse(localStorageTabData)
 		: [{ label: '캐릭터1', key: '1', dailyBossData: DailyBossMap.map(mappingBoss), weeklyBossData: WeeklyBossMap.map(mappingBoss) }]
@@ -63,7 +63,7 @@ const BossSoulCrystalCalculatorContainer = () => {
 	const [showModal] = useModal();
 	
 	const onChange = (tabKey: string, type: 'daily' | 'weekly', column: BossColumn, key: 'difficulty' | 'numberOfPeople' | 'defeatCount', value: any) => {
-		setTabData((pv: TabData[]) => pv.map((td: TabData) => {
+		setTabData((pv: BossSoulCrystalCalculatorTabData[]) => pv.map((td: BossSoulCrystalCalculatorTabData) => {
 			if (td.key === tabKey) {
 				const targetKey = type === 'daily' ? 'dailyBossData' : 'weeklyBossData';
 				return {
@@ -120,7 +120,7 @@ const BossSoulCrystalCalculatorContainer = () => {
 			
 			// 키를 단순히 배열길이 + 1 로 하면 난리나기 때문에 max key 뽑아서 + 1 처리함.
 			const activeKey = (Math.max(...tabData.map(v => Number(v.key))) + 1).toString();
-			setTabData((pv: TabData[]) => [ ...pv, { key: (Math.max(...tabData.map(v => Number(v.key))) + 1).toString(), label: `캐릭터${pv.length + 1}`, dailyBossData: DailyBossMap.map(mappingBoss), weeklyBossData: WeeklyBossMap.map(mappingBoss) } ] )
+			setTabData((pv: BossSoulCrystalCalculatorTabData[]) => [ ...pv, { key: (Math.max(...tabData.map(v => Number(v.key))) + 1).toString(), label: `캐릭터${pv.length + 1}`, dailyBossData: DailyBossMap.map(mappingBoss), weeklyBossData: WeeklyBossMap.map(mappingBoss) } ] )
 			setActiveTabKey(activeKey)
 		} else {
 			if (tabData.length === 1) {
@@ -130,13 +130,13 @@ const BossSoulCrystalCalculatorContainer = () => {
 			
 			// 지우려는 탭이 현재 활성화된 탭이면 키값이 가장높은 탭을 활성탭으로 만든다.
 			if (activeTabKey === e) {
-				setActiveTabKey((Math.max(...tabData.filter((td: TabData) => td.key !== e).map(v => Number(v.key)))).toString())
+				setActiveTabKey((Math.max(...tabData.filter((td: BossSoulCrystalCalculatorTabData) => td.key !== e).map(v => Number(v.key)))).toString())
 			}
 			
-			setTabData((pv: TabData[]) => {
+			setTabData((pv: BossSoulCrystalCalculatorTabData[]) => {
 				return pv
-					.filter((td: TabData) => td.key !== e)
-					.map((td: TabData, idx: number) => {
+					.filter((td: BossSoulCrystalCalculatorTabData) => td.key !== e)
+					.map((td: BossSoulCrystalCalculatorTabData, idx: number) => {
 						// 키바꾸면 난리난다..
 						return {
 							...td,
@@ -148,9 +148,9 @@ const BossSoulCrystalCalculatorContainer = () => {
 	}
 	
 	const resetCurrentTab = () => {
-		setTabData((pv: TabData[]) => {
+		setTabData((pv: BossSoulCrystalCalculatorTabData[]) => {
 			return pv
-				.map((td: TabData) => {
+				.map((td: BossSoulCrystalCalculatorTabData) => {
 					if (td.key === activeTabKey) {
 						return {
 							...td,
@@ -175,7 +175,7 @@ const BossSoulCrystalCalculatorContainer = () => {
 		const activeKey = (Math.max(...tabData.map(v => Number(v.key))) + 1).toString();
 		const currentActiveData = tabData.find(data => data.key === activeTabKey)!;
 		
-		setTabData((pv: TabData[]) => [ ...pv, {
+		setTabData((pv: BossSoulCrystalCalculatorTabData[]) => [ ...pv, {
 			key: (Math.max(...tabData.map(v => Number(v.key))) + 1).toString(),
 			label: `캐릭터${pv.length + 1}`,
 			dailyBossData: currentActiveData.dailyBossData,
@@ -204,7 +204,7 @@ const BossSoulCrystalCalculatorContainer = () => {
 			})
 		}
 		
-		tabData.forEach((td: TabData) => {
+		tabData.forEach((td: BossSoulCrystalCalculatorTabData) => {
 			calc(td.dailyBossData);
 			calc(td.weeklyBossData);
 		});
@@ -276,7 +276,7 @@ const BossSoulCrystalCalculatorContainer = () => {
 								<Button type={'primary'} onClick={resetCurrentTab}>현재 탭 초기화</Button>
 							</div>
 						}
-						items={tabData.map((data: TabData) => {
+						items={tabData.map((data: BossSoulCrystalCalculatorTabData) => {
 							return {
 								...data,
 								closable: tabData.length !== 1,
@@ -351,5 +351,3 @@ const BossSoulCrystalCalculatorContainer = () => {
 		</>
 	)
 }
-
-export default BossSoulCrystalCalculatorContainer

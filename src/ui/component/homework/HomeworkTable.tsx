@@ -42,6 +42,8 @@ interface Data {
 
 interface Props {
 	title: string
+	localStorageKey: string
+	currentTabName: string
 	data: Data[]
 	type: 'daily' | 'weekly'
 	resetDay?: 'thu' | 'mon'
@@ -55,7 +57,13 @@ type Properties = {
 	doWork: boolean
 }
 
-interface LocalStorageSavedForm {
+export interface LocalStorageSavedWrapper {
+	key: string,
+	label: string,
+	data: LocalStorageSavedForm[]
+}
+
+export interface LocalStorageSavedForm {
 	title: string
 	date: string
 	type: 'daily' | 'weekly'
@@ -68,57 +76,59 @@ const TODAY = DateTimeUtils.getTodayDate();
 
 export const HomeworkTable = (props: Props) => {
 	
-	const item = window.localStorage.getItem(HOMEWORK_KEY);
-	let localStorageSavedItems: LocalStorageSavedForm[] = item === null ? [] : JSON.parse(item) as LocalStorageSavedForm[];
+	// const item = window.localStorage.getItem(HOMEWORK_KEY);
+	// let localStorageSavedItems: LocalStorageSavedForm[] = item === null ? [] : JSON.parse(item) as LocalStorageSavedForm[];
+	//
+	// // 오늘날짜가 아닌 숙제가 있다면
+	// if (localStorageSavedItems.some(item => item.date !== TODAY)) {
+	// 	localStorageSavedItems = localStorageSavedItems.map((item: LocalStorageSavedForm) => {
+	// 		// 이럴일은 없지만 날짜가 오늘이라면 그냥 그대로 리턴함.
+	// 		if (item.date === TODAY) {
+	// 			return item;
+	// 		}
+	//
+	// 		// 일일 숙제의 경우 날짜는 오늘날짜로 바꾸고 사용여부는 기존의것 사용, 달성여부는 false
+	// 		if (item.type === 'daily') {
+	// 			return {
+	// 				...item,
+	// 				date: TODAY,
+	// 				data: item.data.map((data: Properties) => {
+	// 					return {
+	// 						...data,
+	// 						use: data.use,
+	// 						doWork: false
+	// 					}
+	// 				})
+	// 			};
+	// 		}
+	//
+	// 		// 주간 숙제
+	// 		// 리셋날짜 이전이라면 모든 프로퍼티를 그대로 가저감
+	// 		if (moment(TODAY).isBefore(item.weeklyResetDate)) {
+	// 			return {
+	// 				...item,
+	// 				date: TODAY
+	// 			}
+	// 		}
+	//
+	// 		// 리셋날짜 당일 or 리셋날짜 이후라면 사용여부는 기존것 사용, 달성여부는 false
+	// 		return {
+	// 			...item,
+	// 			date: TODAY,
+	// 			data: item.data.map((data: Properties) => {
+	// 				return {
+	// 					...data,
+	// 					use: data.use,
+	// 					doWork: false
+	// 				}
+	// 			})
+	// 		}
+	// 	})
+	// }
+	//
+	// const matchedItem = localStorageSavedItems.find(item => item.title === props.title);
 	
-	// 오늘날짜가 아닌 숙제가 있다면
-	if (localStorageSavedItems.some(item => item.date !== TODAY)) {
-		localStorageSavedItems = localStorageSavedItems.map((item: LocalStorageSavedForm) => {
-			// 이럴일은 없지만 날짜가 오늘이라면 그냥 그대로 리턴함.
-			if (item.date === TODAY) {
-				return item;
-			}
-			
-			// 일일 숙제의 경우 날짜는 오늘날짜로 바꾸고 사용여부는 기존의것 사용, 달성여부는 false
-			if (item.type === 'daily') {
-				return {
-					...item,
-					date: TODAY,
-					data: item.data.map((data: Properties) => {
-						return {
-							...data,
-							use: data.use,
-							doWork: false
-						}
-					})
-				};
-			}
-			
-			// 주간 숙제
-			// 리셋날짜 이전이라면 모든 프로퍼티를 그대로 가저감
-			if (moment(TODAY).isBefore(item.weeklyResetDate)) {
-				return {
-					...item,
-					date: TODAY
-				}
-			}
-			
-			// 리셋날짜 당일 or 리셋날짜 이후라면 사용여부는 기존것 사용, 달성여부는 false
-			return {
-				...item,
-				date: TODAY,
-				data: item.data.map((data: Properties) => {
-					return {
-						...data,
-						use: data.use,
-						doWork: false
-					}
-				})
-			}
-		})
-	}
-	
-	const matchedItem = localStorageSavedItems.find(item => item.title === props.title);
+	const matchedItem: any = undefined;
 	
 	const [data, setData] = useState<Properties[]>(
 		props.data.map((prop: Data) => {
@@ -149,12 +159,29 @@ export const HomeworkTable = (props: Props) => {
 	)
 	
 	useEffect(() => {
-		const item = window.localStorage.getItem(HOMEWORK_KEY);
+		const localStorageSavedItem: any = window.localStorage.getItem(HOMEWORK_KEY);
 		
-		let arr: LocalStorageSavedForm[] = [];
-		if (item !== null) {
-			arr = JSON.parse(item).filter((item: LocalStorageSavedForm) => item.title !== props.title);
+		// 첫 접근이라면
+		if (localStorageSavedItem === null) {
+			const wrapper: LocalStorageSavedWrapper[] = [{ key: props.localStorageKey, label: props.currentTabName, data: [{ date: TODAY, title: props.title, data: data, type: props.type }] }]
+			
+			window.localStorage.setItem(HOMEWORK_KEY, JSON.stringify(wrapper));
+			
+			return;
 		}
+		
+		const item: LocalStorageSavedWrapper[] = JSON.parse(localStorageSavedItem) as LocalStorageSavedWrapper[];
+		const filteredItem: LocalStorageSavedWrapper | undefined = item.find((d: any) => d.key === props.localStorageKey);
+		
+		// 새로운 탭이라면
+		if (!filteredItem) {
+			item.push({ key: props.localStorageKey, label: props.currentTabName, data: [{ date: TODAY, title: props.title, data: data, type: props.type }] });
+			
+			window.localStorage.setItem(HOMEWORK_KEY, JSON.stringify(item));
+			return;
+		}
+		
+		const new1 = filteredItem.data.filter(item => item.title !== props.title);
 		
 		let form: LocalStorageSavedForm = {
 			date: TODAY,
@@ -181,9 +208,10 @@ export const HomeworkTable = (props: Props) => {
 			form.weeklyResetDate = momentDay.format('YYYY-MM-DD');
 		}
 		
-		arr.push(form)
+		new1.push(form);
+		item.find((dt: LocalStorageSavedWrapper) => dt.key === props.localStorageKey)!.data = new1;
 		
-		window.localStorage.setItem(HOMEWORK_KEY, JSON.stringify(arr));
+		window.localStorage.setItem(HOMEWORK_KEY, JSON.stringify(item));
 	}, [data])
 	
 	const check = (key: 'use' | 'doWork', idx: number) => {
