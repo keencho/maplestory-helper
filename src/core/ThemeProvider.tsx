@@ -1,6 +1,7 @@
 import {ThemeSwitcherProvider} from 'react-css-theme-switcher';
 import {useRecoilValue} from 'recoil';
 import {ThemeAtom} from '../recoil/theme.atom';
+import React from 'react';
 
 interface Props {
 	children: React.ReactNode;
