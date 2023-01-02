@@ -3,7 +3,7 @@ import React from 'react';
 import {DollarCircleOutlined, HomeOutlined, LinkOutlined} from '@ant-design/icons';
 import {BossSoulCrystalCalculatorContainer} from '../ui/container/BossSoulCrystalCalculatorContainer';
 import LinkSkillContainer from '../ui/container/LinkSkillContainer';
-import {HomeworkContainerV2} from '../ui/container/HomeworkContainerV2';
+import {HomeworkContainer} from '../ui/container/HomeworkContainer';
 
 export interface MenuType {
 	path: string,
@@ -21,7 +21,7 @@ export const Menu: MenuType[] = [
 	{
 		path: Path.HOMEWORK,
 		label: '숙제표',
-		element: <HomeworkContainerV2 />,
+		element: <HomeworkContainer />,
 		menuIcon: <HomeOutlined />
 	},
 	// {
