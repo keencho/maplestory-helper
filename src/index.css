@@ -17,6 +17,14 @@ html, body, #root {
   overflow: auto;
 }
 
+.d-flex {
+  display: flex;
+}
+
+.justify-content-space-between {
+  justify-content: space-between;
+}
+
 /* ant design*/
 
 /* 탭바에 스크롤바 생기는 현상 막기 위함 */

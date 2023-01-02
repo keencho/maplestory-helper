@@ -1,10 +1,9 @@
 import Path from './path.model';
-import HomeworkContainer from '../ui/container/HomeworkContainer';
 import React from 'react';
-import {DollarCircleOutlined, HomeOutlined, LinkOutlined, SkinOutlined} from '@ant-design/icons';
-import BossSoulCrystalCalculatorContainer from '../ui/container/BossSoulCrystalCalculatorContainer';
+import {DollarCircleOutlined, HomeOutlined, LinkOutlined} from '@ant-design/icons';
+import {BossSoulCrystalCalculatorContainer} from '../ui/container/BossSoulCrystalCalculatorContainer';
 import LinkSkillContainer from '../ui/container/LinkSkillContainer';
-import CoordinationSimulatorContainer from '../ui/container/CoordinationSimulatorContainer';
+import {HomeworkContainer} from '../ui/container/HomeworkContainer';
 
 export interface MenuType {
 	path: string,
