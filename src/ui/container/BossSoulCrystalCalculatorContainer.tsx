@@ -12,11 +12,13 @@ import {
 	WeeklyBossMap
 } from '../../model/boss.model';
 import {CustomCol, CustomRow} from '../component/common/element/CustomRowCol';
-import NotificationUtil from '../../util/NotificationUtil';
+import NotificationUtil from '../../util/notification.util';
 import PageTitle from '../component/common/PageTitle';
 import useModal from '../../hooks/useModal';
 import BossTable from '../component/boss-soul-crystal-calculator/BossTable';
 import BossSoulCrystalCalculatorHelp from '../component/boss-soul-crystal-calculator/BossSoulCrystalCalculatorHelp';
+import {FlexBox} from '../component/common/element/FlexBox';
+import { CommonStyledSpan } from '../../model/style.model';
 
 const { Title } = Typography;
 const { Column } = Table;
@@ -253,13 +255,13 @@ export const BossSoulCrystalCalculatorContainer = () => {
 				title={'결정석 수입 계산기'}
 				marginBottom={'.5rem'}
 				extraContents={
-				<div style={{ display: 'flex', gap: '.5rem' }}>
-					<div style={{ display: 'flex', alignItems: 'center', gap: '.5rem'}}>
-						<span style={{ fontSize: '14px', fontWeight: 600 }}>자동저장</span>
+				<FlexBox gap={'.5rem'}>
+					<FlexBox alignItems={'center'} gap={'.5rem'}>
+						<CommonStyledSpan fontSize={'14px'} fontWeight={600}>자동저장</CommonStyledSpan>
 						<Switch checked={autoSave} onChange={setAutoSave} />
-					</div>
+					</FlexBox>
 					<Button type={'primary'} onClick={openHelpModal}>도움말</Button>
-				</div>
+				</FlexBox>
 				}
 			/>
 			<CustomRow gutter={32}>
