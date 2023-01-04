@@ -10,6 +10,8 @@ interface Props extends CommonStyle {
 	alignItems?: Property.AlignItems
 	justifyContent?: Property.JustifyContent
 	gap?: Property.Gap
+	flexDirection?: Property.FlexDirection
+	flexGrow?: Property.FlexGrow
 }
 
 const FlexBoxContainer = styled(CommonStyledDiv)<Props>`
@@ -18,6 +20,8 @@ const FlexBoxContainer = styled(CommonStyledDiv)<Props>`
 	${props => StyledComponentUtil.apply('align-items', props.alignItems)}
 	${props => StyledComponentUtil.apply('justify-content', props.justifyContent)}
 	${props => StyledComponentUtil.apply('gap', props.gap)}
+	${props => StyledComponentUtil.apply('flex-direction', props.flexDirection)}
+	${props => StyledComponentUtil.apply('flex-grow', props.flexGrow)}
 `
 
 export const FlexBox = (props: Props) => {

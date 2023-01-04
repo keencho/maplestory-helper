@@ -8,6 +8,9 @@ export interface CommonStyle {
 	border?: Property.Border
 	fontSize?: Property.FontSize
 	fontWeight?: Property.FontWeight
+	height?: Property.Height
+	overflowY?: Property.OverflowY
+	overflowWrap?: Property.OverflowWrap
 }
 
 export const CommonStyledDiv = styled.div<CommonStyle>`
@@ -16,6 +19,9 @@ export const CommonStyledDiv = styled.div<CommonStyle>`
 	${props => StyledComponentUtil.apply('border', props.border)}
 	${props => StyledComponentUtil.apply('font-size', props.fontSize)}
 	${props => StyledComponentUtil.apply('font-weight', props.fontWeight)}
+	${props => StyledComponentUtil.apply('height', props.height)}
+	${props => StyledComponentUtil.apply('overflow-y', props.overflowY)}
+	${props => StyledComponentUtil.apply('overflow-wrap', props.overflowWrap)}
 `
 
 export const CommonStyledSpan = styled.span<CommonStyle>`
@@ -24,4 +30,7 @@ export const CommonStyledSpan = styled.span<CommonStyle>`
 	${props => StyledComponentUtil.apply('border', props.border)}
 	${props => StyledComponentUtil.apply('font-size', props.fontSize)}
 	${props => StyledComponentUtil.apply('font-weight', props.fontWeight)}
+	${props => StyledComponentUtil.apply('height', props.height)}
+  ${props => StyledComponentUtil.apply('overflow-y', props.overflowY)}
+	${props => StyledComponentUtil.apply('overflow-wrap', props.overflowWrap)}
 `
