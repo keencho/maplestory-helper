@@ -104,29 +104,29 @@ const HomeworkTable = (props: Props): JSX.Element => {
 					return (
 						<Table key={table.title}>
 							<thead>
-							<tr>
-								<td colSpan={table && table.data.length - 1}>
-									<NoMarginHeading size={3}>{table.title}</NoMarginHeading>
-								</td>
-								<td style={{ textAlign: 'right' }}><Button size={'small'} type={'primary'} danger onClick={() => props.reset(table.title)}>초기화</Button></td>
-							</tr>
+								<tr>
+									<td colSpan={table && table.data.length - 1}>
+										<NoMarginHeading size={3}>{table.title}</NoMarginHeading>
+									</td>
+									<td style={{ textAlign: 'right' }}><Button size={'small'} type={'primary'} danger onClick={() => props.reset(table.title)}>초기화</Button></td>
+								</tr>
 							</thead>
 							<tbody>
-							<tr>
-								{getElementByKey('use', table)}
-							</tr>
-							<tr>
-								{getElementByKey('name', table)}
-							</tr>
-							<tr>
-								{getElementByKey('src', table)}
-							</tr>
-							<tr>
-								<td colSpan={1}>달성률</td>
-								<td colSpan={table && table.data.length - 1} style={{ padding: '0 16px' }}>
-									<Progress percent={calculateRate(table.data)} strokeColor={Color.BLUE} status={'normal'} />
-								</td>
-							</tr>
+								<tr>
+									{getElementByKey('use', table)}
+								</tr>
+								<tr>
+									{getElementByKey('name', table)}
+								</tr>
+								<tr>
+									{getElementByKey('src', table)}
+								</tr>
+								<tr>
+									<td colSpan={1}>달성률</td>
+									<td colSpan={table && table.data.length - 1} style={{ padding: '0 16px' }}>
+										<Progress percent={calculateRate(table.data)} strokeColor={Color.BLUE} status={'normal'} />
+									</td>
+								</tr>
 							</tbody>
 						</Table>
 					)

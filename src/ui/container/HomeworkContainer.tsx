@@ -6,11 +6,12 @@ import HomeworkHelp from '../component/homework/HomeworkHelp';
 import {CustomCol, CustomRow} from '../component/common/element/CustomRowCol';
 import NoMarginHeading from '../component/common/element/NoMarginHeading';
 import Textarea from '../component/common/element/Textarea';
-import NotificationUtil from '../../util/NotificationUtil';
+import NotificationUtil from '../../util/notification.util';
 import HomeworkTable from '../component/homework/HomeworkTable';
-import styled from 'styled-components';
+import styled, {CSSProperties} from 'styled-components';
 import moment from 'moment';
-import DateTimeUtils from '../../util/DateTimeUtils';
+import DateTimeUtils from '../../util/date-time.util';
+import {FlexBox} from '../component/common/element/FlexBox';
 
 const HOMEWORK_KEY = "HOMEWORK_V2"
 const MY_ROUTINE_KEY = 'MY_ROUTINE';
@@ -300,7 +301,7 @@ export const HomeworkContainer = () => {
 				})
 		})
 		
-		NotificationUtil.fire('success', '초기화 완료', '현재 탭이 초기화 되었습니다.')
+		NotificationUtil.fire('success', '초기화 완료', '달성 여부가 모두 초기화 되었습니다.')
 	}
 	
 	return (
@@ -312,10 +313,10 @@ export const HomeworkContainer = () => {
 			/>
 			<CustomRow gutter={32}>
 				<CustomCol span={9}>
-					<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '.25rem'}}>
+					<FlexBox alignItems={'center'} justifyContent={'space-between'} margin={'0 0 .25rem 0'}>
 						<NoMarginHeading size={2}>나만의 루틴</NoMarginHeading>
 						<Button size={'small'} type={'primary'} onClick={saveMyRoutine}>저장</Button>
-					</div>
+					</FlexBox>
 					<Textarea
 						value={myRoutine}
 						setValue={setMyRoutine}

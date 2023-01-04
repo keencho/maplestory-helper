@@ -4,16 +4,17 @@ import React from 'react';
 import Header from '../ui/component/common/Header';
 import Modal from '../ui/component/common/Modal';
 import {Menu, MenuType} from '../model/menu.model';
+import {FlexBox} from '../ui/component/common/element/FlexBox';
 
 const Router = () => {
 	return (
-		<div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+		<FlexBox flexDirection={'column'} height={'100%'}>
 			<Header />
 			<Modal />
 			<BrowserRouter>
-				<div style={{ display: 'flex', flexGrow: 1, overflowY: 'auto' }}>
+				<FlexBox flexGrow={1} overflowY={'auto'}>
 					<LeftMenu />
-					<div style={{ padding: '24px', flexGrow: '1', overflowY: 'auto', display: 'flex', flexDirection: 'column', overflowWrap: 'break-word' }}>
+					<FlexBox overflowY={'auto'} flexGrow={1} flexDirection={'column'} overflowWrap={'break-word'} padding={'24px'}>
 						<Routes>
 							{
 								Menu.map((data: MenuType) => {
@@ -25,10 +26,10 @@ const Router = () => {
 								})
 							}
 						</Routes>
-					</div>
-				</div>
+					</FlexBox>
+				</FlexBox>
 			</BrowserRouter>
-		</div>
+		</FlexBox>
 	)
 }
 
