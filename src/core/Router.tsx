@@ -12,9 +12,9 @@ const Router = () => {
 			<Header />
 			<Modal />
 			<BrowserRouter>
-				<FlexBox flexGrow={1} overflowY={'auto'}>
+				<FlexBox flexGrow={'1'} overflowY={'auto'}>
 					<LeftMenu />
-					<FlexBox overflowY={'auto'} flexGrow={1} flexDirection={'column'} overflowWrap={'break-word'} padding={'24px'}>
+					<FlexBox overflowY={'auto'} flexGrow={'1'} flexDirection={'column'} overflowWrap={'break-word'} padding={'24px'}>
 						<Routes>
 							{
 								Menu.map((data: MenuType) => {
