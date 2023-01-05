@@ -11,6 +11,7 @@ export interface CommonStyle {
 	height?: Property.Height
 	overflowY?: Property.OverflowY
 	overflowWrap?: Property.OverflowWrap
+	minWidth?: Property.MinWidth
 }
 
 export const CommonStyledDiv = styled.div<CommonStyle>`
@@ -22,6 +23,7 @@ export const CommonStyledDiv = styled.div<CommonStyle>`
 	${props => StyledComponentUtil.apply('height', props.height)}
 	${props => StyledComponentUtil.apply('overflow-y', props.overflowY)}
 	${props => StyledComponentUtil.apply('overflow-wrap', props.overflowWrap)}
+	${props => StyledComponentUtil.apply('min-width', props.minWidth)}
 `
 
 export const CommonStyledSpan = styled.span<CommonStyle>`
@@ -33,4 +35,5 @@ export const CommonStyledSpan = styled.span<CommonStyle>`
 	${props => StyledComponentUtil.apply('height', props.height)}
   ${props => StyledComponentUtil.apply('overflow-y', props.overflowY)}
 	${props => StyledComponentUtil.apply('overflow-wrap', props.overflowWrap)}
+  ${props => StyledComponentUtil.apply('min-width', props.minWidth)}
 `

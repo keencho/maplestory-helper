@@ -1,6 +1,7 @@
 import {useRecoilState} from 'recoil';
 import {ModalAtom, ModalDefault} from '../../../recoil/modal.atom';
 import {Button, Modal as AntdModal} from 'antd';
+import NoMarginHeading from './element/NoMarginHeading';
 
 const Modal = () => {
 	const [modal, setModal] = useRecoilState(ModalAtom);
@@ -25,7 +26,7 @@ const Modal = () => {
 	return (
 		<AntdModal
 			width={getWidth()}
-			title={<h2 style={{ marginBottom: 0 }}>{modal.title}</h2>}
+			title={<NoMarginHeading size={2}>{modal.title}</NoMarginHeading>}
 			open={modal.show}
 			onCancel={closeModal}
 			footer={
