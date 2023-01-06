@@ -7,7 +7,9 @@ import {
 } from '../component/link/LinkSkillTable';
 import {LinkMap, LinkModel, LinkType} from '../../model/link.model';
 import {Class, ClassLine, ClassMap, ClassModel, JobLine} from '../../model/class.model';
-import {Radio, Input, Button} from 'antd';
+import {Button, Input, Radio} from 'antd';
+import {FlexBox} from '../component/common/element/FlexBox';
+import {CommonStyledDiv} from '../../model/style.model';
 
 const LinkSkillContainer = () => {
 	
@@ -79,25 +81,26 @@ const LinkSkillContainer = () => {
 				title={'링크스킬'}
 				marginBottom={'.5rem'}
 			/>
-			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+			<FlexBox justifyContent={'space-between'} alignItems={'center'}>
 				<Radio.Group onChange={(e) => setType(e.target.value)} value={type} style={{ flex: 2 }}>
 					<Radio value={'TYPE'}>타입별 구분</Radio>
 					<Radio value={'CLASS_LINE'}>직업 계열별 구분</Radio>
 					<Radio value={'JOB_LINE'}>전직 계열별 구분</Radio>
 				</Radio.Group>
-				<div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', flex: 1 }}>
+				<FlexBox alignItems={'center'} gap={'.5rem'} flex={1}>
 					<Input placeholder="직업 검색" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} onPressEnter={() => search(true)} />
 					<Button type={'primary'} onClick={() => search(true)}>검색</Button>
-				</div>
-			</div>
+					
+				</FlexBox>
+			</FlexBox>
 			{
 				data && data.length > 0
 				?
-					<div style={{ overflow: 'auto', marginTop: '.5rem' }}>
+					<CommonStyledDiv margin={'.5rem 0 0 0'} overflowY={'auto'}>
 						<LinkSkillTable data={data} />
-					</div>
+					</CommonStyledDiv>
 				:
-					<div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', fontWeight: 700 }}>검색 결과가 없습니다.</div>
+					<FlexBox height={'100%'} alignItems={'center'} justifyContent={'center'} fontSize={'3rem'} fontWeight={'700'}>검색 결과가 없습니다.</FlexBox>
 			}
 		</>
 	)

@@ -8,7 +8,7 @@ import NoMarginHeading from '../component/common/element/NoMarginHeading';
 import Textarea from '../component/common/element/Textarea';
 import NotificationUtil from '../../util/notification.util';
 import HomeworkTable from '../component/homework/HomeworkTable';
-import styled, {CSSProperties} from 'styled-components';
+import styled from 'styled-components';
 import moment from 'moment';
 import DateTimeUtils from '../../util/date-time.util';
 import {FlexBox} from '../component/common/element/FlexBox';

@@ -17,11 +17,7 @@ interface Props extends CommonStyle {
 const FlexBoxContainer = styled(CommonStyledDiv)<Props>`
 	display: flex;
 	
-	${props => StyledComponentUtil.apply('align-items', props.alignItems)}
-	${props => StyledComponentUtil.apply('justify-content', props.justifyContent)}
-	${props => StyledComponentUtil.apply('gap', props.gap)}
-	${props => StyledComponentUtil.apply('flex-direction', props.flexDirection)}
-	${props => StyledComponentUtil.apply('flex-grow', props.flexGrow)}
+	${props => StyledComponentUtil.apply(props)}
 `
 
 export const FlexBox = (props: Props) => {

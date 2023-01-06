@@ -11,6 +11,7 @@ import React, {useState} from 'react';
 import Path from '../../../model/path.model';
 import {useLocation, useNavigate} from 'react-router-dom';
 import { Menu as AppMenu, MenuType } from '../../../model/menu.model'
+import {FlexBox} from './element/FlexBox';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -46,13 +47,11 @@ const LeftMenu = () => {
 	};
 	
 	return (
-		<div style={{ minWidth: collapsed ? 'inherit' : 256, display: 'flex', flexDirection: 'column', alignItems: collapsed ? 'center' : 'flex-start' }}>
+		<FlexBox flexDirection={'column'} alignItems={collapsed ? 'center' : 'flex-start'} minWidth={collapsed ? 'inherit' : '256px'}>
 			<Button type="primary" onClick={toggleCollapsed} style={{ marginBottom: '.5rem', width: 'inherit', marginLeft: collapsed ? 'inherit' : '1rem' }}>
 				{collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
 			</Button>
 			<Menu
-				// defaultSelectedKeys={['1']}
-				// defaultOpenKeys={['sub1']}
 				mode='inline'
 				inlineCollapsed={collapsed}
 				activeKey={location.pathname}
@@ -62,7 +61,7 @@ const LeftMenu = () => {
 					height: '100%'
 				}}
 			/>
-		</div>
+		</FlexBox>
 	);
 }
 
