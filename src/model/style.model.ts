@@ -12,28 +12,13 @@ export interface CommonStyle {
 	overflowY?: Property.OverflowY
 	overflowWrap?: Property.OverflowWrap
 	minWidth?: Property.MinWidth
+	flex?: Property.Flex
 }
 
 export const CommonStyledDiv = styled.div<CommonStyle>`
-	${props => StyledComponentUtil.apply('margin', props.margin)}
-	${props => StyledComponentUtil.apply('padding', props.padding)}
-	${props => StyledComponentUtil.apply('border', props.border)}
-	${props => StyledComponentUtil.apply('font-size', props.fontSize)}
-	${props => StyledComponentUtil.apply('font-weight', props.fontWeight)}
-	${props => StyledComponentUtil.apply('height', props.height)}
-	${props => StyledComponentUtil.apply('overflow-y', props.overflowY)}
-	${props => StyledComponentUtil.apply('overflow-wrap', props.overflowWrap)}
-	${props => StyledComponentUtil.apply('min-width', props.minWidth)}
+	${props => StyledComponentUtil.apply(props)}
 `
 
 export const CommonStyledSpan = styled.span<CommonStyle>`
-	${props => StyledComponentUtil.apply('margin', props.margin)}
-	${props => StyledComponentUtil.apply('padding', props.padding)}
-	${props => StyledComponentUtil.apply('border', props.border)}
-	${props => StyledComponentUtil.apply('font-size', props.fontSize)}
-	${props => StyledComponentUtil.apply('font-weight', props.fontWeight)}
-	${props => StyledComponentUtil.apply('height', props.height)}
-  ${props => StyledComponentUtil.apply('overflow-y', props.overflowY)}
-	${props => StyledComponentUtil.apply('overflow-wrap', props.overflowWrap)}
-  ${props => StyledComponentUtil.apply('min-width', props.minWidth)}
+	${props => StyledComponentUtil.apply(props)}
 `

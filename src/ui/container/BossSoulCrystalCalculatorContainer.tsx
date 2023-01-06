@@ -273,10 +273,10 @@ export const BossSoulCrystalCalculatorContainer = () => {
 						className={'full-height'}
 						onEdit={onEdit}
 						tabBarExtraContent={
-							<div style={{ display: 'flex', gap: '.5rem' }}>
+							<FlexBox gap={'.5rem'}>
 								<Button type={'primary'} onClick={copyCurrentTab}>현재 탭 복사</Button>
 								<Button type={'primary'} onClick={resetCurrentTab}>현재 탭 초기화</Button>
-							</div>
+							</FlexBox>
 						}
 						items={tabData.map((data: BossSoulCrystalCalculatorTabData) => {
 							return {
