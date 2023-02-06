@@ -1,9 +1,10 @@
 import Path from './path.model';
 import React from 'react';
-import {DollarCircleOutlined, HomeOutlined, LinkOutlined} from '@ant-design/icons';
+import {DollarCircleOutlined, HomeOutlined, LinkOutlined, StarOutlined} from '@ant-design/icons';
 import {BossSoulCrystalCalculatorContainer} from '../ui/container/BossSoulCrystalCalculatorContainer';
 import LinkSkillContainer from '../ui/container/LinkSkillContainer';
 import {HomeworkContainer} from '../ui/container/HomeworkContainer';
+import StarForceSimulatorContainer from '../ui/container/StarForceSimulatorContainer';
 
 export interface MenuType {
 	path: string,
@@ -24,12 +25,12 @@ export const Menu: MenuType[] = [
 		element: <HomeworkContainer />,
 		menuIcon: <HomeOutlined />
 	},
-	// {
-	// 	path: Path.COORDINATION_SIMULATOR,
-	// 	label: '코디 시뮬레이터',
-	// 	element: <CoordinationSimulatorContainer />,
-	// 	menuIcon: <SkinOutlined />
-	// },
+	{
+		path: Path.COORDINATION_SIMULATOR,
+		label: '스타포스 시뮬레이터',
+		element: <StarForceSimulatorContainer />,
+		menuIcon: <StarOutlined />
+	},
 	{
 		path: Path.BOSS_SOUL_CRYSTAL_CALCULATOR,
 		label: '결정석 수입 계산기',
