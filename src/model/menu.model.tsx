@@ -4,7 +4,7 @@ import {DollarCircleOutlined, HomeOutlined, LinkOutlined, StarOutlined} from '@a
 import {BossSoulCrystalCalculatorContainer} from '../ui/container/BossSoulCrystalCalculatorContainer';
 import LinkSkillContainer from '../ui/container/LinkSkillContainer';
 import {HomeworkContainer} from '../ui/container/HomeworkContainer';
-import StarForceSimulatorContainer from '../ui/container/StarForceSimulatorContainer';
+import {StarForceSimulatorContainerWrapper} from '../ui/container/StarForceSimulatorContainer';
 
 export interface MenuType {
 	path: string,
@@ -26,9 +26,9 @@ export const Menu: MenuType[] = [
 		menuIcon: <HomeOutlined />
 	},
 	{
-		path: Path.COORDINATION_SIMULATOR,
+		path: Path.STAR_FORCE_SIMULATOR,
 		label: '스타포스 시뮬레이터',
-		element: <StarForceSimulatorContainer />,
+		element: <StarForceSimulatorContainerWrapper />,
 		menuIcon: <StarOutlined />
 	},
 	{
