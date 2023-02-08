@@ -1,17 +1,17 @@
 import PageTitle from '../component/common/PageTitle';
-import {Alert, Button, Checkbox, Input, Radio, Typography} from 'antd';
+import {Alert, Button, Checkbox, Input, Radio, Spin, Typography} from 'antd';
 import {CustomCol, CustomRow} from '../component/common/element/CustomRowCol';
 import React, {useEffect, useState} from 'react';
 import {FlexBox} from '../component/common/element/FlexBox';
 // import MaplestoryIOApi from '../../api/maplestory-io.api';
 import useMapleFetch from '../../hooks/useMapleFetch';
-import {getAllItems, getItemIcon} from '../../api/maplestory-io.api';
+import {getAllItems, getItem, getItemIcon} from '../../api/maplestory-io.api';
 import styled from 'styled-components';
 import {useRecoilValue} from 'recoil';
 import {ThemeAtom} from '../../recoil/theme.atom';
 import {BACKGROUND, HOVER} from '../../model/color.model';
-import {doCacheFetch} from '../../util/fetch.util';
 import {cacheName, region, version} from '../../model/maplestory-io.model';
+import AsyncCacheImage from '../component/common/element/AsyncCacheImage';
 
 const { Title } = Typography;
 
@@ -40,22 +40,26 @@ const eventOptions = [
 ];
 
 const SearchBox = styled.div<{ theme: 'light' | 'dark' }>`
-		border: 1px solid rgba(140, 140, 140, 0.35);
-		max-height: 250px;
-		overflow-y: auto;
-		position: absolute;
-		width: 100%;
-		background-color: ${props => BACKGROUND(props.theme)};
-	`
+	border: 1px solid rgba(140, 140, 140, 0.35);
+	max-height: 250px;
+	overflow-y: auto;
+	position: absolute;
+	width: 100%;
+	background-color: ${props => BACKGROUND(props.theme)};
+`
 
 const SearchBoxItem = styled.div<{ theme: 'light' | 'dark' }>`
-		cursor: pointer;
-		padding: .25rem 1rem;
-		
-		&:hover {
-			background-color: ${props => HOVER(props.theme)};
-		}
-	`
+	cursor: pointer;
+	padding: .25rem .5rem;
+	&:not(:last-child) {
+		border-bottom: 1px solid rgba(140, 140, 140, 0.35);
+	}
+	
+	
+	&:hover {
+		background-color: ${props => HOVER(props.theme)};
+	}
+`
 
 export const StarForceSimulatorContainer = ({ items } : { items: any }) => {
 	
@@ -66,9 +70,13 @@ export const StarForceSimulatorContainer = ({ items } : { items: any }) => {
 	
 	const defaultSearchItemCount = 20;
 	const [searchItemCount, setSearchItemCount] = useState<number>(defaultSearchItemCount);
-	const [searchKeyword, setSearchKeyword] = useState<string>('나이트');
+	const [searchKeyword, setSearchKeyword] = useState<string>('');
 	const [searchedItem, setSearchedItem] = useState<any[]>([]);
 	const [searchItemTotal, setSearchItemTotal] = useState<number>(0);
+	
+	// 아케인셰이드 튜너
+	const [selectedItemId, setSelectedItemId] = useState<string>('1213018');
+	const [selectedItem, error, isLoadingSelectedItem, fetchItem] = useMapleFetch({ apiURL: getItem, notFetchOnInit: true, singleValue: true })
 	
 	const searchItem = async(keyword: string) => {
 		if (!keyword) {
@@ -76,8 +84,8 @@ export const StarForceSimulatorContainer = ({ items } : { items: any }) => {
 			return;
 		}
 		
-		const filteredData = items
-			.filter((item: any) => item.name.includes(keyword))
+		let filteredData = items
+			.filter((item: any) => item.name.includes(keyword) && item.typeInfo.subCategory !== 'Mass' && item.typeInfo.subCategory !== 'Medal' && item.typeInfo.subCategory !== 'Badge' && item.typeInfo.subCategory !== 'Pocket Item')
 			.sort((a: any, b: any) => {
 				if (searchSort === 'NAME') {
 					return a.name > b.name ? 1 : -1;
@@ -88,13 +96,7 @@ export const StarForceSimulatorContainer = ({ items } : { items: any }) => {
 		
 		setSearchItemTotal(filteredData.length);
 		
-		setSearchedItem(
-			await Promise.all(
-				filteredData
-					.slice(0, searchItemCount)
-					.map(async (item: any) => { return { ...item, imageUrl: await doCacheFetch(getItemIcon(region, version, item.id), cacheName) } })
-			)
-		);
+		setSearchedItem(filteredData.slice(0, searchItemCount));
 	}
 	
 	useEffect(() => {
@@ -110,8 +112,10 @@ export const StarForceSimulatorContainer = ({ items } : { items: any }) => {
 	}, [searchItemCount, searchSort]);
 	
 	useEffect(() => {
-		console.log(searchItemTotal);
-	}, [searchItemTotal])
+		if (selectedItemId) {
+			fetchItem(selectedItemId)
+		}
+	}, [selectedItemId])
 	
 	return (
 		<>
@@ -154,9 +158,12 @@ export const StarForceSimulatorContainer = ({ items } : { items: any }) => {
 									<FlexBox flexDirection={'column'} gap={'.5rem'}>
 										{
 											searchedItem.map((item: any) =>
-												<SearchBoxItem key={item.id} theme={theme}>
+												<SearchBoxItem key={item.id} theme={theme} onClick={() => {
+													setSelectedItemId(item.id);
+													setSearchKeyword('');
+												}}>
 													<FlexBox alignItems={'center'} gap={'.75rem'}>
-														<img src={item.imageUrl}  alt={item.name} style={{ width: '25px' }} />
+														<AsyncCacheImage src={getItemIcon(region, version, item.id)} cacheName={cacheName} alt={item.name} style={{ width: '30px' }} />
 														<span>{item.name}</span>
 														<span style={{ marginLeft: 'auto' }}>{item.requiredLevel} lv</span>
 													</FlexBox>
@@ -175,7 +182,22 @@ export const StarForceSimulatorContainer = ({ items } : { items: any }) => {
 							</div>
 						: <></>
 					}
-					
+					<FlexBox alignItems={'center'} justifyContent={'center'} flex={1} flexDirection={'column'}>
+					{
+						isLoadingSelectedItem
+						?
+							<Spin tip="아이템을 불러오는 중입니다..." size={'large'} />
+						:
+							selectedItem
+							?
+								<>
+									<Title level={3}>{selectedItem.description.name}</Title>
+									<img src={'data:image/png;base64,' + selectedItem.metaInfo.iconRaw} style={{ width: '100px' }}></img>
+								</>
+							:
+								<>...</>
+					}
+					</FlexBox>
 				</CustomCol>
 			</CustomRow>
 		</>

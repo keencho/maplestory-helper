@@ -16,7 +16,6 @@ interface Props extends CommonStyle {
 
 const FlexBoxContainer = styled(CommonStyledDiv)<Props>`
 	display: flex;
-
 	${props => StyledComponentUtil.apply(props)}
 `
 

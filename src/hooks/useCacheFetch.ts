@@ -5,10 +5,12 @@ interface Props {
 	apiURL: (...args: any[]) => string
 	cacheName: string
 	filter?: (data: any) => any
+	notFetchOnInit?: boolean
+	singleValue?: boolean
 }
 
 const useCacheFetch = (props: Props) => {
-	const [data, setData] = useState([]);
+	const [data, setData] = useState(props.singleValue === true ? undefined : []);
 	const [error, setError] = useState<any>(undefined);
 	const [loading, setLoading] = useState(false);
 	
@@ -31,7 +33,9 @@ const useCacheFetch = (props: Props) => {
 	}
 	
 	useEffect(() => {
-		doProcess();
+		if (props.notFetchOnInit !== true) {
+			doProcess();
+		}
 	}, [])
 	
 	return [data, error, loading, doProcess]
