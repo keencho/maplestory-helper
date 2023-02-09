@@ -32,7 +32,7 @@ function getItem(
 }
 
 const items: MenuItem[] = AppMenu
-	.filter((data: MenuType) => data.redirect === undefined)
+	.filter((data: MenuType) => data.redirect === undefined && data.dev !== true)
 	.map((data: MenuType) => {
 		return getItem(data.label, data.path, data.menuIcon)
 	});

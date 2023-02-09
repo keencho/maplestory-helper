@@ -11,7 +11,8 @@ export interface MenuType {
 	label?: string
 	redirect?: string,
 	element?: JSX.Element,
-	menuIcon?: JSX.Element
+	menuIcon?: JSX.Element,
+	dev?: boolean
 }
 
 export const Menu: MenuType[] = [
@@ -29,7 +30,8 @@ export const Menu: MenuType[] = [
 		path: Path.STAR_FORCE_SIMULATOR,
 		label: '장비강화 시뮬레이터',
 		element: <EquipmentEnhancementSimulatorWrapper />,
-		menuIcon: <SkinOutlined />
+		menuIcon: <SkinOutlined />,
+		dev: true
 	},
 	{
 		path: Path.BOSS_SOUL_CRYSTAL_CALCULATOR,
