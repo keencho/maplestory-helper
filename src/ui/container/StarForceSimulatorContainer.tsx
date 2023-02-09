@@ -12,6 +12,8 @@ import {ThemeAtom} from '../../recoil/theme.atom';
 import {BACKGROUND, HOVER} from '../../model/color.model';
 import {cacheName, region, version} from '../../model/maplestory-io.model';
 import AsyncCacheImage from '../component/common/element/AsyncCacheImage';
+import {getSubCategoryName, isAvailableStarForce, isSubWeapon, isWeapon} from '../../util/equipment.util';
+import {EquipmentCategory, equipmentCategoryName} from '../../model/equipment.model';
 
 const { Title } = Typography;
 
@@ -85,7 +87,7 @@ export const StarForceSimulatorContainer = ({ items } : { items: any }) => {
 		}
 		
 		let filteredData = items
-			.filter((item: any) => item.name.includes(keyword) && item.typeInfo.subCategory !== 'Mass' && item.typeInfo.subCategory !== 'Medal' && item.typeInfo.subCategory !== 'Badge' && item.typeInfo.subCategory !== 'Pocket Item')
+			.filter((item: any) => item.name.includes(keyword))
 			.sort((a: any, b: any) => {
 				if (searchSort === 'NAME') {
 					return a.name > b.name ? 1 : -1;
@@ -117,6 +119,12 @@ export const StarForceSimulatorContainer = ({ items } : { items: any }) => {
 		}
 	}, [selectedItemId])
 	
+	useEffect(() => {
+		if (selectedItem) {
+			console.log(selectedItem);
+		}
+	}, [selectedItem])
+	
 	return (
 		<>
 			<PageTitle
@@ -138,6 +146,28 @@ export const StarForceSimulatorContainer = ({ items } : { items: any }) => {
 						style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}
 						value={event}
 						onChange={(e) => setEvent(e as number[]) }  />
+					
+					{/*임시*/}
+					{
+						selectedItem && <pre style={{ marginTop: '1rem', border: '1px solid blue' }}>{JSON.stringify(
+							// Object.keys(selectedItem.typeInfo)
+							// 	.filter(key => !key.includes('icon'))
+							// 	.reduce((obj: any, key: any)=> {
+							// 		obj[key] = selectedItem.metaInfo[key];
+							// 		return obj;
+							// 	}, {}),
+							// Object.keys(selectedItem)
+							// 	.filter(key => !key.includes('frameBooks') && !key.includes('itemEffects'))
+							// 	.reduce((obj: any, key: any)=> {
+							// 		obj[key] = selectedItem[key];
+							// 		return obj;
+							// 	}, {})
+							// ,
+							selectedItem.typeInfo,
+							undefined,
+							2)}</pre>
+					}
+					
 				</CustomCol>
 				<CustomCol span={9}>
 					<FlexBox justifyContent={'space-between'} alignItems={'center'}>
@@ -190,10 +220,43 @@ export const StarForceSimulatorContainer = ({ items } : { items: any }) => {
 						:
 							selectedItem
 							?
-								<>
+								<FlexBox flexDirection={'column'} alignItems={'center'} width={'80%'}>
 									<Title level={3}>{selectedItem.description.name}</Title>
-									<img src={'data:image/png;base64,' + selectedItem.metaInfo.iconRaw} style={{ width: '100px' }}></img>
-								</>
+									<img src={'data:image/png;base64,' + selectedItem.metaInfo.iconRaw} style={{ width: '100px' }} />
+									<div style={{ width: '100%' }}>
+										{
+											isWeapon(selectedItem.typeInfo.category)
+											?
+												<FlexBox justifyContent={'space-between'}>
+													<span>무기분류</span>
+													<span>{getSubCategoryName(selectedItem.typeInfo.subCategory)} ({equipmentCategoryName[selectedItem.typeInfo.category as EquipmentCategory]})</span>
+												</FlexBox>
+											:
+												<FlexBox justifyContent={'space-between'}>
+													<span>장비분류</span>
+													<span>
+														{
+															isSubWeapon(selectedItem.typeInfo.category)
+															? `보조무기 (${getSubCategoryName(selectedItem.typeInfo.subCategory)})`
+															: getSubCategoryName(selectedItem.typeInfo.subCategory)
+														}
+													</span>
+												</FlexBox>
+										}
+									</div>
+									{
+										isAvailableStarForce(selectedItem)
+										?
+											<></>
+										:
+											<Alert
+												message="스타포스 강화 할 수 없는 아이템 입니다."
+												type="warning"
+												showIcon
+												style={{ marginTop: '1rem' }}
+											/>
+									}
+								</FlexBox>
 							:
 								<>...</>
 					}

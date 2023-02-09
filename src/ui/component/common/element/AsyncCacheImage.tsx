@@ -15,7 +15,7 @@ const AsyncCacheImage = (props: { src: string, cacheName: string, alt?: string, 
 	
 	if (loadedSrc) {
 		return (
-			<img {...props} />
+			<img src={loadedSrc} alt={props.alt} style={props.style} />
 		);
 	}
 	
