@@ -1,10 +1,10 @@
 import Path from './path.model';
 import React from 'react';
-import {DollarCircleOutlined, HomeOutlined, LinkOutlined, StarOutlined} from '@ant-design/icons';
+import {DollarCircleOutlined, HomeOutlined, LinkOutlined, SkinOutlined} from '@ant-design/icons';
 import {BossSoulCrystalCalculatorContainer} from '../ui/container/BossSoulCrystalCalculatorContainer';
 import LinkSkillContainer from '../ui/container/LinkSkillContainer';
 import {HomeworkContainer} from '../ui/container/HomeworkContainer';
-import {StarForceSimulatorContainerWrapper} from '../ui/container/StarForceSimulatorContainer';
+import {EquipmentEnhancementSimulatorWrapper} from '../ui/container/EquipmentEnhancementSimulator';
 
 export interface MenuType {
 	path: string,
@@ -27,9 +27,9 @@ export const Menu: MenuType[] = [
 	},
 	{
 		path: Path.STAR_FORCE_SIMULATOR,
-		label: '스타포스 시뮬레이터',
-		element: <StarForceSimulatorContainerWrapper />,
-		menuIcon: <StarOutlined />
+		label: '장비강화 시뮬레이터',
+		element: <EquipmentEnhancementSimulatorWrapper />,
+		menuIcon: <SkinOutlined />
 	},
 	{
 		path: Path.BOSS_SOUL_CRYSTAL_CALCULATOR,

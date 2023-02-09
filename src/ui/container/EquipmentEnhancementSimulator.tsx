@@ -12,12 +12,13 @@ import {ThemeAtom} from '../../recoil/theme.atom';
 import {BACKGROUND, HOVER} from '../../model/color.model';
 import {cacheName, region, version} from '../../model/maplestory-io.model';
 import AsyncCacheImage from '../component/common/element/AsyncCacheImage';
-import {getSubCategoryName, isAvailableStarForce, isSubWeapon, isWeapon} from '../../util/equipment.util';
-import {EquipmentCategory, equipmentCategoryName} from '../../model/equipment.model';
+import {buildStats, isAvailableStarForce} from '../../util/equipment.util';
+import {Equipment} from '../../model/equipment.model';
+import Item from '../component/equipment-enhancement-simulator/Item';
 
 const { Title } = Typography;
 
-export const StarForceSimulatorContainerWrapper = () => {
+export const EquipmentEnhancementSimulatorWrapper = () => {
 	
 	const [items, errors, isLoading] = useMapleFetch({
 		apiURL: getAllItems,
@@ -32,7 +33,7 @@ export const StarForceSimulatorContainerWrapper = () => {
 		return <></>
 	}
 	
-	return <StarForceSimulatorContainer items={items} />
+	return <EquipmentEnhancementSimulator items={items} />
 }
 
 const eventOptions = [
@@ -63,7 +64,7 @@ const SearchBoxItem = styled.div<{ theme: 'light' | 'dark' }>`
 	}
 `
 
-export const StarForceSimulatorContainer = ({ items } : { items: any }) => {
+export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	
 	const theme = useRecoilValue(ThemeAtom);
 	
@@ -76,9 +77,10 @@ export const StarForceSimulatorContainer = ({ items } : { items: any }) => {
 	const [searchedItem, setSearchedItem] = useState<any[]>([]);
 	const [searchItemTotal, setSearchItemTotal] = useState<number>(0);
 	
-	// 아케인셰이드 튜너
+	// default - 아케인셰이드 튜너
 	const [selectedItemId, setSelectedItemId] = useState<string>('1213018');
-	const [selectedItem, error, isLoadingSelectedItem, fetchItem] = useMapleFetch({ apiURL: getItem, notFetchOnInit: true, singleValue: true })
+	const [selectedFetchItem, error, isLoadingSelectedItem, fetchItem] = useMapleFetch({ apiURL: getItem, notFetchOnInit: true, singleValue: true })
+	const [item, setItem] = useState<Equipment | undefined>(undefined);
 	
 	const searchItem = async(keyword: string) => {
 		if (!keyword) {
@@ -101,6 +103,22 @@ export const StarForceSimulatorContainer = ({ items } : { items: any }) => {
 		setSearchedItem(filteredData.slice(0, searchItemCount));
 	}
 	
+	const initItem = () => {
+		setItem({
+			itemName: selectedFetchItem.description.name,
+			level: selectedFetchItem.metaInfo.reqLevel,
+			base64Icon: `data:image/png;base64,${selectedFetchItem.metaInfo.iconRaw}`,
+			starForce: 0,
+			isSuperiorItem: Object.hasOwn(selectedFetchItem.metaInfo, 'superiorEqp') && selectedFetchItem.metaInfo.superiorEqp === true,
+			isAvailableStarforce: isAvailableStarForce(selectedFetchItem),
+			category: selectedFetchItem.typeInfo.category,
+			subCategory: selectedFetchItem.typeInfo.subCategory,
+			stats: buildStats(selectedFetchItem.metaInfo)
+		})
+	}
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	
 	useEffect(() => {
 		if (defaultSearchItemCount === searchItemCount) {
 			searchItem(searchKeyword);
@@ -120,15 +138,15 @@ export const StarForceSimulatorContainer = ({ items } : { items: any }) => {
 	}, [selectedItemId])
 	
 	useEffect(() => {
-		if (selectedItem) {
-			console.log(selectedItem);
+		if (selectedFetchItem) {
+			initItem()
 		}
-	}, [selectedItem])
+	}, [selectedFetchItem])
 	
 	return (
 		<>
 			<PageTitle
-				title={'스타포스 시뮬레이터'}
+				title={'장비강화 시뮬레이터'}
 				marginBottom={'.5rem'}
 			/>
 			<Alert
@@ -149,21 +167,13 @@ export const StarForceSimulatorContainer = ({ items } : { items: any }) => {
 					
 					{/*임시*/}
 					{
-						selectedItem && <pre style={{ marginTop: '1rem', border: '1px solid blue' }}>{JSON.stringify(
-							// Object.keys(selectedItem.typeInfo)
-							// 	.filter(key => !key.includes('icon'))
-							// 	.reduce((obj: any, key: any)=> {
-							// 		obj[key] = selectedItem.metaInfo[key];
-							// 		return obj;
-							// 	}, {}),
-							// Object.keys(selectedItem)
-							// 	.filter(key => !key.includes('frameBooks') && !key.includes('itemEffects'))
-							// 	.reduce((obj: any, key: any)=> {
-							// 		obj[key] = selectedItem[key];
-							// 		return obj;
-							// 	}, {})
-							// ,
-							selectedItem.typeInfo,
+						selectedFetchItem && <pre style={{ marginTop: '1rem', border: '1px solid blue' }}>{JSON.stringify(
+							Object.keys(selectedFetchItem.metaInfo)
+								.filter(key => !key.includes('icon'))
+								.reduce((obj: any, key: any)=> {
+									obj[key] = selectedFetchItem.metaInfo[key];
+									return obj;
+								}, {}),
 							undefined,
 							2)}</pre>
 					}
@@ -202,10 +212,8 @@ export const StarForceSimulatorContainer = ({ items } : { items: any }) => {
 										}
 										{
 											searchedItem.length < searchItemTotal
-											?
-												<Button type='primary' style={{ borderRadius: 0 }} onClick={() => setSearchItemCount(searchItemCount + defaultSearchItemCount)}>더보기</Button>
-											:
-												<></>
+											? <Button type='primary' style={{ borderRadius: 0 }} onClick={() => setSearchItemCount(searchItemCount + defaultSearchItemCount)}>더보기</Button>
+											: <></>
 										}
 									</FlexBox>
 								</SearchBox>
@@ -218,47 +226,7 @@ export const StarForceSimulatorContainer = ({ items } : { items: any }) => {
 						?
 							<Spin tip="아이템을 불러오는 중입니다..." size={'large'} />
 						:
-							selectedItem
-							?
-								<FlexBox flexDirection={'column'} alignItems={'center'} width={'80%'}>
-									<Title level={3}>{selectedItem.description.name}</Title>
-									<img src={'data:image/png;base64,' + selectedItem.metaInfo.iconRaw} style={{ width: '100px' }} />
-									<div style={{ width: '100%' }}>
-										{
-											isWeapon(selectedItem.typeInfo.category)
-											?
-												<FlexBox justifyContent={'space-between'}>
-													<span>무기분류</span>
-													<span>{getSubCategoryName(selectedItem.typeInfo.subCategory)} ({equipmentCategoryName[selectedItem.typeInfo.category as EquipmentCategory]})</span>
-												</FlexBox>
-											:
-												<FlexBox justifyContent={'space-between'}>
-													<span>장비분류</span>
-													<span>
-														{
-															isSubWeapon(selectedItem.typeInfo.category)
-															? `보조무기 (${getSubCategoryName(selectedItem.typeInfo.subCategory)})`
-															: getSubCategoryName(selectedItem.typeInfo.subCategory)
-														}
-													</span>
-												</FlexBox>
-										}
-									</div>
-									{
-										isAvailableStarForce(selectedItem)
-										?
-											<></>
-										:
-											<Alert
-												message="스타포스 강화 할 수 없는 아이템 입니다."
-												type="warning"
-												showIcon
-												style={{ marginTop: '1rem' }}
-											/>
-									}
-								</FlexBox>
-							:
-								<>...</>
+							<Item item={item} />
 					}
 					</FlexBox>
 				</CustomCol>

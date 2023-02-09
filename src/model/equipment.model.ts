@@ -239,5 +239,95 @@ export const equipmentSubCategoryInfo: [EquipmentCategory, EquipmentSubCategory,
 	[ 'Two-Handed Weapon', 'Two-Handed Axe', '두손도끼'],
 	[ 'Two-Handed Weapon', 'Two-Handed Blunt', '두손둔기'],
 	[ 'Two-Handed Weapon', 'Two-Handed Sword', '두손검']
-	
 ]
+
+export type MetaInfoStats =
+	| 'incMAD'          // 마력
+	| 'incPAD'          // 공격력
+	| 'incSTR'          // STR
+	| 'incDEX'          // DEX
+	| 'incINT'          // INT
+	| 'incLUK'          // LUK
+	| 'incMHP'          // HP
+	| 'incMMP'          // MP
+	| 'incPDD'          // 물리 방어력
+	| 'incMDD'          // 마법 방어력
+	| 'incJump'         // 점프력
+	| 'incSpeed'        // 이동속도
+	| 'imdR'            // 방무
+	| 'bdR'             // 보공
+
+export type EquipmentOption =
+	| 'STR'
+	| 'DEX'
+	| 'INT'
+	| 'LUK'
+	| 'MAX_HP'
+	| 'MAX_MP'
+	| 'WEAR_LEVEL_DECREASE'
+	| 'DEFENSE'
+	| 'MAGIC_DEFENSE'
+	| 'ATTACK'
+	| 'MAGIC'
+	| 'IGNORE_DEFENSE'
+	| 'BOSS_DAMAGE'
+	| 'DAMAGE'
+	| 'MOVE_SPEED'
+	| 'JUMP'
+	| 'ALL_STATS'
+
+export const metaInfoEquipmentOptionMap: Record<MetaInfoStats, EquipmentOption> = {
+	'incSTR'            : 'STR',
+	'incDEX'            : 'DEX',
+	'incINT'            : 'INT',
+	'incLUK'            : 'LUK',
+	'incMHP'            : 'MAX_HP',
+	'incMMP'            : 'MAX_MP',
+	'incPAD'            : 'ATTACK',
+	'incMAD'            : 'MAGIC',
+	'incPDD'            : 'DEFENSE',
+	'incMDD'            : 'MAGIC_DEFENSE',
+	'incSpeed'          : 'MOVE_SPEED',
+	'incJump'           : 'JUMP',
+	'imdR'              : 'IGNORE_DEFENSE',
+	'bdR'               : 'BOSS_DAMAGE'
+}
+
+export const equipmentOptionName: Record<EquipmentOption, string> = {
+	'STR'                   : 'STR',
+	'DEX'                   : 'DEX',
+	'INT'                   : 'INT',
+	'LUK'                   : 'LUK',
+	'MAX_HP'                : 'MaxHP',
+	'MAX_MP'                : 'MaxMP',
+	'WEAR_LEVEL_DECREASE'   : '착용 레벨 감소',
+	'DEFENSE'               : '방어력',
+	'MAGIC_DEFENSE'         : '마법 방어력',
+	'ATTACK'                : '공격력',
+	'MAGIC'                 : '마력',
+	'IGNORE_DEFENSE'        : '방어력 무시',
+	'BOSS_DAMAGE'           : '보스 몬스터 공격 시 데미지',
+	'DAMAGE'                : '데미지 %',
+	'MOVE_SPEED'            : '이동속도',
+	'JUMP'                  : '점프력',
+	'ALL_STATS'             : '올스탯'
+}
+
+export interface Stats {
+	key: EquipmentOption
+	value: number
+	additionalValue?: number              // 추옵
+	enhancementAdditionalValue?: number   // 장비강화 스탯
+}
+
+export interface Equipment {
+	itemName: string
+	level: number
+	isSuperiorItem: boolean
+	base64Icon: string
+	starForce: number
+	isAvailableStarforce: boolean
+	category: EquipmentCategory
+	subCategory: EquipmentSubCategory
+	stats: Stats[]
+}
