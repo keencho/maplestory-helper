@@ -90,7 +90,6 @@ const LinkSkillContainer = () => {
 				<FlexBox alignItems={'center'} gap={'.5rem'} flex={1}>
 					<Input placeholder="직업 검색" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} onPressEnter={() => search(true)} />
 					<Button type={'primary'} onClick={() => search(true)}>검색</Button>
-					
 				</FlexBox>
 			</FlexBox>
 			{

@@ -1,7 +1,13 @@
 import {blue, green, red} from '@ant-design/colors';
 
-export default class Color {
-	static BLUE = blue[4]
-	static GREEN = green[4]
-	static RED = red[4]
+export const BLUE = blue[4];
+export const GREEN = green[4];
+export const RED = red[4];
+
+export const BACKGROUND = (theme: 'light' | 'dark') => {
+	return theme === 'dark' ? '#303030' : '#fff';
+}
+
+export const HOVER = (theme: 'light' | 'dark') => {
+	return theme === 'dark' ? '#262626' : '#fafafa';
 }

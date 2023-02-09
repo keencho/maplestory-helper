@@ -12,6 +12,7 @@ interface Props extends CommonStyle {
 	gap?: Property.Gap
 	flexDirection?: Property.FlexDirection
 	flexGrow?: Property.FlexGrow
+	width?: Property.Width
 }
 
 const FlexBoxContainer = styled(CommonStyledDiv)<Props>`

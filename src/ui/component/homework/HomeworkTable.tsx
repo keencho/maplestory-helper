@@ -3,7 +3,7 @@ import {Data, HomeworkTabData, Table as TableInterface} from '../../container/Ho
 import styled from 'styled-components';
 import NoMarginHeading from '../common/element/NoMarginHeading';
 import {Button, Progress} from 'antd';
-import Color from '../../../model/color.model';
+import {BLUE, RED} from '../../../model/color.model';
 import {ResetButton} from '../common/element/ResetButton';
 
 const Table = styled.table`
@@ -52,14 +52,14 @@ const HomeworkTable = (props: Props): JSX.Element => {
 				case 'use':
 					if (data.use) {
 						return (
-							<td style={{ backgroundColor: Color.BLUE }} key={idx}>
+							<td style={{ backgroundColor: BLUE }} key={idx}>
 								<ResetButton fullWidth={true} onClick={() => props.onClickRow(key, table.title, idx)}>O</ResetButton>
 							</td>
 						)
 					}
 					
 					return (
-						<td style={{ backgroundColor: Color.RED }} key={idx}>
+						<td style={{ backgroundColor: RED }} key={idx}>
 							<ResetButton fullWidth={true} onClick={() => props.onClickRow(key, table.title, idx)}>X</ResetButton>
 						</td>
 					)
@@ -71,7 +71,7 @@ const HomeworkTable = (props: Props): JSX.Element => {
 					}
 					
 					return (
-						<td key={idx} style={{ backgroundColor: data.doWork ? Color.BLUE : 'inherit' }}>
+						<td key={idx} style={{ backgroundColor: data.doWork ? BLUE : 'inherit' }}>
 							<ResetButton fullWidth={true} onClick={() => props.onClickRow(key, table.title, idx)}>
 								<img src={data.src} alt={data.name} />
 							</ResetButton>
@@ -124,7 +124,7 @@ const HomeworkTable = (props: Props): JSX.Element => {
 								<tr>
 									<td colSpan={1}>달성률</td>
 									<td colSpan={table && table.data.length - 1} style={{ padding: '0 16px' }}>
-										<Progress percent={calculateRate(table.data)} strokeColor={Color.BLUE} status={'normal'} />
+										<Progress percent={calculateRate(table.data)} strokeColor={BLUE} status={'normal'} />
 									</td>
 								</tr>
 							</tbody>
