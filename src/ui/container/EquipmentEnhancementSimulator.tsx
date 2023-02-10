@@ -1,20 +1,23 @@
 import PageTitle from '../component/common/PageTitle';
-import {Alert, Button, Checkbox, Input, Radio, Spin, Typography} from 'antd';
+import {Alert, Button, Checkbox, Descriptions, Input, Radio, Spin, Switch, Typography} from 'antd';
 import {CustomCol, CustomRow} from '../component/common/element/CustomRowCol';
 import React, {useEffect, useState} from 'react';
 import {FlexBox} from '../component/common/element/FlexBox';
 // import MaplestoryIOApi from '../../api/maplestory-io.api';
 import useMapleFetch from '../../hooks/useMapleFetch';
 import {getAllItems, getItem, getItemIcon} from '../../api/maplestory-io.api';
-import styled from 'styled-components';
+import styled, {css} from 'styled-components';
 import {useRecoilValue} from 'recoil';
 import {ThemeAtom} from '../../recoil/theme.atom';
 import {BACKGROUND, HOVER} from '../../model/color.model';
 import {cacheName, region, version} from '../../model/maplestory-io.model';
 import AsyncCacheImage from '../component/common/element/AsyncCacheImage';
-import {buildStats, isAvailableStarForce} from '../../util/equipment.util';
+import {buildStats, getStarForceUpgradeInfo, isAvailableStarForce, isStarForceDown} from '../../util/equipment.util';
 import {Equipment} from '../../model/equipment.model';
 import Item from '../component/equipment-enhancement-simulator/Item';
+import {numberComma} from '../../util/common.util';
+import {CommonStyledSpan} from '../../model/style.model';
+import {CloseOutlined} from '@ant-design/icons';
 
 const { Title } = Typography;
 
@@ -42,11 +45,37 @@ const eventOptions = [
 	{ label: '5, 10, 15성에서 강화시 성공확률 100%', value: 2 },
 ];
 
-const SearchBox = styled.div<{ theme: 'light' | 'dark' }>`
-	border: 1px solid rgba(140, 140, 140, 0.35);
-	max-height: 250px;
-	overflow-y: auto;
+const SearchBoxWrapper = styled.div<{ theme: 'light' | 'dark', show: boolean }>`
 	position: absolute;
+	width: 50%;
+	height: 50%;
+	background-color: ${props => BACKGROUND(props.theme)};
+	border: 1px solid rgba(140, 140, 140, 0.35);
+	border-radius: 8px;
+	padding: 1rem;
+	display: flex;
+	flex-direction: column;
+	right: 0;
+	opacity: 1;
+
+	@keyframes frames {
+		from {
+			opacity: 0;
+			right: -50%;
+		}
+		to {
+			opacity: 1;
+			right: 0;
+		}
+	}
+
+	animation-name: frames;
+	animation-duration: .3s;
+`
+
+const SearchBox = styled.div<{ theme: 'light' | 'dark' }>`
+	margin-top: .5rem;
+	overflow-y: auto;
 	width: 100%;
 	background-color: ${props => BACKGROUND(props.theme)};
 `
@@ -54,10 +83,10 @@ const SearchBox = styled.div<{ theme: 'light' | 'dark' }>`
 const SearchBoxItem = styled.div<{ theme: 'light' | 'dark' }>`
 	cursor: pointer;
 	padding: .25rem .5rem;
+	
 	&:not(:last-child) {
 		border-bottom: 1px solid rgba(140, 140, 140, 0.35);
 	}
-	
 	
 	&:hover {
 		background-color: ${props => HOVER(props.theme)};
@@ -72,6 +101,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	const [searchSort, setSearchSort] = useState<'NAME' | 'LEVEL'>('LEVEL');
 	
 	const defaultSearchItemCount = 20;
+	const [showSearchItemBox, setShowSearchItemBox] = useState<boolean>(true);
 	const [searchItemCount, setSearchItemCount] = useState<number>(defaultSearchItemCount);
 	const [searchKeyword, setSearchKeyword] = useState<string>('');
 	const [searchedItem, setSearchedItem] = useState<any[]>([]);
@@ -109,12 +139,41 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 			level: selectedFetchItem.metaInfo.reqLevel,
 			base64Icon: `data:image/png;base64,${selectedFetchItem.metaInfo.iconRaw}`,
 			starForce: 0,
+			destroyed: false,
 			isSuperiorItem: Object.hasOwn(selectedFetchItem.metaInfo, 'superiorEqp') && selectedFetchItem.metaInfo.superiorEqp === true,
-			isAvailableStarforce: isAvailableStarForce(selectedFetchItem),
+			isAvailableStarForce: isAvailableStarForce(selectedFetchItem),
 			category: selectedFetchItem.typeInfo.category,
 			subCategory: selectedFetchItem.typeInfo.subCategory,
-			stats: buildStats(selectedFetchItem.metaInfo)
+			stats: buildStats(selectedFetchItem.metaInfo),
+			usedMeso: 0
 		})
+	}
+	
+	const doUpgradeStarForce = () => {
+		
+		const info = getStarForceUpgradeInfo(item!);
+		
+		// 성공
+		if (item!.starForceFailCount === 2 || Math.floor(Math.random() * 100) <= info.successPercentage) {
+			setItem((pv) => ({ ...pv!, starForce: pv!.starForce + 1, starForceFailCount: 0, usedMeso: pv!.usedMeso + info.cost }))
+			return;
+		}
+		
+		// 실패
+		
+		// 파괴
+		if (Math.floor(Math.random() * 100) <= info.destroyPercentage) {
+		
+		}
+		
+		setItem((pv) => {
+			if (isStarForceDown(pv!)) {
+				return { ...pv!, starForce:  pv!.starForce - 1, starForceFailCount: (pv!.starForceFailCount ?? 0) + 1, usedMeso: pv!.usedMeso + info.cost }
+			} else {
+				return { ...pv!, starForce: pv!.starForce, starForceFailCount: pv!.starForceFailCount, usedMeso: pv!.usedMeso + info.cost }
+			}
+		})
+		
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -148,6 +207,13 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 			<PageTitle
 				title={'장비강화 시뮬레이터'}
 				marginBottom={'.5rem'}
+				extraContents={
+					<FlexBox alignItems={'center'} gap={'.5rem'}>
+						<Button type={'primary'} onClick={() => setShowSearchItemBox(!showSearchItemBox)}>아이템 검색</Button>
+						{/*<CommonStyledSpan fontSize={'14px'} fontWeight={'bold'}>아이템 검색</CommonStyledSpan>*/}
+						{/*<Switch checked={showSearchItemBox} onChange={setShowSearchItemBox} />*/}
+					</FlexBox>
+				}
 			/>
 			<Alert
 				message="PC 환경(사양)에 따라 결과 처리가 늦어질 수 있습니다."
@@ -156,8 +222,9 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 				closable
 				style={{ marginBottom: '.5rem' }}
 			/>
-			<CustomRow gutter={32}>
-				<CustomCol span={15}>
+			<CustomRow gutter={0}>
+				
+				<CustomCol span={16}>
 					<Title level={5}>스타포스 이벤트</Title>
 					<Checkbox.Group
 						options={eventOptions}
@@ -165,71 +232,73 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 						value={event}
 						onChange={(e) => setEvent(e as number[]) }  />
 					
-					{/*임시*/}
-					{
-						selectedFetchItem && <pre style={{ marginTop: '1rem', border: '1px solid blue' }}>{JSON.stringify(
-							Object.keys(selectedFetchItem.metaInfo)
-								.filter(key => !key.includes('icon'))
-								.reduce((obj: any, key: any)=> {
-									obj[key] = selectedFetchItem.metaInfo[key];
-									return obj;
-								}, {}),
-							undefined,
-							2)}</pre>
-					}
-					
-				</CustomCol>
-				<CustomCol span={9}>
-					<FlexBox justifyContent={'space-between'} alignItems={'center'}>
-						<Title level={5}>아이템 검색</Title>
-						<Radio.Group onChange={(e) => setSearchSort(e.target.value)} value={searchSort}>
-							<Radio value={'LEVEL'}>레벨순 정렬</Radio>
-							<Radio value={'NAME'}>이름순 정렬</Radio>
-						</Radio.Group>
+					<FlexBox margin={'auto 0 0 0'} gap={'1rem'} justifyContent={'center'}>
+						<Button type={'primary'} style={{ marginTop: 'auto', flexGrow: 1 }}>환생의 불꽃 강화</Button>
+						<Button type={'primary'} disabled={!(item && item.isAvailableStarForce)} style={{ marginTop: 'auto', flexGrow: 1 }} onClick={() => doUpgradeStarForce()}>스타포스 강화</Button>
 					</FlexBox>
 					
-					<Input placeholder={'아이템 이름을 입력해주세요.'} value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)} />
-					
 					{
-						searchKeyword && searchedItem.length > 0
+						showSearchItemBox
 						?
-							<div style={{ position: 'relative' }}>
-								<SearchBox theme={theme}>
-									<FlexBox flexDirection={'column'} gap={'.5rem'}>
-										{
-											searchedItem.map((item: any) =>
-												<SearchBoxItem key={item.id} theme={theme} onClick={() => {
-													setSelectedItemId(item.id);
-													setSearchKeyword('');
-												}}>
-													<FlexBox alignItems={'center'} gap={'.75rem'}>
-														<AsyncCacheImage src={getItemIcon(region, version, item.id)} cacheName={cacheName} alt={item.name} style={{ width: '30px' }} />
-														<span>{item.name}</span>
-														<span style={{ marginLeft: 'auto' }}>{item.requiredLevel} lv</span>
-													</FlexBox>
-												</SearchBoxItem>
-											)
-										}
-										{
-											searchedItem.length < searchItemTotal
-											? <Button type='primary' style={{ borderRadius: 0 }} onClick={() => setSearchItemCount(searchItemCount + defaultSearchItemCount)}>더보기</Button>
-											: <></>
-										}
-									</FlexBox>
-								</SearchBox>
-							</div>
-						: <></>
-					}
-					<FlexBox alignItems={'center'} justifyContent={'center'} flex={1} flexDirection={'column'}>
-					{
-						isLoadingSelectedItem
-						?
-							<Spin tip="아이템을 불러오는 중입니다..." size={'large'} />
+							<SearchBoxWrapper theme={theme} show={showSearchItemBox}>
+								<FlexBox justifyContent={'space-between'} alignItems={'center'}>
+									<Title level={5}>아이템 검색</Title>
+									<Radio.Group onChange={(e) => setSearchSort(e.target.value)} value={searchSort}>
+										<Radio value={'LEVEL'}>레벨순 정렬</Radio>
+										<Radio value={'NAME'}>이름순 정렬</Radio>
+									</Radio.Group>
+								</FlexBox>
+								
+								<Input placeholder={'아이템 이름을 입력해주세요.'} value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)} style={{ marginTop: '.5rem' }} />
+								
+								{
+									searchKeyword && searchedItem.length > 0
+										?
+										<SearchBox theme={theme}>
+											<FlexBox flexDirection={'column'} gap={'.5rem'}>
+												{
+													searchedItem.map((item: any) =>
+														<SearchBoxItem key={item.id} theme={theme} onClick={() => {
+															setSelectedItemId(item.id);
+															setSearchKeyword('');
+															setShowSearchItemBox(false)
+														}}>
+															<FlexBox alignItems={'center'} gap={'.75rem'}>
+																<AsyncCacheImage src={getItemIcon(region, version, item.id)} cacheName={cacheName} alt={item.name} style={{ width: '30px' }} />
+																<span>{item.name}</span>
+																<span style={{ marginLeft: 'auto' }}>{item.requiredLevel} lv</span>
+															</FlexBox>
+														</SearchBoxItem>
+													)
+												}
+												{
+													searchedItem.length < searchItemTotal
+														? <Button type='primary' style={{ borderRadius: 0 }} onClick={() => setSearchItemCount(searchItemCount + defaultSearchItemCount)}>더보기</Button>
+														: <></>
+												}
+											</FlexBox>
+										</SearchBox>
+										: <></>
+								}
+							</SearchBoxWrapper>
 						:
-							<Item item={item} />
+							<></>
 					}
+					
+				</CustomCol>
+				
+				<CustomCol span={8}>
+					<FlexBox alignItems={'center'} justifyContent={'center'} flex={1} flexDirection={'column'}>
+						{
+							isLoadingSelectedItem
+								?
+								<Spin tip="아이템을 불러오는 중입니다..." size={'large'} />
+								:
+								<Item item={item} />
+						}
 					</FlexBox>
 				</CustomCol>
+				
 			</CustomRow>
 		</>
 	)

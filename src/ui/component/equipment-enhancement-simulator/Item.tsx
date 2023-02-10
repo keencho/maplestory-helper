@@ -1,10 +1,17 @@
 import {FlexBox} from '../common/element/FlexBox';
 import {Alert, Typography} from 'antd';
-import {getMaxStarForce, getSubCategoryName, isSubWeapon, isWeapon} from '../../../util/equipment.util';
+import {
+	getMaxStarForce,
+	getStarForceUpgradeInfo,
+	getSubCategoryName,
+	isSubWeapon,
+	isWeapon
+} from '../../../util/equipment.util';
 import {Equipment, equipmentCategoryName, equipmentOptionName} from '../../../model/equipment.model';
-import React from 'react';
+import React, {useEffect} from 'react';
 import styled from 'styled-components';
 import {StarFilled, StarOutlined} from '@ant-design/icons';
+import {numberComma} from '../../../util/common.util';
 
 const { Title } = Typography;
 
@@ -17,7 +24,7 @@ const ItemStatsBox = styled(FlexBox)`
 `
 
 const ItemStatsText = styled.span`
-	font-size: 18px;
+	font-size: 1rem;
 	font-weight: bold;
 `
 
@@ -30,8 +37,10 @@ const Item = ({ item }: { item: Equipment | undefined }) => {
 	
 	if (!item) return <></>;
 	
+	const starForceUpgradeInfo = getStarForceUpgradeInfo(item)
+	
 	const getStarForceElement = (): JSX.Element => {
-		if (!item.isAvailableStarforce) return <></>
+		if (!item.isAvailableStarForce) return <></>
 		
 		const arr: JSX.Element[] = [];
 		
@@ -49,7 +58,7 @@ const Item = ({ item }: { item: Equipment | undefined }) => {
 				arr.push(<div style={{ marginTop: '.25rem' }} key={'divider'} />)
 			}
 			
-			if (i <= 8) {
+			if (i <= item.starForce) {
 				arr.push(<StarFilled style={style} key={i} />)
 			} else {
 				arr.push(<StarOutlined style={style} key={i} />)
@@ -61,10 +70,11 @@ const Item = ({ item }: { item: Equipment | undefined }) => {
 	}
 	
 	return (
-		<FlexBox flexDirection={'column'} alignItems={'center'} width={'80%'}>
+		<FlexBox flexDirection={'column'} alignItems={'center'} width={'90%'}>
 			{getStarForceElement()}
 			<Title level={3}>{item.itemName}</Title>
-			<img src={item.base64Icon} style={{ width: '100px' }} />
+			{/*<img src={'https://cdn.pixabay.com/photo/2018/05/13/16/57/dog-3397110__480.jpg'} style={{ width: '200px' }} />*/}
+			<img src={item.base64Icon} style={{ width: '80px' }} alt={item.itemName} />
 			<div style={{ width: '100%', marginTop: '2rem' }}>
 				{
 					isWeapon(item.category)
@@ -97,16 +107,22 @@ const Item = ({ item }: { item: Equipment | undefined }) => {
 						</ItemStatsBox>
 					)
 				}
+				{/*<div>잠재</div>*/}
+				{/*<div>잠재1</div>*/}
+				{/*<div>잠재2</div>*/}
+				{/*<div>잠재3</div>*/}
 			</div>
 			{
-				item.isAvailableStarforce
-					? <></>
-					: <Alert
-						message="스타포스 강화 할 수 없는 아이템 입니다."
-						type="warning"
-						showIcon
-						style={{ marginTop: '1rem' }}
-					/>
+				item.isAvailableStarForce
+					?
+						<></>
+					:
+						<Alert
+							message="스타포스 강화 할 수 없는 아이템 입니다."
+							type="warning"
+							showIcon
+							style={{ marginTop: '1rem' }}
+						/>
 			}
 		</FlexBox>
 	)

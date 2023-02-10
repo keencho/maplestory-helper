@@ -30,8 +30,7 @@ export const Menu: MenuType[] = [
 		path: Path.STAR_FORCE_SIMULATOR,
 		label: '장비강화 시뮬레이터',
 		element: <EquipmentEnhancementSimulatorWrapper />,
-		menuIcon: <SkinOutlined />,
-		dev: true
+		menuIcon: <SkinOutlined />
 	},
 	{
 		path: Path.BOSS_SOUL_CRYSTAL_CALCULATOR,

@@ -325,9 +325,12 @@ export interface Equipment {
 	level: number
 	isSuperiorItem: boolean
 	base64Icon: string
+	destroyed: boolean
 	starForce: number
-	isAvailableStarforce: boolean
+	starForceFailCount?: number
+	isAvailableStarForce: boolean
 	category: EquipmentCategory
 	subCategory: EquipmentSubCategory
 	stats: Stats[]
+	usedMeso: number
 }
