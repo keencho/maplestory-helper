@@ -1,5 +1,5 @@
 import PageTitle from '../component/common/PageTitle';
-import {Alert, Button, Checkbox, Descriptions, Input, Radio, Spin, Switch, Typography} from 'antd';
+import {Alert, Button, Checkbox, Descriptions, Form, Input, Radio, Spin, Switch, Typography, InputNumber } from 'antd';
 import {CustomCol, CustomRow} from '../component/common/element/CustomRowCol';
 import React, {useEffect, useState} from 'react';
 import {FlexBox} from '../component/common/element/FlexBox';
@@ -58,19 +58,19 @@ const SearchBoxWrapper = styled.div<{ theme: 'light' | 'dark', show: boolean }>`
 	right: 0;
 	opacity: 1;
 
-	@keyframes frames {
-		from {
-			opacity: 0;
-			right: -50%;
-		}
-		to {
-			opacity: 1;
-			right: 0;
-		}
-	}
-
-	animation-name: frames;
-	animation-duration: .3s;
+	//@keyframes frames {
+	//	from {
+	//		opacity: 0;
+	//		right: -50%;
+	//	}
+	//	to {
+	//		opacity: 1;
+	//		right: 0;
+	//	}
+	//}
+	//
+	//animation-name: frames;
+	//animation-duration: .3s;
 `
 
 const SearchBox = styled.div<{ theme: 'light' | 'dark' }>`
@@ -101,7 +101,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	const [searchSort, setSearchSort] = useState<'NAME' | 'LEVEL'>('LEVEL');
 	
 	const defaultSearchItemCount = 20;
-	const [showSearchItemBox, setShowSearchItemBox] = useState<boolean>(true);
+	const [showSearchItemBox, setShowSearchItemBox] = useState<boolean>(false);
 	const [searchItemCount, setSearchItemCount] = useState<number>(defaultSearchItemCount);
 	const [searchKeyword, setSearchKeyword] = useState<string>('');
 	const [searchedItem, setSearchedItem] = useState<any[]>([]);
@@ -111,6 +111,8 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	const [selectedItemId, setSelectedItemId] = useState<string>('1213018');
 	const [selectedFetchItem, error, isLoadingSelectedItem, fetchItem] = useMapleFetch({ apiURL: getItem, notFetchOnInit: true, singleValue: true })
 	const [item, setItem] = useState<Equipment | undefined>(undefined);
+	const [itemSpairMeso, setItemSpairMeso] = useState<number>(1000000000);
+	const [mesoWon, setMesoWon] = useState<number>(2500);
 	
 	const searchItem = async(keyword: string) => {
 		if (!keyword) {
@@ -145,11 +147,19 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 			category: selectedFetchItem.typeInfo.category,
 			subCategory: selectedFetchItem.typeInfo.subCategory,
 			stats: buildStats(selectedFetchItem.metaInfo),
-			usedMeso: 0
+			usedMeso: 0,
+			destroyedCount: 0,
+			spairMeso: itemSpairMeso,
+			mesoWon: mesoWon
 		})
 	}
 	
-	const doUpgradeStarForce = () => {
+	const doStarForce = () => {
+		
+		if (item?.destroyed === true) {
+			setItem((pv) => ({ ...pv!, starForce: item.isSuperiorItem ? 0 : 12, starForceFailCount: 0, usedMeso: pv!.usedMeso + pv!.spairMeso, destroyed: false }))
+			return;
+		}
 		
 		const info = getStarForceUpgradeInfo(item!);
 		
@@ -159,13 +169,13 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 			return;
 		}
 		
-		// 실패
-		
 		// 파괴
 		if (Math.floor(Math.random() * 100) <= info.destroyPercentage) {
-		
+			setItem((pv) => ({ ...pv!, starForce: 0, starForceFailCount: 0, usedMeso: pv!.usedMeso + info.cost, destroyedCount: pv!.destroyedCount + 1, destroyed: true }))
+			return;
 		}
 		
+		// 실패
 		setItem((pv) => {
 			if (isStarForceDown(pv!)) {
 				return { ...pv!, starForce:  pv!.starForce - 1, starForceFailCount: (pv!.starForceFailCount ?? 0) + 1, usedMeso: pv!.usedMeso + info.cost }
@@ -202,6 +212,12 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 		}
 	}, [selectedFetchItem])
 	
+	useEffect(() => {
+		if (item) {
+			setItem((pv) => ({ ...pv!, mesoWon: mesoWon, spairMeso: itemSpairMeso }))
+		}
+	}, [mesoWon, itemSpairMeso])
+	
 	return (
 		<>
 			<PageTitle
@@ -215,16 +231,40 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 					</FlexBox>
 				}
 			/>
-			<Alert
-				message="PC 환경(사양)에 따라 결과 처리가 늦어질 수 있습니다."
-				type="warning"
-				showIcon
-				closable
-				style={{ marginBottom: '.5rem' }}
-			/>
+			{/*<Alert*/}
+			{/*	message="PC 환경(사양)에 따라 결과 처리가 늦어질 수 있습니다."*/}
+			{/*	type="warning"*/}
+			{/*	showIcon*/}
+			{/*	closable*/}
+			{/*	style={{ marginBottom: '.5rem' }}*/}
+			{/*/>*/}
 			<CustomRow gutter={0}>
 				
 				<CustomCol span={16}>
+					
+					<div style={{ marginBottom: '1rem' }}>
+						<Title level={5}>스타포스 옵션 세팅</Title>
+					
+						<div style={{ marginBottom: '.25rem' }}>스페어(노작) 가격</div>
+						<InputNumber
+							value={itemSpairMeso}
+							formatter={value => numberComma(Number(value!))}
+							parser={value => Number(value!.replaceAll(',', ''))}
+							onChange={(value) => setItemSpairMeso(value ?? 0)}
+							style={{ marginBottom: '1rem', width: '100%' }}
+						/>
+						
+						<div style={{ marginBottom: '.25rem' }}>1억당 현금</div>
+						<InputNumber
+							value={mesoWon}
+							formatter={value => numberComma(Number(value!))}
+							parser={value => Number(value!.replaceAll(',', ''))}
+							onChange={(value) => setMesoWon(value ?? 0)}
+							style={{ marginBottom: '1rem', width: '100%' }}
+						/>
+					</div>
+					
+					
 					<Title level={5}>스타포스 이벤트</Title>
 					<Checkbox.Group
 						options={eventOptions}
@@ -234,7 +274,13 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 					
 					<FlexBox margin={'auto 0 0 0'} gap={'1rem'} justifyContent={'center'}>
 						<Button type={'primary'} style={{ marginTop: 'auto', flexGrow: 1 }}>환생의 불꽃 강화</Button>
-						<Button type={'primary'} disabled={!(item && item.isAvailableStarForce)} style={{ marginTop: 'auto', flexGrow: 1 }} onClick={() => doUpgradeStarForce()}>스타포스 강화</Button>
+						<Button type={'primary'} disabled={!(item && item.isAvailableStarForce)} style={{ marginTop: 'auto', flexGrow: 1 }} onClick={() => doStarForce()}>
+							{
+								item?.destroyed === true
+								? '아이템 복구'
+								: '스타포스 강화'
+							}
+						</Button>
 					</FlexBox>
 					
 					{
@@ -249,7 +295,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 									</Radio.Group>
 								</FlexBox>
 								
-								<Input placeholder={'아이템 이름을 입력해주세요.'} value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)} style={{ marginTop: '.5rem' }} />
+								<Input autoFocus placeholder={'아이템 이름을 입력해주세요.'} value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)} style={{ marginTop: '.5rem' }} />
 								
 								{
 									searchKeyword && searchedItem.length > 0

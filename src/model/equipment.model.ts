@@ -333,4 +333,7 @@ export interface Equipment {
 	subCategory: EquipmentSubCategory
 	stats: Stats[]
 	usedMeso: number
+	destroyedCount: number
+	spairMeso: number
+	mesoWon: number
 }

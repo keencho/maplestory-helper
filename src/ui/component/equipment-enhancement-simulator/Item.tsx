@@ -12,6 +12,7 @@ import React, {useEffect} from 'react';
 import styled from 'styled-components';
 import {StarFilled, StarOutlined} from '@ant-design/icons';
 import {numberComma} from '../../../util/common.util';
+import {BLUE, RED} from '../../../model/color.model';
 
 const { Title } = Typography;
 
@@ -33,6 +34,31 @@ const StarForce = styled.div`
 	text-align: center;
 `
 
+const SummaryBox = styled.div`
+	display: flex;
+	gap: .5rem;
+	margin-bottom: 1rem;
+	width: 100%;
+	
+	div {
+		flex: 1
+	}
+`
+
+const SummaryItem = styled.div`
+	display: flex;
+	flex-direction: column;
+	border: 1px solid rgba(140, 140, 140, 0.35);
+	border-radius: 4px;
+	padding: .25rem 1rem;
+	
+	span {
+		font-size: 20px;
+	}
+	justify-content: center;
+	align-items: center;
+`
+
 const Item = ({ item }: { item: Equipment | undefined }) => {
 	
 	if (!item) return <></>;
@@ -41,13 +67,15 @@ const Item = ({ item }: { item: Equipment | undefined }) => {
 	
 	const getStarForceElement = (): JSX.Element => {
 		if (!item.isAvailableStarForce) return <></>
+		if (item.destroyed === true) return <></>
 		
 		const arr: JSX.Element[] = [];
 		
 		for (let i = 1; i <= getMaxStarForce(item.level, item.isSuperiorItem); i ++) {
+			
 			const style: React.CSSProperties = {
 				fontSize: '15px',
-				color: '#FFAA00'
+				color: '#FFAA00',
 			}
 			
 			if (i % 5 === 1) {
@@ -63,7 +91,6 @@ const Item = ({ item }: { item: Equipment | undefined }) => {
 			} else {
 				arr.push(<StarOutlined style={style} key={i} />)
 			}
-			
 		}
 		
 		return <StarForce>{arr}</StarForce>
@@ -71,10 +98,50 @@ const Item = ({ item }: { item: Equipment | undefined }) => {
 	
 	return (
 		<FlexBox flexDirection={'column'} alignItems={'center'} width={'90%'}>
+			
+			<SummaryBox>
+				<SummaryItem>
+					<span style={{ fontWeight: 'bold' }}>누적메소</span>
+					<span>{numberComma(item.usedMeso)}</span>
+				</SummaryItem>
+				
+				<SummaryItem>
+					<span style={{ fontWeight: 'bold', color: BLUE }}>현금</span>
+					<span style={{ color: BLUE }}>{numberComma(Number((item.mesoWon / 100000000 * item.usedMeso).toFixed(0)))}</span>
+				</SummaryItem>
+				
+				<SummaryItem>
+					<span style={{ fontWeight: 'bold', color: RED }}>파괴 횟수</span>
+					<span style={{ color: RED }}>{numberComma(item.destroyedCount)}</span>
+				</SummaryItem>
+			</SummaryBox>
+			
+			{
+				item.destroyed === true
+				? <></>
+				:
+					<SummaryBox>
+						<SummaryItem>
+							<span style={{ fontWeight: 'bold' }}>강화비용</span>
+							<span>{numberComma(starForceUpgradeInfo.cost)}</span>
+						</SummaryItem>
+						
+						<SummaryItem>
+							<span style={{ fontWeight: 'bold', color: BLUE }}>성공확률</span>
+							<span style={{ color: BLUE }}>{numberComma(starForceUpgradeInfo.successPercentage)}%</span>
+						</SummaryItem>
+						
+						<SummaryItem>
+							<span style={{ fontWeight: 'bold', color: RED }}>파괴확률</span>
+							<span style={{ color: RED }}>{numberComma(starForceUpgradeInfo.destroyPercentage)}%</span>
+						</SummaryItem>
+					</SummaryBox>
+			}
+			
 			{getStarForceElement()}
-			<Title level={3}>{item.itemName}</Title>
+			<Title level={3}>{item.itemName} {item.destroyed ? '(파괴됨)' : ''}</Title>
 			{/*<img src={'https://cdn.pixabay.com/photo/2018/05/13/16/57/dog-3397110__480.jpg'} style={{ width: '200px' }} />*/}
-			<img src={item.base64Icon} style={{ width: '80px' }} alt={item.itemName} />
+			<img src={item.base64Icon} style={{ width: '80px', filter: item.destroyed ? 'grayscale(95%) drop-shadow(black 0px 0px 0.1rem)' : '' }} alt={item.itemName} />
 			<div style={{ width: '100%', marginTop: '2rem' }}>
 				{
 					isWeapon(item.category)
@@ -107,10 +174,6 @@ const Item = ({ item }: { item: Equipment | undefined }) => {
 						</ItemStatsBox>
 					)
 				}
-				{/*<div>잠재</div>*/}
-				{/*<div>잠재1</div>*/}
-				{/*<div>잠재2</div>*/}
-				{/*<div>잠재3</div>*/}
 			</div>
 			{
 				item.isAvailableStarForce
