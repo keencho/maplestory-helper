@@ -1,12 +1,12 @@
 import PageTitle from '../component/common/PageTitle';
-import {Alert, Button, Checkbox, Descriptions, Form, Input, Radio, Spin, Switch, Typography, InputNumber } from 'antd';
+import {Button, Checkbox, Input, InputNumber, Radio, Spin, Typography} from 'antd';
 import {CustomCol, CustomRow} from '../component/common/element/CustomRowCol';
 import React, {useEffect, useState} from 'react';
 import {FlexBox} from '../component/common/element/FlexBox';
 // import MaplestoryIOApi from '../../api/maplestory-io.api';
 import useMapleFetch from '../../hooks/useMapleFetch';
 import {getAllItems, getItem, getItemIcon} from '../../api/maplestory-io.api';
-import styled, {css} from 'styled-components';
+import styled from 'styled-components';
 import {useRecoilValue} from 'recoil';
 import {ThemeAtom} from '../../recoil/theme.atom';
 import {BACKGROUND, HOVER} from '../../model/color.model';
@@ -16,8 +16,6 @@ import {buildStats, getStarForceUpgradeInfo, isAvailableStarForce, isStarForceDo
 import {Equipment} from '../../model/equipment.model';
 import Item from '../component/equipment-enhancement-simulator/Item';
 import {numberComma} from '../../util/common.util';
-import {CommonStyledSpan} from '../../model/style.model';
-import {CloseOutlined} from '@ant-design/icons';
 
 const { Title } = Typography;
 
@@ -99,6 +97,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	
 	const [event, setEvent] = useState<number[]>([]);
 	const [searchSort, setSearchSort] = useState<'NAME' | 'LEVEL'>('LEVEL');
+	const [autoStarForce, setAutoStarForce] = useState<boolean>(true);
 	
 	const defaultSearchItemCount = 20;
 	const [showSearchItemBox, setShowSearchItemBox] = useState<boolean>(false);
@@ -154,6 +153,10 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 		})
 	}
 	
+	const doAutoStarForce = () => {
+		console.log(item);
+	}
+	
 	const doStarForce = () => {
 		
 		if (item?.destroyed === true) {
@@ -163,8 +166,10 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 		
 		const info = getStarForceUpgradeInfo(item!);
 		
+		const rand = Math.floor(Math.random() * 100);
+		
 		// 성공
-		if (item!.starForceFailCount === 2 || Math.floor(Math.random() * 100) <= info.successPercentage) {
+		if (item!.starForceFailCount === 2 || rand <= info.successPercentage) {
 			setItem((pv) => ({ ...pv!, starForce: pv!.starForce + 1, starForceFailCount: 0, usedMeso: pv!.usedMeso + info.cost }))
 			return;
 		}
@@ -183,7 +188,6 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 				return { ...pv!, starForce: pv!.starForce, starForceFailCount: pv!.starForceFailCount, usedMeso: pv!.usedMeso + info.cost }
 			}
 		})
-		
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -264,7 +268,6 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 						/>
 					</div>
 					
-					
 					<Title level={5}>스타포스 이벤트</Title>
 					<Checkbox.Group
 						options={eventOptions}
@@ -274,7 +277,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 					
 					<FlexBox margin={'auto 0 0 0'} gap={'1rem'} justifyContent={'center'}>
 						<Button type={'primary'} style={{ marginTop: 'auto', flexGrow: 1 }}>환생의 불꽃 강화</Button>
-						<Button type={'primary'} disabled={!(item && item.isAvailableStarForce)} style={{ marginTop: 'auto', flexGrow: 1 }} onClick={() => doStarForce()}>
+						<Button type={'primary'} disabled={!(item && item.isAvailableStarForce)} style={{ marginTop: 'auto', flexGrow: 1 }} onClick={() => autoStarForce ? doAutoStarForce() : doStarForce()}>
 							{
 								item?.destroyed === true
 								? '아이템 복구'

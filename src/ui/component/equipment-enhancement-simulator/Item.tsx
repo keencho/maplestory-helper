@@ -18,7 +18,7 @@ const { Title } = Typography;
 
 const ItemStatsBox = styled(FlexBox)`
 	justify-content: space-between;
-	
+
 	&:not(:last-child) {
 		margin-bottom: .5rem;
 	}
@@ -39,7 +39,7 @@ const SummaryBox = styled.div`
 	gap: .5rem;
 	margin-bottom: 1rem;
 	width: 100%;
-	
+
 	div {
 		flex: 1
 	}
@@ -51,7 +51,7 @@ const SummaryItem = styled.div`
 	border: 1px solid rgba(140, 140, 140, 0.35);
 	border-radius: 4px;
 	padding: .25rem 1rem;
-	
+
 	span {
 		font-size: 20px;
 	}
@@ -99,43 +99,50 @@ const Item = ({ item }: { item: Equipment | undefined }) => {
 	return (
 		<FlexBox flexDirection={'column'} alignItems={'center'} width={'90%'}>
 			
-			<SummaryBox>
-				<SummaryItem>
-					<span style={{ fontWeight: 'bold' }}>누적메소</span>
-					<span>{numberComma(item.usedMeso)}</span>
-				</SummaryItem>
-				
-				<SummaryItem>
-					<span style={{ fontWeight: 'bold', color: BLUE }}>현금</span>
-					<span style={{ color: BLUE }}>{numberComma(Number((item.mesoWon / 100000000 * item.usedMeso).toFixed(0)))}</span>
-				</SummaryItem>
-				
-				<SummaryItem>
-					<span style={{ fontWeight: 'bold', color: RED }}>파괴 횟수</span>
-					<span style={{ color: RED }}>{numberComma(item.destroyedCount)}</span>
-				</SummaryItem>
-			</SummaryBox>
-			
 			{
-				item.destroyed === true
-				? <></>
-				:
-					<SummaryBox>
-						<SummaryItem>
-							<span style={{ fontWeight: 'bold' }}>강화비용</span>
-							<span>{numberComma(starForceUpgradeInfo.cost)}</span>
-						</SummaryItem>
-						
-						<SummaryItem>
-							<span style={{ fontWeight: 'bold', color: BLUE }}>성공확률</span>
-							<span style={{ color: BLUE }}>{numberComma(starForceUpgradeInfo.successPercentage)}%</span>
-						</SummaryItem>
-						
-						<SummaryItem>
-							<span style={{ fontWeight: 'bold', color: RED }}>파괴확률</span>
-							<span style={{ color: RED }}>{numberComma(starForceUpgradeInfo.destroyPercentage)}%</span>
-						</SummaryItem>
-					</SummaryBox>
+				item.isAvailableStarForce === true
+					?
+					<>
+						<SummaryBox>
+							<SummaryItem>
+								<span style={{ fontWeight: 'bold' }}>누적메소</span>
+								<span>{numberComma(item.usedMeso)}</span>
+							</SummaryItem>
+							
+							<SummaryItem>
+								<span style={{ fontWeight: 'bold' }}>현금</span>
+								<span>{numberComma(Number((item.mesoWon / 100000000 * item.usedMeso).toFixed(0)))}</span>
+							</SummaryItem>
+							
+							<SummaryItem>
+								<span style={{ fontWeight: 'bold', color: RED }}>파괴 횟수</span>
+								<span style={{ color: RED }}>{numberComma(item.destroyedCount)}</span>
+							</SummaryItem>
+						</SummaryBox>
+						{
+							item.destroyed === true
+								? <></>
+								:
+								<SummaryBox>
+									<SummaryItem>
+										<span style={{ fontWeight: 'bold' }}>강화비용</span>
+										<span>{numberComma(starForceUpgradeInfo.cost)}</span>
+									</SummaryItem>
+									
+									<SummaryItem>
+										<span style={{ fontWeight: 'bold', color: BLUE }}>성공확률</span>
+										<span style={{ color: BLUE }}>{numberComma(starForceUpgradeInfo.successPercentage)}%</span>
+									</SummaryItem>
+									
+									<SummaryItem>
+										<span style={{ fontWeight: 'bold', color: RED }}>파괴확률</span>
+										<span style={{ color: RED }}>{numberComma(starForceUpgradeInfo.destroyPercentage)}%</span>
+									</SummaryItem>
+								</SummaryBox>
+						}
+					</>
+					:
+					<></>
 			}
 			
 			{getStarForceElement()}
@@ -178,14 +185,14 @@ const Item = ({ item }: { item: Equipment | undefined }) => {
 			{
 				item.isAvailableStarForce
 					?
-						<></>
+					<></>
 					:
-						<Alert
-							message="스타포스 강화 할 수 없는 아이템 입니다."
-							type="warning"
-							showIcon
-							style={{ marginTop: '1rem' }}
-						/>
+					<Alert
+						message="스타포스 강화 할 수 없는 아이템 입니다."
+						type="warning"
+						showIcon
+						style={{ marginTop: '5rem' }}
+					/>
 			}
 		</FlexBox>
 	)
