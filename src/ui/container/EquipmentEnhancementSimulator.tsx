@@ -1,7 +1,7 @@
 import PageTitle from '../component/common/PageTitle';
 import {Button, Checkbox, Input, InputNumber, Radio, Spin, Typography} from 'antd';
 import {CustomCol, CustomRow} from '../component/common/element/CustomRowCol';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useReducer, useRef, useState} from 'react';
 import {FlexBox} from '../component/common/element/FlexBox';
 // import MaplestoryIOApi from '../../api/maplestory-io.api';
 import useMapleFetch from '../../hooks/useMapleFetch';
@@ -16,6 +16,7 @@ import {buildStats, getStarForceUpgradeInfo, isAvailableStarForce, isStarForceDo
 import {Equipment} from '../../model/equipment.model';
 import Item from '../component/equipment-enhancement-simulator/Item';
 import {numberComma} from '../../util/common.util';
+import NotificationUtil from '../../util/notification.util';
 
 const { Title } = Typography;
 
@@ -43,61 +44,16 @@ const eventOptions = [
 	{ label: '5, 10, 15성에서 강화시 성공확률 100%', value: 2 },
 ];
 
-const SearchBoxWrapper = styled.div<{ theme: 'light' | 'dark', show: boolean }>`
-	position: absolute;
-	width: 50%;
-	height: 50%;
-	background-color: ${props => BACKGROUND(props.theme)};
-	border: 1px solid rgba(140, 140, 140, 0.35);
-	border-radius: 8px;
-	padding: 1rem;
-	display: flex;
-	flex-direction: column;
-	right: 0;
-	opacity: 1;
-
-	//@keyframes frames {
-	//	from {
-	//		opacity: 0;
-	//		right: -50%;
-	//	}
-	//	to {
-	//		opacity: 1;
-	//		right: 0;
-	//	}
-	//}
-	//
-	//animation-name: frames;
-	//animation-duration: .3s;
-`
-
-const SearchBox = styled.div<{ theme: 'light' | 'dark' }>`
-	margin-top: .5rem;
-	overflow-y: auto;
-	width: 100%;
-	background-color: ${props => BACKGROUND(props.theme)};
-`
-
-const SearchBoxItem = styled.div<{ theme: 'light' | 'dark' }>`
-	cursor: pointer;
-	padding: .25rem .5rem;
-	
-	&:not(:last-child) {
-		border-bottom: 1px solid rgba(140, 140, 140, 0.35);
-	}
-	
-	&:hover {
-		background-color: ${props => HOVER(props.theme)};
-	}
-`
-
 export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	
 	const theme = useRecoilValue(ThemeAtom);
 	
 	const [event, setEvent] = useState<number[]>([]);
 	const [searchSort, setSearchSort] = useState<'NAME' | 'LEVEL'>('LEVEL');
-	const [autoStarForce, setAutoStarForce] = useState<boolean>(true);
+	const [autoStarForce, setAutoStarForce] = useState<boolean>(false);
+	const [autoStarForceRunning, setAutoStarForceRunning] = useState<boolean>(false);
+	const [autoStarForceTargetStar, setAutoStarForceTargetStar] = useState<number>(0);
+	const autoStarForceRef = useRef<NodeJS.Timeout | null>(null);
 	
 	const defaultSearchItemCount = 20;
 	const [showSearchItemBox, setShowSearchItemBox] = useState<boolean>(false);
@@ -110,7 +66,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	const [selectedItemId, setSelectedItemId] = useState<string>('1213018');
 	const [selectedFetchItem, error, isLoadingSelectedItem, fetchItem] = useMapleFetch({ apiURL: getItem, notFetchOnInit: true, singleValue: true })
 	const [item, setItem] = useState<Equipment | undefined>(undefined);
-	const [itemSpairMeso, setItemSpairMeso] = useState<number>(1000000000);
+	const [itemSpairMeso, setItemSpairMeso] = useState<number>(100000000);
 	const [mesoWon, setMesoWon] = useState<number>(2500);
 	
 	const searchItem = async(keyword: string) => {
@@ -153,12 +109,15 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 		})
 	}
 	
-	const doAutoStarForce = () => {
-		console.log(item);
+	const onClickStarForce = () => {
+		if (autoStarForce) {
+			setAutoStarForceRunning(true);
+		} else {
+			doStarForce();
+		}
 	}
 	
 	const doStarForce = () => {
-		
 		if (item?.destroyed === true) {
 			setItem((pv) => ({ ...pv!, starForce: item.isSuperiorItem ? 0 : 12, starForceFailCount: 0, usedMeso: pv!.usedMeso + pv!.spairMeso, destroyed: false }))
 			return;
@@ -222,6 +181,30 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 		}
 	}, [mesoWon, itemSpairMeso])
 	
+	const clearAutoStarForceTimeout = () => {
+		if (autoStarForceRef.current) {
+			clearTimeout(autoStarForceRef.current)
+		}
+	}
+	
+	useEffect(() => {
+		if (item && autoStarForceRunning) {
+			if (item.starForce < autoStarForceTargetStar) {
+				autoStarForceRef.current = setTimeout(doStarForce, 50);
+			} else {
+				NotificationUtil.fire('success', '강화 완료', `${autoStarForceTargetStar}성 강화가 완료되었습니다.`)
+				setAutoStarForceRunning(false);
+				clearAutoStarForceTimeout();
+			}
+		}
+	}, [autoStarForceRunning, item])
+	
+	useEffect(() => {
+		return () => {
+			clearAutoStarForceTimeout();
+		}
+	}, []);
+	
 	return (
 		<>
 			<PageTitle
@@ -268,20 +251,45 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 						/>
 					</div>
 					
-					<Title level={5}>스타포스 이벤트</Title>
-					<Checkbox.Group
-						options={eventOptions}
-						style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}
-						value={event}
-						onChange={(e) => setEvent(e as number[]) }  />
+					<div style={{ marginBottom: '1rem' }}>
+					
+						<Title level={5}>스타포스 이벤트</Title>
+						<Checkbox.Group
+							options={eventOptions}
+							style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}
+							value={event}
+							onChange={(e) => setEvent(e as number[]) }  />
+					</div>
+					
+					<Title level={5}>자동강화</Title>
+					
+					<div style={{ marginBottom: '.25rem' }}>목표 스타포스</div>
+					<InputNumber
+						value={autoStarForceTargetStar}
+						onChange={(value) => setAutoStarForceTargetStar(value ?? 0)}
+						style={{ marginBottom: '1rem', width: '100%' }}
+						min={1}
+						max={25}
+					/>
+					
+					<Checkbox
+						onChange={(e) => setAutoStarForce(e.target.checked)}
+						checked={autoStarForce}
+					>
+						활성화
+					</Checkbox>
 					
 					<FlexBox margin={'auto 0 0 0'} gap={'1rem'} justifyContent={'center'}>
 						<Button type={'primary'} style={{ marginTop: 'auto', flexGrow: 1 }}>환생의 불꽃 강화</Button>
-						<Button type={'primary'} disabled={!(item && item.isAvailableStarForce)} style={{ marginTop: 'auto', flexGrow: 1 }} onClick={() => autoStarForce ? doAutoStarForce() : doStarForce()}>
+						<Button type={'primary'} disabled={!(item && item.isAvailableStarForce)} style={{ marginTop: 'auto', flexGrow: 1 }} onClick={onClickStarForce}>
 							{
-								item?.destroyed === true
-								? '아이템 복구'
-								: '스타포스 강화'
+								autoStarForceRunning
+								?
+									'멈추기'
+								:
+									item?.destroyed === true
+									? '아이템 복구'
+									: '스타포스 강화'
 							}
 						</Button>
 					</FlexBox>
@@ -340,9 +348,9 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 					<FlexBox alignItems={'center'} justifyContent={'center'} flex={1} flexDirection={'column'}>
 						{
 							isLoadingSelectedItem
-								?
+							?
 								<Spin tip="아이템을 불러오는 중입니다..." size={'large'} />
-								:
+							:
 								<Item item={item} />
 						}
 					</FlexBox>
@@ -352,3 +360,51 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 		</>
 	)
 }
+
+const SearchBoxWrapper = styled.div<{ theme: 'light' | 'dark', show: boolean }>`
+	position: absolute;
+	width: 50%;
+	height: 50%;
+	background-color: ${props => BACKGROUND(props.theme)};
+	border: 1px solid rgba(140, 140, 140, 0.35);
+	border-radius: 8px;
+	padding: 1rem;
+	display: flex;
+	flex-direction: column;
+	right: 0;
+	opacity: 1;
+
+	//@keyframes frames {
+	//	from {
+	//		opacity: 0;
+	//		right: -50%;
+	//	}
+	//	to {
+	//		opacity: 1;
+	//		right: 0;
+	//	}
+	//}
+	//
+	//animation-name: frames;
+	//animation-duration: .3s;
+`
+
+const SearchBox = styled.div<{ theme: 'light' | 'dark' }>`
+	margin-top: .5rem;
+	overflow-y: auto;
+	width: 100%;
+	background-color: ${props => BACKGROUND(props.theme)};
+`
+
+const SearchBoxItem = styled.div<{ theme: 'light' | 'dark' }>`
+	cursor: pointer;
+	padding: .25rem .5rem;
+	
+	&:not(:last-child) {
+		border-bottom: 1px solid rgba(140, 140, 140, 0.35);
+	}
+	
+	&:hover {
+		background-color: ${props => HOVER(props.theme)};
+	}
+`
