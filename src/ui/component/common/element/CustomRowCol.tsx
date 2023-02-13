@@ -4,7 +4,7 @@ import {Col, Row} from 'antd';
 
 interface RowProps {
 	children: ReactNode,
-	gutter?: Gutter
+	gutter?: Gutter | [Gutter, Gutter]
 }
 
 export const CustomRow = (props: RowProps) => {
@@ -19,11 +19,12 @@ export const CustomRow = (props: RowProps) => {
 interface ColProps {
 	children: ReactNode,
 	span?: number | string
+	height?: number
 }
 
 export const CustomCol = (props: ColProps) => {
 	return (
-		<Col span={props.span} style={{ height: '100%', overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
+		<Col span={props.span} style={{ height: `${props.height ? props.height : 100}%`, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
 			{props.children}
 		</Col>
 	)
