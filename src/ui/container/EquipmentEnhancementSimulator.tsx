@@ -52,7 +52,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	const [searchSort, setSearchSort] = useState<'NAME' | 'LEVEL'>('LEVEL');
 	const [autoStarForce, setAutoStarForce] = useState<boolean>(false);
 	const [autoStarForceRunning, setAutoStarForceRunning] = useState<boolean>(false);
-	const [autoStarForceTargetStar, setAutoStarForceTargetStar] = useState<number>(0);
+	const [autoStarForceTargetStar, setAutoStarForceTargetStar] = useState<number>(22);
 	const autoStarForceRef = useRef<NodeJS.Timeout | null>(null);
 	
 	const defaultSearchItemCount = 20;
@@ -109,8 +109,30 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 		})
 	}
 	
+	const resetItem = () => {
+		if (autoStarForceRunning) {
+			stopAutoStarForceRunning()
+		}
+		initItem()
+		NotificationUtil.fire('success', '아이템이 초기화 되었습니다.');
+	}
+	
+	const stopAutoStarForceRunning = () => {
+		if (autoStarForceRunning) {
+			setAutoStarForceRunning(false);
+		}
+		
+		if (autoStarForceRef.current) {
+			clearTimeout(autoStarForceRef.current)
+		}
+	}
+	
 	const onClickStarForce = () => {
 		if (autoStarForce) {
+			if (item!.starForce >= autoStarForceTargetStar) {
+				NotificationUtil.fire('error', '자동강화 불가', '목표 스타포스를 조정하거나 아이템을 초기화 해 주세요.', 5)
+				return;
+			}
 			setAutoStarForceRunning(true);
 		} else {
 			doStarForce();
@@ -181,27 +203,20 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 		}
 	}, [mesoWon, itemSpairMeso])
 	
-	const clearAutoStarForceTimeout = () => {
-		if (autoStarForceRef.current) {
-			clearTimeout(autoStarForceRef.current)
-		}
-	}
-	
 	useEffect(() => {
 		if (item && autoStarForceRunning) {
 			if (item.starForce < autoStarForceTargetStar) {
-				autoStarForceRef.current = setTimeout(doStarForce, 50);
+				autoStarForceRef.current = setTimeout(doStarForce, 25);
 			} else {
 				NotificationUtil.fire('success', '강화 완료', `${autoStarForceTargetStar}성 강화가 완료되었습니다.`)
-				setAutoStarForceRunning(false);
-				clearAutoStarForceTimeout();
+				stopAutoStarForceRunning();
 			}
 		}
 	}, [autoStarForceRunning, item])
 	
 	useEffect(() => {
 		return () => {
-			clearAutoStarForceTimeout();
+			stopAutoStarForceRunning();
 		}
 	}, []);
 	
@@ -212,7 +227,8 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 				marginBottom={'.5rem'}
 				extraContents={
 					<FlexBox alignItems={'center'} gap={'.5rem'}>
-						<Button type={'primary'} onClick={() => setShowSearchItemBox(!showSearchItemBox)}>아이템 검색</Button>
+						<Button type={'primary'} disabled={autoStarForceRunning} onClick={() => setShowSearchItemBox(!showSearchItemBox)}>아이템 검색</Button>
+						<Button type={'primary'} onClick={resetItem}>아이템 초기화</Button>
 						{/*<CommonStyledSpan fontSize={'14px'} fontWeight={'bold'}>아이템 검색</CommonStyledSpan>*/}
 						{/*<Switch checked={showSearchItemBox} onChange={setShowSearchItemBox} />*/}
 					</FlexBox>
@@ -239,6 +255,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 							parser={value => Number(value!.replaceAll(',', ''))}
 							onChange={(value) => setItemSpairMeso(value ?? 0)}
 							style={{ marginBottom: '1rem', width: '100%' }}
+							disabled={autoStarForceRunning}
 						/>
 						
 						<div style={{ marginBottom: '.25rem' }}>1억당 현금</div>
@@ -248,6 +265,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 							parser={value => Number(value!.replaceAll(',', ''))}
 							onChange={(value) => setMesoWon(value ?? 0)}
 							style={{ marginBottom: '1rem', width: '100%' }}
+							disabled={autoStarForceRunning}
 						/>
 					</div>
 					
@@ -258,7 +276,9 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 							options={eventOptions}
 							style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}
 							value={event}
-							onChange={(e) => setEvent(e as number[]) }  />
+							onChange={(e) => setEvent(e as number[]) }
+							disabled={autoStarForceRunning}
+						/>
 					</div>
 					
 					<Title level={5}>자동강화</Title>
@@ -270,28 +290,42 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 						style={{ marginBottom: '1rem', width: '100%' }}
 						min={1}
 						max={25}
+						disabled={autoStarForceRunning}
 					/>
 					
 					<Checkbox
 						onChange={(e) => setAutoStarForce(e.target.checked)}
 						checked={autoStarForce}
+						disabled={autoStarForceRunning}
 					>
 						활성화
 					</Checkbox>
 					
 					<FlexBox margin={'auto 0 0 0'} gap={'1rem'} justifyContent={'center'}>
-						<Button type={'primary'} style={{ marginTop: 'auto', flexGrow: 1 }}>환생의 불꽃 강화</Button>
-						<Button type={'primary'} disabled={!(item && item.isAvailableStarForce)} style={{ marginTop: 'auto', flexGrow: 1 }} onClick={onClickStarForce}>
+						<Button type={'primary'} disabled={!(item && item.isAvailableStarForce && !autoStarForceRunning)} style={{ marginTop: 'auto', flexGrow: 1 }} onClick={onClickStarForce}>
 							{
 								autoStarForceRunning
 								?
-									'멈추기'
+									<>
+										자동강화가 진행 중입니다.
+										<Spin style={{ marginLeft: '1rem', color: 'green' }} />
+									</>
 								:
 									item?.destroyed === true
-									? '아이템 복구'
-									: '스타포스 강화'
+										? '아이템 복구'
+										: '스타포스 강화'
 							}
 						</Button>
+						{
+							autoStarForceRunning
+							?
+								<Button type={'primary'} disabled={!(item && item.isAvailableStarForce)} style={{ marginTop: 'auto', flexGrow: 1 }} onClick={stopAutoStarForceRunning}>
+									자동강화 멈추기
+								</Button>
+							:
+								<></>
+								
+						}
 					</FlexBox>
 					
 					{
