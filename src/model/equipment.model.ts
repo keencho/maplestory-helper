@@ -337,3 +337,7 @@ export interface Equipment {
 	spairMeso: number
 	mesoWon: number
 }
+
+export enum StarForceEventType {
+	ONE_PLUS_ONE, DISCOUNT_30, PERCENTAGE_100
+}

@@ -7,13 +7,17 @@ import {
 	isSubWeapon,
 	isWeapon
 } from '../../../util/equipment.util';
-import {Equipment, equipmentCategoryName, equipmentOptionName} from '../../../model/equipment.model';
+import {
+	Equipment,
+	equipmentCategoryName,
+	equipmentOptionName,
+	StarForceEventType
+} from '../../../model/equipment.model';
 import React, {useEffect} from 'react';
 import styled from 'styled-components';
 import {StarFilled, StarOutlined} from '@ant-design/icons';
 import {numberComma} from '../../../util/common.util';
 import {BLUE, RED} from '../../../model/color.model';
-import {StarForceEventType} from '../../container/EquipmentEnhancementSimulator';
 
 const { Title } = Typography;
 

@@ -7,7 +7,7 @@ import {
 	MetaInfoStats,
 	Stats
 } from '../model/equipment.model';
-import {StarForceEventType} from '../ui/container/EquipmentEnhancementSimulator';
+import {StarForceEventType} from '../model/equipment.model';
 
 export const getMaxStarForce = (level: number, isSuperiorItem = false): number => {
 	if (level < 95) {

@@ -13,7 +13,7 @@ import {BACKGROUND, HOVER} from '../../model/color.model';
 import {cacheName, region, version} from '../../model/maplestory-io.model';
 import AsyncCacheImage from '../component/common/element/AsyncCacheImage';
 import {buildStats, getStarForceUpgradeInfo, isAvailableStarForce, isStarForceDown} from '../../util/equipment.util';
-import {Equipment} from '../../model/equipment.model';
+import {Equipment, StarForceEventType} from '../../model/equipment.model';
 import Item from '../component/equipment-enhancement-simulator/Item';
 import {numberComma} from '../../util/common.util';
 import NotificationUtil from '../../util/notification.util';
@@ -64,10 +64,6 @@ export const EquipmentEnhancementSimulatorWrapper = () => {
 	}
 	
 	return <EquipmentEnhancementSimulator items={items} />
-}
-
-export enum StarForceEventType {
-	ONE_PLUS_ONE, DISCOUNT_30, PERCENTAGE_100
 }
 
 const eventOptions: { label: string, value: StarForceEventType }[] = [
