@@ -10,7 +10,12 @@ interface RowProps {
 export const CustomRow = (props: RowProps) => {
 	return (
 		// children container에서 자신들만의 스크롤바가 생기게 함
-		<Row gutter={props.gutter} style={{ height: 0, flex: '1 1 auto' }}>
+		<Row
+			gutter={props.gutter}
+			style={{
+				height: 0,
+				flex: '1 1 auto'
+		}}>
 			{props.children}
 		</Row>
 	)
@@ -19,12 +24,20 @@ export const CustomRow = (props: RowProps) => {
 interface ColProps {
 	children: ReactNode,
 	span?: number | string
-	height?: number
+	height?: number | string
 }
 
 export const CustomCol = (props: ColProps) => {
 	return (
-		<Col span={props.span} style={{ height: `${props.height ? props.height : 100}%`, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
+		<Col
+			span={props.span}
+			style={{
+				height: `${props.height ? props.height : '100%'}`,
+				overflow: 'auto',
+				display: 'flex',
+				flexDirection: 'column',
+			}}
+		>
 			{props.children}
 		</Col>
 	)
