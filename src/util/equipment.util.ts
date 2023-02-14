@@ -3,9 +3,11 @@ import {
 	EquipmentCategory,
 	EquipmentSubCategory,
 	equipmentSubCategoryInfo,
-	metaInfoEquipmentOptionMap, MetaInfoStats,
+	metaInfoEquipmentOptionMap,
+	MetaInfoStats,
 	Stats
 } from '../model/equipment.model';
+import {StarForceEventType} from '../ui/container/EquipmentEnhancementSimulator';
 
 export const getMaxStarForce = (level: number, isSuperiorItem = false): number => {
 	if (level < 95) {
@@ -80,12 +82,12 @@ export const buildStats = (metaInfo: any): Stats[] => {
 	return stats;
 }
 
-const getStarForceUpgradeCost = (item: Equipment) => {
+const getStarForceUpgradeCost = (item: Equipment, event: StarForceEventType[]) => {
 	if (item.isSuperiorItem) {
 		return Math.round(Math.pow(Math.round(item.level / 10) * 10, 3.56) / 100) * 100
 	}
 	
-	let result = 0;
+	let result: number;
 	if (item.starForce < 10) {
 		result = 1000 + (Math.pow(item.level, 3) * (item.starForce + 1)) / 25
 	} else if (item.starForce < 15) {
@@ -94,10 +96,25 @@ const getStarForceUpgradeCost = (item: Equipment) => {
 		result = 1000 + (Math.pow(item.level, 3) * Math.pow(item.starForce + 1, 2.27)) / 200
 	}
 	
-	return Math.round(result / 100) * 100;
+	result = Math.round(result / 100) * 100;
+	
+	if (event.some(ev => ev === StarForceEventType.DISCOUNT_30)) {
+		result = result * 0.7;
+	}
+	
+	return result;
 }
 
-const getStarForceUpgradeSuccessPercentage = (item: Equipment) => {
+const getStarForceUpgradeSuccessPercentage = (item: Equipment, event: StarForceEventType[]) => {
+	
+	if (item.starForceFailCount === 2) {
+		return 100;
+	}
+	
+	if (event.some(ev => ev === StarForceEventType.PERCENTAGE_100) && [5, 10, 15].some(num => num === item.starForce) && !item.isSuperiorItem) {
+		return 100;
+	}
+	
 	if (item.isSuperiorItem) {
 		if (item.starForce < 2) {
 			return 50;
@@ -153,7 +170,16 @@ const getStarForceUpgradeSuccessPercentage = (item: Equipment) => {
 	return 1;
 }
 
-const getStarForceUpgradeDestroyPercentage = (item: Equipment) => {
+const getStarForceUpgradeDestroyPercentage = (item: Equipment, event: StarForceEventType[]) => {
+	
+	if (item.starForceFailCount === 2) {
+		return 0;
+	}
+	
+	if (event.some(ev => ev === StarForceEventType.PERCENTAGE_100) && [5, 10, 15].some(num => num === item.starForce) && !item.isSuperiorItem) {
+		return 0;
+	}
+	
 	if (item.isSuperiorItem) {
 		if (item.starForce < 5) {
 			return 0;
@@ -225,11 +251,11 @@ const getStarForceUpgradeDestroyPercentage = (item: Equipment) => {
 	return 39.6;
 }
 
-export const getStarForceUpgradeInfo = (item: Equipment): { cost: number, successPercentage: number, destroyPercentage: number } => {
+export const getStarForceUpgradeInfo = (item: Equipment, event: StarForceEventType[]): { cost: number, successPercentage: number, destroyPercentage: number } => {
 	return {
-		cost: getStarForceUpgradeCost(item),
-		successPercentage: getStarForceUpgradeSuccessPercentage(item),
-		destroyPercentage: getStarForceUpgradeDestroyPercentage(item)
+		cost: getStarForceUpgradeCost(item, event),
+		successPercentage: getStarForceUpgradeSuccessPercentage(item, event),
+		destroyPercentage: getStarForceUpgradeDestroyPercentage(item, event)
 	};
 }
 

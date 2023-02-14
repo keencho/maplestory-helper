@@ -1,5 +1,5 @@
 import {FlexBox} from '../common/element/FlexBox';
-import {Alert, Typography} from 'antd';
+import {Alert, Spin, Typography} from 'antd';
 import {
 	getMaxStarForce,
 	getStarForceUpgradeInfo,
@@ -13,6 +13,7 @@ import styled from 'styled-components';
 import {StarFilled, StarOutlined} from '@ant-design/icons';
 import {numberComma} from '../../../util/common.util';
 import {BLUE, RED} from '../../../model/color.model';
+import {StarForceEventType} from '../../container/EquipmentEnhancementSimulator';
 
 const { Title } = Typography;
 
@@ -59,11 +60,11 @@ const SummaryItem = styled.div`
 	align-items: center;
 `
 
-const Item = ({ item }: { item: Equipment | undefined }) => {
+const Item = ({ item, isAutoRunning, event }: { item: Equipment | undefined, isAutoRunning: boolean, event: StarForceEventType[] }) => {
 	
 	if (!item) return <></>;
 	
-	const starForceUpgradeInfo = getStarForceUpgradeInfo(item)
+	const starForceUpgradeInfo = getStarForceUpgradeInfo(item, event)
 	
 	const getStarForceElement = (): JSX.Element => {
 		if (!item.isAvailableStarForce) return <></>
@@ -138,6 +139,7 @@ const Item = ({ item }: { item: Equipment | undefined }) => {
 										<span style={{ fontWeight: 'bold', color: RED }}>파괴확률</span>
 										<span style={{ color: RED }}>{numberComma(starForceUpgradeInfo.destroyPercentage)}%</span>
 									</SummaryItem>
+									
 								</SummaryBox>
 						}
 					</>
@@ -145,55 +147,58 @@ const Item = ({ item }: { item: Equipment | undefined }) => {
 					<></>
 			}
 			
-			{getStarForceElement()}
-			<Title level={3}>{item.itemName} {item.destroyed ? '(파괴됨)' : ''}</Title>
-			{/*<img src={'https://cdn.pixabay.com/photo/2018/05/13/16/57/dog-3397110__480.jpg'} style={{ width: '200px' }} />*/}
-			<img src={item.base64Icon} style={{ width: '80px', filter: item.destroyed ? 'grayscale(95%) drop-shadow(black 0px 0px 0.1rem)' : '' }} alt={item.itemName} />
-			<div style={{ width: '100%', marginTop: '2rem' }}>
-				{
-					isWeapon(item.category)
-						?
+			<div style={{ width: '100%', textAlign: 'center' }}>
+				<Spin spinning={isAutoRunning} size={'large'} tip={'자동강화가 진행 중입니다.'}>
+					{getStarForceElement()}
+					<Title level={3}>{item.itemName} {item.destroyed ? '(파괴됨)' : ''}</Title>
+					<img src={item.base64Icon} style={{ width: '80px', filter: item.destroyed ? 'grayscale(95%) drop-shadow(black 0px 0px 0.1rem)' : '' }} alt={item.itemName} />
+					<div style={{ width: '100%', marginTop: '2rem' }}>
+						{
+							isWeapon(item.category)
+								?
+								<ItemStatsBox>
+									<ItemStatsText>무기분류</ItemStatsText>
+									<ItemStatsText>{getSubCategoryName(item.subCategory)} ({equipmentCategoryName[item.category]})</ItemStatsText>
+								</ItemStatsBox>
+								:
+								<ItemStatsBox>
+									<ItemStatsText>장비분류</ItemStatsText>
+									<ItemStatsText>
+										{
+											isSubWeapon(item.category)
+												? `보조무기 (${getSubCategoryName(item.subCategory)})`
+												: getSubCategoryName(item.subCategory)
+										}
+									</ItemStatsText>
+								</ItemStatsBox>
+						}
 						<ItemStatsBox>
-							<ItemStatsText>무기분류</ItemStatsText>
-							<ItemStatsText>{getSubCategoryName(item.subCategory)} ({equipmentCategoryName[item.category]})</ItemStatsText>
+							<ItemStatsText>요구레벨</ItemStatsText>
+							<ItemStatsText>{item.level}</ItemStatsText>
 						</ItemStatsBox>
-						:
-						<ItemStatsBox>
-							<ItemStatsText>장비분류</ItemStatsText>
-							<ItemStatsText>
-								{
-									isSubWeapon(item.category)
-										? `보조무기 (${getSubCategoryName(item.subCategory)})`
-										: getSubCategoryName(item.subCategory)
-								}
-							</ItemStatsText>
-						</ItemStatsBox>
-				}
-				<ItemStatsBox>
-					<ItemStatsText>요구레벨</ItemStatsText>
-					<ItemStatsText>{item.level}</ItemStatsText>
-				</ItemStatsBox>
-				{
-					item.stats.map(stat =>
-						<ItemStatsBox key={stat.key}>
-							<ItemStatsText>{equipmentOptionName[stat.key]}</ItemStatsText>
-							<ItemStatsText>{stat.value} {stat.key === 'IGNORE_DEFENSE' || stat.key === 'BOSS_DAMAGE' || stat.key === 'DAMAGE' ? '%' : ''}</ItemStatsText>
-						</ItemStatsBox>
-					)
-				}
+						{
+							item.stats.map(stat =>
+								<ItemStatsBox key={stat.key}>
+									<ItemStatsText>{equipmentOptionName[stat.key]}</ItemStatsText>
+									<ItemStatsText>{stat.value} {stat.key === 'IGNORE_DEFENSE' || stat.key === 'BOSS_DAMAGE' || stat.key === 'DAMAGE' ? '%' : ''}</ItemStatsText>
+								</ItemStatsBox>
+							)
+						}
+					</div>
+					{
+						item.isAvailableStarForce
+							?
+							<></>
+							:
+							<Alert
+								message="스타포스 강화 할 수 없는 아이템 입니다."
+								type="warning"
+								showIcon
+								style={{ marginTop: '5rem' }}
+							/>
+					}
+				</Spin>
 			</div>
-			{
-				item.isAvailableStarForce
-					?
-					<></>
-					:
-					<Alert
-						message="스타포스 강화 할 수 없는 아이템 입니다."
-						type="warning"
-						showIcon
-						style={{ marginTop: '5rem' }}
-					/>
-			}
 		</FlexBox>
 	)
 }

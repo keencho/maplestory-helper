@@ -1,5 +1,5 @@
 import PageTitle from '../component/common/PageTitle';
-import {Button, Checkbox, Input, InputNumber, Radio, Spin, Typography} from 'antd';
+import {Button, Checkbox, Input, InputNumber, Radio, Spin, Typography, Result, Alert, Col, Row} from 'antd';
 import {CustomCol, CustomRow} from '../component/common/element/CustomRowCol';
 import React, {useEffect, useReducer, useRef, useState} from 'react';
 import {FlexBox} from '../component/common/element/FlexBox';
@@ -20,6 +20,13 @@ import NotificationUtil from '../../util/notification.util';
 
 const { Title } = Typography;
 
+const LoadingBox = styled(FlexBox)`
+	width: 100%;
+	height: 100%;
+	align-items: center;
+	justify-content: center;
+`
+
 export const EquipmentEnhancementSimulatorWrapper = () => {
 	
 	const [items, errors, isLoading] = useMapleFetch({
@@ -31,24 +38,49 @@ export const EquipmentEnhancementSimulatorWrapper = () => {
 			}, new Set)
 	});
 	
-	if (items.length === 0) {
+	if (isLoading) {
+		return (
+			<LoadingBox>
+				<Spin size={'large'} tip={'로딩중 입니다...'} />
+			</LoadingBox>
+		)
+	}
+	
+	if (errors) {
+		return (
+			<LoadingBox>
+				<Result
+					status="500"
+					title="에러"
+					subTitle="데이터를 불러오는데 실패하였습니다."
+					extra={<Button type="primary" onClick={() => location.reload()}>새로고침</Button>}
+				/>
+			</LoadingBox>
+		)
+	}
+	
+	if (items.length == 0) {
 		return <></>
 	}
 	
 	return <EquipmentEnhancementSimulator items={items} />
 }
 
-const eventOptions = [
-	{ label: '10성 이하 1+1 강화', value: 0 },
-	{ label: '강화비용 30% 할인', value: 1 },
-	{ label: '5, 10, 15성에서 강화시 성공확률 100%', value: 2 },
+export enum StarForceEventType {
+	ONE_PLUS_ONE, DISCOUNT_30, PERCENTAGE_100
+}
+
+const eventOptions: { label: string, value: StarForceEventType }[] = [
+	{ label: '10성 이하 1+1 강화', value: StarForceEventType.ONE_PLUS_ONE },
+	{ label: '강화비용 30% 할인', value: StarForceEventType.DISCOUNT_30 },
+	{ label: '5, 10, 15성에서 강화시 성공확률 100%', value: StarForceEventType.PERCENTAGE_100 },
 ];
 
 export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	
 	const theme = useRecoilValue(ThemeAtom);
 	
-	const [event, setEvent] = useState<number[]>([]);
+	const [event, setEvent] = useState<StarForceEventType[]>([]);
 	const [searchSort, setSearchSort] = useState<'NAME' | 'LEVEL'>('LEVEL');
 	const [autoStarForce, setAutoStarForce] = useState<boolean>(false);
 	const [autoStarForceRunning, setAutoStarForceRunning] = useState<boolean>(false);
@@ -130,7 +162,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	const onClickStarForce = () => {
 		if (autoStarForce) {
 			if (item!.starForce >= autoStarForceTargetStar) {
-				NotificationUtil.fire('error', '자동강화 불가', '목표 스타포스를 조정하거나 아이템을 초기화 해 주세요.', 5)
+				NotificationUtil.fire('error', '자동강화 불가', '목표 스타포스를 조정하거나 아이템을 초기화 해 주세요.')
 				return;
 			}
 			setAutoStarForceRunning(true);
@@ -145,13 +177,18 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 			return;
 		}
 		
-		const info = getStarForceUpgradeInfo(item!);
+		const info = getStarForceUpgradeInfo(item!, event);
 		
 		const rand = Math.floor(Math.random() * 100);
 		
 		// 성공
 		if (item!.starForceFailCount === 2 || rand <= info.successPercentage) {
-			setItem((pv) => ({ ...pv!, starForce: pv!.starForce + 1, starForceFailCount: 0, usedMeso: pv!.usedMeso + info.cost }))
+			setItem((pv) => ({
+				...pv!,
+				starForce: pv!.starForce + (event.some(ev => ev === StarForceEventType.ONE_PLUS_ONE) && item!.starForce <= 10 && !item!.isSuperiorItem ? 2 : 1),
+				starForceFailCount: 0,
+				usedMeso: pv!.usedMeso + info.cost
+			}))
 			return;
 		}
 		
@@ -243,91 +280,102 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 			{/*/>*/}
 			<CustomRow gutter={0}>
 				
+				{/* 왼쪽 */}
 				<CustomCol span={16}>
-					
-					<div style={{ marginBottom: '1rem' }}>
-						<Title level={5}>스타포스 옵션 세팅</Title>
-					
-						<div style={{ marginBottom: '.25rem' }}>스페어(노작) 가격</div>
-						<InputNumber
-							value={itemSpairMeso}
-							formatter={value => numberComma(Number(value!))}
-							parser={value => Number(value!.replaceAll(',', ''))}
-							onChange={(value) => setItemSpairMeso(value ?? 0)}
-							style={{ marginBottom: '1rem', width: '100%' }}
-							disabled={autoStarForceRunning}
-						/>
+					<CustomRow gutter={0}>
 						
-						<div style={{ marginBottom: '.25rem' }}>1억당 현금</div>
-						<InputNumber
-							value={mesoWon}
-							formatter={value => numberComma(Number(value!))}
-							parser={value => Number(value!.replaceAll(',', ''))}
-							onChange={(value) => setMesoWon(value ?? 0)}
-							style={{ marginBottom: '1rem', width: '100%' }}
-							disabled={autoStarForceRunning}
-						/>
-					</div>
+						{/* 왼쪽 위 - 스타포스 */}
+						<CustomCol span={24} height={'50%'}>
+							<Title level={4}>스타포스</Title>
+							<FlexBox width={'100%'} gap={'1rem'}>
+								<FlexBox flex={1} flexDirection={'column'}>
+									<Title level={5}>이벤트</Title>
+									<Checkbox.Group
+										options={eventOptions}
+										style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}
+										value={event}
+										onChange={(e) => setEvent(e as StarForceEventType[]) }
+										disabled={autoStarForceRunning}
+									/>
+								</FlexBox>
+								<FlexBox flex={1} flexDirection={'column'}>
+									<Title level={5}>스페어(노작) 메소</Title>
+									<InputNumber
+										value={itemSpairMeso}
+										formatter={value => numberComma(Number(value!))}
+										parser={value => Number(value!.replaceAll(',', ''))}
+										onChange={(value) => setItemSpairMeso(value ?? 0)}
+										style={{ marginBottom: '1rem', width: '100%' }}
+										disabled={autoStarForceRunning}
+									/>
+									<Title level={5}>1억당 현금</Title>
+									<InputNumber
+										value={mesoWon}
+										formatter={value => numberComma(Number(value!))}
+										parser={value => Number(value!.replaceAll(',', ''))}
+										onChange={(value) => setMesoWon(value ?? 0)}
+										style={{ marginBottom: '1rem', width: '100%' }}
+										disabled={autoStarForceRunning}
+									/>
+								</FlexBox>
+								<FlexBox flex={1} flexDirection={'column'}>
+									<Title level={5}>목표 스타포스</Title>
+									<InputNumber
+										value={autoStarForceTargetStar}
+										onChange={(value) => setAutoStarForceTargetStar(value ?? 0)}
+										style={{ marginBottom: '1rem', width: '100%' }}
+										min={1}
+										max={25}
+										disabled={autoStarForceRunning}
+									/>
+									
+									<Title level={5}>자동강화</Title>
+									<Checkbox
+										onChange={(e) => setAutoStarForce(e.target.checked)}
+										checked={autoStarForce}
+										disabled={autoStarForceRunning}
+									>
+										활성화
+									</Checkbox>
+								</FlexBox>
+							</FlexBox>
+							
+							<FlexBox gap={'1rem'} justifyContent={'center'} margin={'auto 0 0 0'}>
+								<FlexBox width={'50%'} gap={'1rem'}>
+									<Button type={'primary'} disabled={!(item && item.isAvailableStarForce && !autoStarForceRunning)} style={{ marginTop: 'auto', flexGrow: 1 }} onClick={onClickStarForce}>
+										{
+											autoStarForceRunning
+												?
+												<>
+													{autoStarForceTargetStar}성 자동강화가 진행 중입니다.
+													<Spin style={{ marginLeft: '1rem', color: 'green' }} />
+												</>
+												:
+												item?.destroyed === true
+													? '아이템 복구'
+													: '스타포스 강화'
+										}
+									</Button>
+									{
+										autoStarForceRunning
+											?
+											<Button type={'primary'} disabled={!(item && item.isAvailableStarForce)} style={{ marginTop: 'auto', flexGrow: 1 }} onClick={stopAutoStarForceRunning}>
+												자동강화 멈추기
+											</Button>
+											:
+											<></>
+									}
+								</FlexBox>
+							</FlexBox>
+							
+						</CustomCol>
+						
+						{/* 왼쪽 아래 - 잠재, 환불 (?) */}
+						<CustomCol span={24} height={'50%'}>
+						</CustomCol>
+					</CustomRow>
 					
-					<div style={{ marginBottom: '1rem' }}>
-					
-						<Title level={5}>스타포스 이벤트</Title>
-						<Checkbox.Group
-							options={eventOptions}
-							style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}
-							value={event}
-							onChange={(e) => setEvent(e as number[]) }
-							disabled={autoStarForceRunning}
-						/>
-					</div>
-					
-					<Title level={5}>자동강화</Title>
-					
-					<div style={{ marginBottom: '.25rem' }}>목표 스타포스</div>
-					<InputNumber
-						value={autoStarForceTargetStar}
-						onChange={(value) => setAutoStarForceTargetStar(value ?? 0)}
-						style={{ marginBottom: '1rem', width: '100%' }}
-						min={1}
-						max={25}
-						disabled={autoStarForceRunning}
-					/>
-					
-					<Checkbox
-						onChange={(e) => setAutoStarForce(e.target.checked)}
-						checked={autoStarForce}
-						disabled={autoStarForceRunning}
-					>
-						활성화
-					</Checkbox>
-					
-					<FlexBox margin={'auto 0 0 0'} gap={'1rem'} justifyContent={'center'}>
-						<Button type={'primary'} disabled={!(item && item.isAvailableStarForce && !autoStarForceRunning)} style={{ marginTop: 'auto', flexGrow: 1 }} onClick={onClickStarForce}>
-							{
-								autoStarForceRunning
-								?
-									<>
-										자동강화가 진행 중입니다.
-										<Spin style={{ marginLeft: '1rem', color: 'green' }} />
-									</>
-								:
-									item?.destroyed === true
-										? '아이템 복구'
-										: '스타포스 강화'
-							}
-						</Button>
-						{
-							autoStarForceRunning
-							?
-								<Button type={'primary'} disabled={!(item && item.isAvailableStarForce)} style={{ marginTop: 'auto', flexGrow: 1 }} onClick={stopAutoStarForceRunning}>
-									자동강화 멈추기
-								</Button>
-							:
-								<></>
-								
-						}
-					</FlexBox>
-					
+					{/* 아이템 검색 박스 */}
 					{
 						showSearchItemBox
 						?
@@ -378,6 +426,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 					
 				</CustomCol>
 				
+				{/* 오른쪽 */}
 				<CustomCol span={8}>
 					<FlexBox alignItems={'center'} justifyContent={'center'} flex={1} flexDirection={'column'}>
 						{
@@ -385,7 +434,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 							?
 								<Spin tip="아이템을 불러오는 중입니다..." size={'large'} />
 							:
-								<Item item={item} />
+								<Item item={item} isAutoRunning={autoStarForceRunning} event={event} />
 						}
 					</FlexBox>
 				</CustomCol>
