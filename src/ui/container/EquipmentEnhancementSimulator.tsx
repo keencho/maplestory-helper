@@ -1,9 +1,8 @@
 import PageTitle from '../component/common/PageTitle';
-import {Button, Checkbox, Input, InputNumber, Radio, Spin, Typography, Result, Alert, Col, Row} from 'antd';
+import {Button, Checkbox, Input, InputNumber, Radio, Result, Spin, Typography} from 'antd';
 import {CustomCol, CustomRow} from '../component/common/element/CustomRowCol';
-import React, {useEffect, useReducer, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {FlexBox} from '../component/common/element/FlexBox';
-// import MaplestoryIOApi from '../../api/maplestory-io.api';
 import useMapleFetch from '../../hooks/useMapleFetch';
 import {getAllItems, getItem, getItemIcon} from '../../api/maplestory-io.api';
 import styled from 'styled-components';
@@ -17,6 +16,7 @@ import {Equipment, StarForceEventType} from '../../model/equipment.model';
 import Item from '../component/equipment-enhancement-simulator/Item';
 import {numberComma} from '../../util/common.util';
 import NotificationUtil from '../../util/notification.util';
+import it from 'node:test';
 
 const { Title } = Typography;
 
@@ -118,8 +118,8 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 		setSearchedItem(filteredData.slice(0, searchItemCount));
 	}
 	
-	const initItem = () => {
-		setItem({
+	const initBasicItem = (): Equipment => {
+		return {
 			itemName: selectedFetchItem.description.name,
 			level: selectedFetchItem.metaInfo.reqLevel,
 			base64Icon: `data:image/png;base64,${selectedFetchItem.metaInfo.iconRaw}`,
@@ -134,7 +134,11 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 			destroyedCount: 0,
 			spairMeso: itemSpairMeso,
 			mesoWon: mesoWon
-		})
+		}
+	}
+	
+	const initItem = () => {
+		setItem(initBasicItem())
 	}
 	
 	const resetItem = () => {
@@ -163,45 +167,88 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 			}
 			setAutoStarForceRunning(true);
 		} else {
-			doStarForce();
+			doStarForceOnCurrentItem();
 		}
 	}
 	
-	const doStarForce = () => {
-		if (item?.destroyed === true) {
-			setItem((pv) => ({ ...pv!, starForce: item.isSuperiorItem ? 0 : 12, starForceFailCount: 0, usedMeso: pv!.usedMeso + pv!.spairMeso, destroyed: false }))
-			return;
+	const doStarForceSimulating = () => {
+		const promise = new Promise(resolve => {
+			setTimeout(() => {
+				let count = 0;
+				
+				console.time('time');
+				for (let i = 0; i <= 10000000000; i ++) {
+					count ++;
+				}
+				
+				console.timeEnd('time');
+				resolve('done!!!');
+			}, 0)
+		});
+		
+		promise.then(console.log)
+	}
+	
+	const controlEquipment = (item: Equipment, action: 'REPAIR' | 'SUCCESS' | 'DESTROY' | 'FAIL'): Equipment => {
+		const map = new Map<keyof Equipment, any>();
+		const info = getStarForceUpgradeInfo(item, event);
+		
+		switch (action) {
+			case 'REPAIR':
+				map.set('starForce', item.isSuperiorItem ? 0 : 12);
+				map.set('starForceFailCount', 0);
+				map.set('usedMeso', item.usedMeso + item.spairMeso);
+				map.set('destroyed', false);
+				break;
+			case 'SUCCESS':
+				
+				map.set('starForce', item.starForce + (event.some(ev => ev === StarForceEventType.ONE_PLUS_ONE) && item.starForce <= 10 && !item.isSuperiorItem ? 2 : 1));
+				map.set('starForceFailCount', 0);
+				map.set('usedMeso', item.usedMeso + info.cost);
+				map.set('destroyed', false);
+				break;
+			case 'DESTROY':
+				map.set('starForce', 0);
+				map.set('starForceFailCount', 0);
+				map.set('usedMeso', item.usedMeso + info.cost);
+				map.set('destroyedCount', item.destroyedCount + 1);
+				map.set('destroyed', true);
+				break;
+			case 'FAIL':
+				if (isStarForceDown(item)) {
+					map.set('starForce', item.starForce - 1);
+					map.set('starForceFailCount', (item.starForceFailCount ?? 0) + 1);
+				}
+				map.set('usedMeso', item.usedMeso + info.cost);
+				
+				break;
+		}
+		
+		map.forEach((value, key) => item[key] = value as never);
+		
+		return { ...item };
+	}
+	
+	const doStarForceAndGetResult = (item: Equipment): 'REPAIR' | 'SUCCESS' | 'DESTROY' | 'FAIL' => {
+		if (item.destroyed === true) {
+			return 'REPAIR';
 		}
 		
 		const info = getStarForceUpgradeInfo(item!, event);
 		
-		const rand = Math.floor(Math.random() * 100);
-		
-		// 성공
-		if (item!.starForceFailCount === 2 || rand <= info.successPercentage) {
-			setItem((pv) => ({
-				...pv!,
-				starForce: pv!.starForce + (event.some(ev => ev === StarForceEventType.ONE_PLUS_ONE) && item!.starForce <= 10 && !item!.isSuperiorItem ? 2 : 1),
-				starForceFailCount: 0,
-				usedMeso: pv!.usedMeso + info.cost
-			}))
-			return;
+		if (item!.starForceFailCount === 2 || Math.floor(Math.random() * 100) <= info.successPercentage) {
+			return 'SUCCESS'
 		}
 		
-		// 파괴
 		if (Math.floor(Math.random() * 100) <= info.destroyPercentage) {
-			setItem((pv) => ({ ...pv!, starForce: 0, starForceFailCount: 0, usedMeso: pv!.usedMeso + info.cost, destroyedCount: pv!.destroyedCount + 1, destroyed: true }))
-			return;
+			return 'DESTROY';
 		}
 		
-		// 실패
-		setItem((pv) => {
-			if (isStarForceDown(pv!)) {
-				return { ...pv!, starForce:  pv!.starForce - 1, starForceFailCount: (pv!.starForceFailCount ?? 0) + 1, usedMeso: pv!.usedMeso + info.cost }
-			} else {
-				return { ...pv!, starForce: pv!.starForce, starForceFailCount: pv!.starForceFailCount, usedMeso: pv!.usedMeso + info.cost }
-			}
-		})
+		return 'FAIL';
+	}
+	
+	const doStarForceOnCurrentItem = () => {
+		setItem(pv => controlEquipment(pv!, doStarForceAndGetResult(pv!)));
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -239,7 +286,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	useEffect(() => {
 		if (item && autoStarForceRunning) {
 			if (item.starForce < autoStarForceTargetStar) {
-				autoStarForceRef.current = setTimeout(doStarForce, 25);
+				autoStarForceRef.current = setTimeout(doStarForceOnCurrentItem, 25);
 			} else {
 				NotificationUtil.fire('success', '강화 완료', `${autoStarForceTargetStar}성 강화가 완료되었습니다.`)
 				stopAutoStarForceRunning();
@@ -262,8 +309,6 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 					<FlexBox alignItems={'center'} gap={'.5rem'}>
 						<Button type={'primary'} disabled={autoStarForceRunning} onClick={() => setShowSearchItemBox(!showSearchItemBox)}>아이템 검색</Button>
 						<Button type={'primary'} onClick={resetItem}>아이템 초기화</Button>
-						{/*<CommonStyledSpan fontSize={'14px'} fontWeight={'bold'}>아이템 검색</CommonStyledSpan>*/}
-						{/*<Switch checked={showSearchItemBox} onChange={setShowSearchItemBox} />*/}
 					</FlexBox>
 				}
 			/>
@@ -338,29 +383,24 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 							
 							<FlexBox gap={'1rem'} justifyContent={'center'} margin={'auto 0 0 0'}>
 								<FlexBox width={'50%'} gap={'1rem'}>
-									<Button type={'primary'} disabled={!(item && item.isAvailableStarForce && !autoStarForceRunning)} style={{ marginTop: 'auto', flexGrow: 1 }} onClick={onClickStarForce}>
-										{
-											autoStarForceRunning
-												?
-												<>
-													{autoStarForceTargetStar}성 자동강화가 진행 중입니다.
-													<Spin style={{ marginLeft: '1rem', color: 'green' }} />
-												</>
-												:
-												item?.destroyed === true
-													? '아이템 복구'
-													: '스타포스 강화'
-										}
-									</Button>
 									{
 										autoStarForceRunning
 											?
-											<Button type={'primary'} disabled={!(item && item.isAvailableStarForce)} style={{ marginTop: 'auto', flexGrow: 1 }} onClick={stopAutoStarForceRunning}>
+											<Button type={'primary'} disabled={!(item && item.isAvailableStarForce)} style={{ flex: 1 }} onClick={stopAutoStarForceRunning}>
 												자동강화 멈추기
 											</Button>
 											:
-											<></>
+											<Button type={'primary'} disabled={!(item && item.isAvailableStarForce && !autoStarForceRunning)} style={{ flex: 1 }} onClick={onClickStarForce}>
+												{
+													item?.destroyed === true
+														? '복구'
+														: '강화'
+												}
+											</Button>
 									}
+									<Button type={'primary'} style={{ flex: 1 }} onClick={doStarForceSimulating}>
+										시뮬레이션
+									</Button>
 								</FlexBox>
 							</FlexBox>
 							
