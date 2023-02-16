@@ -11,12 +11,13 @@ import {ThemeAtom} from '../../recoil/theme.atom';
 import {BACKGROUND, HOVER} from '../../model/color.model';
 import {cacheName, region, version} from '../../model/maplestory-io.model';
 import AsyncCacheImage from '../component/common/element/AsyncCacheImage';
-import {buildStats, getStarForceUpgradeInfo, isAvailableStarForce, isStarForceDown} from '../../util/equipment.util';
+import {buildStats, isAvailableStarForce} from '../../util/equipment.util';
 import {Equipment, StarForceEventType} from '../../model/equipment.model';
 import Item from '../component/equipment-enhancement-simulator/Item';
 import {numberComma} from '../../util/common.util';
 import NotificationUtil from '../../util/notification.util';
-import it from 'node:test';
+import {starForceSimulationWorker} from '../../workers/starforceSimulationWorker'
+import {doStarForce} from '../../util/starforce-util';
 
 const { Title } = Typography;
 
@@ -82,6 +83,9 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	const [autoStarForceRunning, setAutoStarForceRunning] = useState<boolean>(false);
 	const [autoStarForceTargetStar, setAutoStarForceTargetStar] = useState<number>(22);
 	const autoStarForceRef = useRef<NodeJS.Timeout | null>(null);
+	
+	const [starForceSimulationRunning, setStarForceSimulationRunning] = useState<boolean>(false);
+	const [starForceSimulationResult, setStarForceSimulationResult] = useState<any[]>([]);
 	
 	const defaultSearchItemCount = 20;
 	const [showSearchItemBox, setShowSearchItemBox] = useState<boolean>(false);
@@ -172,83 +176,24 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	}
 	
 	const doStarForceSimulating = () => {
-		const promise = new Promise(resolve => {
-			setTimeout(() => {
-				let count = 0;
-				
-				console.time('time');
-				for (let i = 0; i <= 10000000000; i ++) {
-					count ++;
-				}
-				
-				console.timeEnd('time');
-				resolve('done!!!');
-			}, 0)
-		});
-		
-		promise.then(console.log)
+		setStarForceSimulationRunning(true);
+		starForceSimulationWorker.postMessage(initBasicItem())
 	}
 	
-	const controlEquipment = (item: Equipment, action: 'REPAIR' | 'SUCCESS' | 'DESTROY' | 'FAIL'): Equipment => {
-		const map = new Map<keyof Equipment, any>();
-		const info = getStarForceUpgradeInfo(item, event);
-		
-		switch (action) {
-			case 'REPAIR':
-				map.set('starForce', item.isSuperiorItem ? 0 : 12);
-				map.set('starForceFailCount', 0);
-				map.set('usedMeso', item.usedMeso + item.spairMeso);
-				map.set('destroyed', false);
-				break;
-			case 'SUCCESS':
-				
-				map.set('starForce', item.starForce + (event.some(ev => ev === StarForceEventType.ONE_PLUS_ONE) && item.starForce <= 10 && !item.isSuperiorItem ? 2 : 1));
-				map.set('starForceFailCount', 0);
-				map.set('usedMeso', item.usedMeso + info.cost);
-				map.set('destroyed', false);
-				break;
-			case 'DESTROY':
-				map.set('starForce', 0);
-				map.set('starForceFailCount', 0);
-				map.set('usedMeso', item.usedMeso + info.cost);
-				map.set('destroyedCount', item.destroyedCount + 1);
-				map.set('destroyed', true);
-				break;
-			case 'FAIL':
-				if (isStarForceDown(item)) {
-					map.set('starForce', item.starForce - 1);
-					map.set('starForceFailCount', (item.starForceFailCount ?? 0) + 1);
-				}
-				map.set('usedMeso', item.usedMeso + info.cost);
-				
-				break;
-		}
-		
-		map.forEach((value, key) => item[key] = value as never);
-		
-		return { ...item };
-	}
+	useEffect(() => {
+		starForceSimulationWorker.onmessage = ({ data }: any) => {
+			setStarForceSimulationResult(pv => [ ...pv, data ]);
+		};
+	}, [])
 	
-	const doStarForceAndGetResult = (item: Equipment): 'REPAIR' | 'SUCCESS' | 'DESTROY' | 'FAIL' => {
-		if (item.destroyed === true) {
-			return 'REPAIR';
+	useEffect(() => {
+		if (starForceSimulationResult.length === 5000) {
+			console.log(starForceSimulationResult)
 		}
-		
-		const info = getStarForceUpgradeInfo(item!, event);
-		
-		if (item!.starForceFailCount === 2 || Math.floor(Math.random() * 100) <= info.successPercentage) {
-			return 'SUCCESS'
-		}
-		
-		if (Math.floor(Math.random() * 100) <= info.destroyPercentage) {
-			return 'DESTROY';
-		}
-		
-		return 'FAIL';
-	}
+	}, [starForceSimulationResult])
 	
 	const doStarForceOnCurrentItem = () => {
-		setItem(pv => controlEquipment(pv!, doStarForceAndGetResult(pv!)));
+		setItem(pv => doStarForce(item!, event));
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -399,7 +344,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 											</Button>
 									}
 									<Button type={'primary'} style={{ flex: 1 }} onClick={doStarForceSimulating}>
-										시뮬레이션
+										시뮬레이션 { starForceSimulationRunning ? <>{Math.floor(starForceSimulationResult.length / 50)}%</> : <></> }
 									</Button>
 								</FlexBox>
 							</FlexBox>
