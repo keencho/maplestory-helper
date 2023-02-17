@@ -41,3 +41,49 @@ export const doStarForce = (item: Equipment, event: StarForceEventType[]): Equip
 	
 	return { ...item };
 }
+
+export const doSimpleStarForce = (item: Equipment, event: StarForceEventType[]): Equipment => {
+	const info = getStarForceUpgradeInfo(item, event);
+	
+	// 복구
+	if (item.destroyed === true) {
+		item.starForce = item.isSuperiorItem ? 0 : 12;
+		item.starForceFailCount = 0;
+		item.usedMeso = item.usedMeso + item.spairMeso;
+		item.destroyed = false;
+		
+		return item;
+	}
+	
+	// 성공
+	if (item!.starForceFailCount === 2 || Math.floor(Math.random() * 100) <= info.successPercentage) {
+		item.starForce = item.starForce + (event.some(ev => ev === StarForceEventType.ONE_PLUS_ONE) && item.starForce <= 10 && !item.isSuperiorItem ? 2 : 1);
+		item.starForceFailCount = 0;
+		item.usedMeso = item.usedMeso + info.cost;
+		item.destroyed = false;
+		
+		return item;
+	}
+	
+	// 파괴
+	if (Math.floor(Math.random() * 100) <= info.destroyPercentage) {
+		
+		item.starForce = 0;
+		item.starForceFailCount = 0;
+		item.usedMeso = item.usedMeso + info.cost;
+		item.destroyedCount = item.destroyedCount + 1;
+		item.destroyed = true;
+		
+		return item;
+	}
+	
+	// 실패
+	
+	if (isStarForceDown(item)) {
+		item.starForce = item.starForce - 1;
+		item.starForceFailCount = (item.starForceFailCount ?? 0) + 1;
+		item.usedMeso = item.usedMeso + info.cost;
+	}
+	
+	return item;
+}

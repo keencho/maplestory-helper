@@ -1,5 +1,5 @@
 import PageTitle from '../component/common/PageTitle';
-import {Button, Checkbox, Input, InputNumber, Radio, Result, Spin, Typography} from 'antd';
+import {Button, Checkbox, Input, InputNumber, Radio, Result, Spin, Switch, Typography} from 'antd';
 import {CustomCol, CustomRow} from '../component/common/element/CustomRowCol';
 import React, {useEffect, useRef, useState} from 'react';
 import {FlexBox} from '../component/common/element/FlexBox';
@@ -18,6 +18,7 @@ import {numberComma} from '../../util/common.util';
 import NotificationUtil from '../../util/notification.util';
 import {starForceSimulationWorker} from '../../workers/starforceSimulationWorker'
 import {doStarForce} from '../../util/starforce-util';
+import Simulation from '../component/equipment-enhancement-simulator/Simulation';
 
 const { Title } = Typography;
 
@@ -76,7 +77,9 @@ const eventOptions: { label: string, value: StarForceEventType }[] = [
 export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	
 	const theme = useRecoilValue(ThemeAtom);
+	const starForceSimulationNumber = 5000;
 	
+	const [rightComponentType, setRightComponentType] = useState<'ITEM' | 'STARFORCE_SIMULATION'>('ITEM');
 	const [event, setEvent] = useState<StarForceEventType[]>([]);
 	const [searchSort, setSearchSort] = useState<'NAME' | 'LEVEL'>('LEVEL');
 	const [autoStarForce, setAutoStarForce] = useState<boolean>(false);
@@ -85,7 +88,8 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	const autoStarForceRef = useRef<NodeJS.Timeout | null>(null);
 	
 	const [starForceSimulationRunning, setStarForceSimulationRunning] = useState<boolean>(false);
-	const [starForceSimulationResult, setStarForceSimulationResult] = useState<any[]>([]);
+	const [starForceSimulationPercentage, setStarForceSimulationPercentage] = useState<number>(0);
+	const [starForceSimulationResult, setStarForceSimulationResult] = useState<Equipment[]>([]);
 	
 	const defaultSearchItemCount = 20;
 	const [showSearchItemBox, setShowSearchItemBox] = useState<boolean>(false);
@@ -177,26 +181,16 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	
 	const doStarForceSimulating = () => {
 		setStarForceSimulationRunning(true);
-		starForceSimulationWorker.postMessage(initBasicItem())
+		setStarForceSimulationPercentage(0);
+		setRightComponentType('STARFORCE_SIMULATION');
+		starForceSimulationWorker.postMessage({ item: initBasicItem(), simulationNumber: starForceSimulationNumber, targetStarForce: autoStarForceTargetStar })
 	}
-	
-	useEffect(() => {
-		starForceSimulationWorker.onmessage = ({ data }: any) => {
-			setStarForceSimulationResult(pv => [ ...pv, data ]);
-		};
-	}, [])
-	
-	useEffect(() => {
-		if (starForceSimulationResult.length === 5000) {
-			console.log(starForceSimulationResult)
-		}
-	}, [starForceSimulationResult])
 	
 	const doStarForceOnCurrentItem = () => {
-		setItem(pv => doStarForce(item!, event));
+		setItem(pv => doStarForce(pv!, event));
 	}
 	
-	///////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////
 	
 	useEffect(() => {
 		if (defaultSearchItemCount === searchItemCount) {
@@ -240,6 +234,19 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	}, [autoStarForceRunning, item])
 	
 	useEffect(() => {
+		
+		starForceSimulationWorker.onmessage = ({ data }: { data: Equipment[] | number }) => {
+			// 시뮬레이션 끝났음을 의미
+			if (Array.isArray(data)) {
+				setStarForceSimulationRunning(false);
+				setStarForceSimulationPercentage(0);
+				setStarForceSimulationResult(data);
+			} else {
+				setStarForceSimulationPercentage(data);
+			}
+			
+		};
+		
 		return () => {
 			stopAutoStarForceRunning();
 		}
@@ -254,6 +261,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 					<FlexBox alignItems={'center'} gap={'.5rem'}>
 						<Button type={'primary'} disabled={autoStarForceRunning} onClick={() => setShowSearchItemBox(!showSearchItemBox)}>아이템 검색</Button>
 						<Button type={'primary'} onClick={resetItem}>아이템 초기화</Button>
+						<Switch checked={rightComponentType === 'ITEM'} onChange={(checked) => {setRightComponentType(checked ? 'ITEM' : 'STARFORCE_SIMULATION')}} />
 					</FlexBox>
 				}
 			/>
@@ -281,7 +289,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 										style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}
 										value={event}
 										onChange={(e) => setEvent(e as StarForceEventType[]) }
-										disabled={autoStarForceRunning}
+										disabled={autoStarForceRunning || starForceSimulationRunning}
 									/>
 								</FlexBox>
 								<FlexBox flex={1} flexDirection={'column'}>
@@ -292,7 +300,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 										parser={value => Number(value!.replaceAll(',', ''))}
 										onChange={(value) => setItemSpairMeso(value ?? 0)}
 										style={{ marginBottom: '1rem', width: '100%' }}
-										disabled={autoStarForceRunning}
+										disabled={autoStarForceRunning || starForceSimulationRunning}
 									/>
 									<Title level={5}>1억당 현금</Title>
 									<InputNumber
@@ -301,7 +309,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 										parser={value => Number(value!.replaceAll(',', ''))}
 										onChange={(value) => setMesoWon(value ?? 0)}
 										style={{ marginBottom: '1rem', width: '100%' }}
-										disabled={autoStarForceRunning}
+										disabled={autoStarForceRunning || starForceSimulationRunning}
 									/>
 								</FlexBox>
 								<FlexBox flex={1} flexDirection={'column'}>
@@ -312,14 +320,14 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 										style={{ marginBottom: '1rem', width: '100%' }}
 										min={1}
 										max={25}
-										disabled={autoStarForceRunning}
+										disabled={autoStarForceRunning || starForceSimulationRunning}
 									/>
 									
 									<Title level={5}>자동강화</Title>
 									<Checkbox
 										onChange={(e) => setAutoStarForce(e.target.checked)}
 										checked={autoStarForce}
-										disabled={autoStarForceRunning}
+										disabled={autoStarForceRunning || starForceSimulationRunning}
 									>
 										활성화
 									</Checkbox>
@@ -328,23 +336,24 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 							
 							<FlexBox gap={'1rem'} justifyContent={'center'} margin={'auto 0 0 0'}>
 								<FlexBox width={'50%'} gap={'1rem'}>
-									{
-										autoStarForceRunning
+									
+									<Button type={'primary'} disabled={!(item && item.isAvailableStarForce) || starForceSimulationRunning} style={{ flex: 1 }} onClick={autoStarForceRunning ? stopAutoStarForceRunning : onClickStarForce}>
+										{
+											autoStarForceRunning
 											?
-											<Button type={'primary'} disabled={!(item && item.isAvailableStarForce)} style={{ flex: 1 }} onClick={stopAutoStarForceRunning}>
-												자동강화 멈추기
-											</Button>
+												'자동강화 멈추기'
 											:
-											<Button type={'primary'} disabled={!(item && item.isAvailableStarForce && !autoStarForceRunning)} style={{ flex: 1 }} onClick={onClickStarForce}>
-												{
-													item?.destroyed === true
-														? '복구'
-														: '강화'
-												}
-											</Button>
-									}
-									<Button type={'primary'} style={{ flex: 1 }} onClick={doStarForceSimulating}>
-										시뮬레이션 { starForceSimulationRunning ? <>{Math.floor(starForceSimulationResult.length / 50)}%</> : <></> }
+												item?.destroyed === true
+													? '복구'
+													: '강화'
+										}
+									</Button>
+									<Button type={'primary'} style={{ flex: 1 }} onClick={doStarForceSimulating} disabled={autoStarForceRunning}>
+										{
+											starForceSimulationRunning
+											? '시뮬레이션 멈추기'
+											: '시뮬레이션'
+										}
 									</Button>
 								</FlexBox>
 							</FlexBox>
@@ -353,6 +362,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 						
 						{/* 왼쪽 아래 - 잠재, 환불 (?) */}
 						<CustomCol span={24} height={'50%'}>
+						
 						</CustomCol>
 					</CustomRow>
 					
@@ -415,7 +425,19 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 							?
 								<Spin tip="아이템을 불러오는 중입니다..." size={'large'} />
 							:
-								<Item item={item} isAutoRunning={autoStarForceRunning} event={event} />
+								rightComponentType === 'ITEM'
+									?
+									<Item
+										item={item}
+										isAutoRunning={autoStarForceRunning}
+										event={event}
+									/>
+									:
+									<Simulation
+										simulationNumber={starForceSimulationNumber}
+										progressRate={starForceSimulationPercentage}
+										simulationResult={starForceSimulationResult}
+									/>
 						}
 					</FlexBox>
 				</CustomCol>
