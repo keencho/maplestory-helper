@@ -77,7 +77,7 @@ const eventOptions: { label: string, value: StarForceEventType }[] = [
 export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	
 	const theme = useRecoilValue(ThemeAtom);
-	const starForceSimulationNumber = 5000;
+	const starForceSimulationNumber = 10000;
 	
 	const [rightComponentType, setRightComponentType] = useState<'ITEM' | 'STARFORCE_SIMULATION'>('ITEM');
 	const [event, setEvent] = useState<StarForceEventType[]>([]);

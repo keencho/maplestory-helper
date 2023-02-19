@@ -6,6 +6,7 @@ import {Line} from '@ant-design/charts';
 import {LineConfig} from '@ant-design/plots/es/components/line';
 import {useRecoilValue} from 'recoil';
 import {ThemeAtom} from '../../../recoil/theme.atom';
+import {createHistogram} from '../../../util/clustering.util';
 
 interface Props {
 	simulationNumber: number
@@ -117,8 +118,12 @@ const Simulation = (props: Props) => {
 			totalDestroyedCount: totalDestroyedCount
 		})
 		
-		// 사용메소 오름차순 정렬
-		result = result.sort((a, b) => a.usedMeso - b.usedMeso);
+		const group = result.map(item => item.usedMeso);
+		
+		console.log(createHistogram(group));
+		// console.log(min, max);
+		//
+		// console.log(numberComma(min.usedMeso + max.usedMeso))
 	}
 	
 	useEffect(() => {
