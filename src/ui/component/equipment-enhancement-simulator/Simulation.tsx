@@ -133,7 +133,7 @@ const Simulation = (props: Props) => {
 				?
 					<>
 						<span style={{ fontSize: '16px' }}>
-							{numberComma(props.simulationNumber)}개의 {data.itemStarForce}성 <span style={{ fontWeight: 'bold' }}>{data.itemName}</span> 을(를) 제작하였습니다.
+							{numberComma(props.simulationNumber)}개의 {data.itemStarForce}성 <span style={{ fontWeight: 'bold' }}>{data.itemName}</span> 을(를) 제작 하였습니다.
 						</span>
 						<pre>
 							{JSON.stringify(data, undefined, 2)}

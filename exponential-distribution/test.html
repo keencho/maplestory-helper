@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Exponential Distribution</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.1/dist/chart.min.js"></script>
+  <script src="data.js"></script>
+</head>
+<body>
+  <canvas id="myChart" width="400" height="400"></canvas>
+  
+  <script>
+
+	const arr = data.map(it => it.usedMeso);
+
+
+    // Generate the input array with 1000 elements
+    // const arr = Array.from({length: 1000}, () => Math.random());
+
+    // Sort the array in ascending order
+    arr.sort((a, b) => a - b);
+
+    // Calculate the mean and standard deviation of the array
+    const mean = arr.reduce((acc, curr) => acc + curr, 0) / arr.length;
+    const sd = Math.sqrt(arr.reduce((acc, curr) => acc + (curr - mean) ** 2, 0) / arr.length);
+
+    // Calculate the parameters of the exponential distribution
+    const lambda = 1 / mean;
+
+    // Divide the range of the data into 10 bins
+    const numBins = 10;
+    const binSize = (arr[arr.length - 1] - arr[0]) / numBins;
+    const bins = Array.from({length: numBins}, (_, i) => ({
+      lowerBound: i * binSize,
+      upperBound: (i + 1) * binSize,
+      count: 0
+    }));
+
+    // Count the number of data points that fall into each bin
+    let i = 0;
+    let currBin = bins[i];
+    arr.forEach((x) => {
+      while (x > currBin.upperBound && i < numBins - 1) {
+        i++;
+        currBin = bins[i];
+      }
+      currBin.count++;
+    });
+
+    // Normalize the counts to get the bin heights
+    const binHeights = bins.map((bin) => bin.count / (arr.length * binSize));
+
+    // Draw the bar chart using Chart.js
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: bins.map((bin) => `${bin.lowerBound.toFixed(2)} - ${bin.upperBound.toFixed(2)}`),
+        datasets: [{
+          label: 'Exponential Distribution',
+          data: binHeights,
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        },
+        plugins: {
+          title: {
+            display: true,
+            text: `Exponential Distribution with Lambda = ${lambda.toFixed(2)}, Mean = ${mean.toFixed(2)}, SD = ${sd.toFixed(2)}`,
+            font: {
+              size: 16
+            }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

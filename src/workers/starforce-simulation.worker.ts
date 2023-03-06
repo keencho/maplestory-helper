@@ -5,8 +5,6 @@ self.onmessage = ({ data }: { data: { item: Equipment, simulationNumber: number,
     
     let count = 0;
     const result = [];
-    // console.log('event start!');
-    // console.time('time');
     while (count < data.simulationNumber) {
         let item = structuredClone(data.item);
 
@@ -17,7 +15,6 @@ self.onmessage = ({ data }: { data: { item: Equipment, simulationNumber: number,
         result.push(item);
         count ++;
     }
-    // console.timeEnd('time');
     
     self.postMessage(result);
 }
