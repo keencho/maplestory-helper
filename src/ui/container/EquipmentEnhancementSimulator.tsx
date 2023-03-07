@@ -252,24 +252,6 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 		}
 	}, []);
 	
-	useEffect(() => {
-		const map = starForceSimulationResult
-				.map(it => {
-				if (it) {
-					return {
-						destroyedCount: it.destroyedCount,
-						usedMeso: it.usedMeso
-					}
-				}
-				
-				return undefined;
-			})
-			.filter(it => it !== undefined)
-			.sort((a, b) => a?.usedMeso! - b?.usedMeso!)
-		
-		console.log(map);
-	}, [starForceSimulationResult])
-	
 	return (
 		<>
 			<PageTitle
