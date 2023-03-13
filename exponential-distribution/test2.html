@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Exponential Distribution</title>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.1/dist/chart.min.js"></script>
+	<script src="data.js"></script>
+</head>
+<body>
+<canvas id="myChart" width="400" height="400"></canvas>
+<script>
+    function numberToKorean(number){
+        var inputNumber  = number < 0 ? false : number;
+        var unitWords    = ['', '만', '억', '조', '경'];
+        var splitUnit    = 10000;
+        var splitCount   = unitWords.length;
+        var resultArray  = [];
+        var resultString = '';
+
+        for (var i = 0; i < splitCount; i++){
+            var unitResult = (inputNumber % Math.pow(splitUnit, i + 1)) / Math.pow(splitUnit, i);
+            unitResult = Math.floor(unitResult);
+            if (unitResult > 0){
+                resultArray[i] = unitResult;
+            }
+        }
+
+        for (var i = 0; i < resultArray.length; i++){
+            if(!resultArray[i]) continue;
+            resultString = String(resultArray[i]) + unitWords[i] + resultString;
+        }
+
+        return resultString;
+    }
+
+    console.log(numberToKorean(999999999))
+    console.log(numberToKorean(9999999))
+    console.log(numberToKorean(99999999))
+</script>
+</body>
+</html>

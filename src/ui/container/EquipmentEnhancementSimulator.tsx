@@ -437,6 +437,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 										simulationNumber={starForceSimulationNumber}
 										progressRate={starForceSimulationPercentage}
 										simulationResult={starForceSimulationResult}
+										running={starForceSimulationRunning}
 									/>
 						}
 					</FlexBox>

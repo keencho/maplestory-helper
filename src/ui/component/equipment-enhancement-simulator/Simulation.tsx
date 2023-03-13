@@ -1,81 +1,46 @@
-import {Spin} from 'antd';
+import {Spin, Typography} from 'antd';
 import {Equipment} from '../../../model/equipment.model';
-import {useEffect, useState} from 'react';
-import {numberComma} from '../../../util/common.util';
-import {Column, ColumnConfig, Line} from '@ant-design/charts';
-import {LineConfig} from '@ant-design/plots/es/components/line';
+import {Dispatch, SetStateAction, useEffect, useState} from 'react';
+import {numberComma, numberToKorean} from '../../../util/common.util';
+import {Column, ColumnConfig} from '@ant-design/charts';
 import {useRecoilValue} from 'recoil';
 import {ThemeAtom} from '../../../recoil/theme.atom';
+import styled from 'styled-components';
+
+const { Title } = Typography;
 
 interface Props {
 	simulationNumber: number
 	progressRate: number
 	simulationResult: Equipment[]
+	running: boolean
 }
-
-const chartData =  [
-	{
-		type: '家具家电',
-		sales: 38,
-	},
-	{
-		type: '粮油副食',
-		sales: 52,
-	},
-	{
-		type: '生鲜水果',
-		sales: 61,
-	},
-	{
-		type: '美容洗护',
-		sales: 145,
-	},
-	{
-		type: '母婴用品',
-		sales: 48,
-	},
-	{
-		type: '进口食品',
-		sales: 38,
-	},
-	{
-		type: '食品饮料',
-		sales: 38,
-	},
-	{
-		type: '家庭清洁',
-		sales: 38,
-	},
-];
 
 const buildConfig = (data: { x: string, y: number }[], theme: 'light' | 'dark'): ColumnConfig => {
 	return {
 		data,
 		xField: 'x',
 		yField: 'y',
-		label: {
-			// 可手动配置 label 数据标签位置
-			position: 'middle',
-			// 'top', 'bottom', 'middle',
-			// 配置样式
-			style: {
-				fill: '#FFFFFF',
-				opacity: 0.6,
-			},
-		},
 		xAxis: {
 			label: {
 				autoHide: true,
 				autoRotate: false,
+				formatter: (text) => {
+					return text.split('~')[1]
+				}
 			},
 		},
-		meta: {
-			type: {
-				alias: '类别',
-			},
-			sales: {
-				alias: '销售额',
-			},
+		yAxis: {
+			label: {
+				formatter: (text) => {
+					return numberComma(Number(text))
+				}
+			}
+		},
+		tooltip: {
+			formatter: (datum) => {
+				return { name: '횟수', value: numberComma(datum['y']) }
+			}
 		},
 		theme:
 			theme === 'light'
@@ -88,12 +53,49 @@ const Simulation = (props: Props) => {
 	
 	const theme = useRecoilValue(ThemeAtom);
 	
-	const [config, setConfig] = useState<ColumnConfig | undefined>(undefined);
-	const [data, setData] = useState<any>(undefined);
+	const [mesoConfig, setMesoConfig] = useState<ColumnConfig | undefined>(undefined);
+	const [destroyConfig, setDestroyConfig] = useState<ColumnConfig | undefined>(undefined);
+	
+	const draw = (params: (number | undefined)[], setter: Dispatch<SetStateAction<ColumnConfig | undefined>>) => {
+		// @ts-ignore
+		const arr: number[] = params
+			.filter(item => item !== undefined)
+			.sort((a, b) => a! - b!)
+		
+		if (arr.length === 0) {
+			return;
+		}
+		
+		// 나눌 범위
+		const numBins = 30;
+		
+		const binSize = (arr[arr.length - 1] - arr[0]) / numBins;
+		
+		const bins = Array.from({length: numBins}, (_, i) => ({
+			lowerBound: Math.floor(i * binSize),
+			upperBound: Math.floor((i + 1) * binSize),
+			// 최소 10개의 데이터를 가지고 있어야함.
+			count: 10
+		}));
+		
+		// Count the number of data points that fall into each bin
+		let i = 0;
+		let currBin = bins[i];
+		arr.forEach((x) => {
+			while (x > currBin.upperBound && i < numBins - 1) {
+				i++;
+				currBin = bins[i];
+			}
+			currBin.count++;
+		});
+		
+		const chartData: { x: string, y: number }[] = bins.map(dt =>({ x: `${numberToKorean(dt.lowerBound)} ~ ${numberToKorean(dt.upperBound)}`, y: dt.count }));
+		
+		setter(buildConfig(chartData, theme));
+	}
 	
 	const drawResult = () => {
 		let result = props.simulationResult;
-		const firstItem = result[0];
 		
 		let totalUsedMeso = 0;
 		let totalDestroyedCount = 0;
@@ -102,12 +104,29 @@ const Simulation = (props: Props) => {
 			totalDestroyedCount += item.destroyedCount;
 		})
 		
-		setData({
-			itemName: firstItem.itemName,
-			itemStarForce: firstItem.starForce,
-			totalUsedMeso: totalUsedMeso,
-			totalDestroyedCount: totalDestroyedCount
-		})
+		draw(
+			result
+				.map(it => {
+					if (it) {
+						return it.usedMeso
+					}
+					
+					return undefined;
+				}),
+			setMesoConfig
+		)
+		
+		draw(
+			result
+				.map(it => {
+					if (it) {
+						return it.destroyedCount
+					}
+					
+					return undefined;
+				}),
+			setDestroyConfig
+		)
 		
 		const arr: any[] = result
 			.map(it => {
@@ -124,23 +143,16 @@ const Simulation = (props: Props) => {
 			return;
 		}
 		
-		console.log(arr);
-		
-		// 평균
-		const mean = arr.reduce((acc, curr) => acc + curr, 0) / arr.length;
-		
-		// 표준편차
-		const sd = Math.sqrt(arr.reduce((acc, curr) => acc + (curr - mean) ** 2, 0) / arr.length);
-		
 		// 나눌 범위
-		const numBins = 50;
+		const numBins = 30;
 		
 		const binSize = (arr[arr.length - 1] - arr[0]) / numBins;
 		
 		const bins = Array.from({length: numBins}, (_, i) => ({
-			lowerBound: i * binSize,
-			upperBound: (i + 1) * binSize,
-			count: 0
+			lowerBound: Math.floor(i * binSize),
+			upperBound: Math.floor((i + 1) * binSize),
+			// 최소 10개의 데이터를 가지고 있어야함.
+			count: 10
 		}));
 		
 		// Count the number of data points that fall into each bin
@@ -154,41 +166,45 @@ const Simulation = (props: Props) => {
 			currBin.count++;
 		});
 		
-		const chartData: { x: string, y: number }[] = bins.map(dt =>({ x: `${dt.lowerBound} ~ ${dt.upperBound}`, y: dt.count }));
+		const chartData: { x: string, y: number }[] = bins.map(dt =>({ x: `${numberToKorean(dt.lowerBound)} ~ ${numberToKorean(dt.upperBound)}`, y: dt.count }));
 		
-		setConfig(buildConfig(chartData, theme));
+		setMesoConfig(buildConfig(chartData, theme));
 	}
 	
 	useEffect(() => {
+		if (mesoConfig) {
+			setMesoConfig(buildConfig(mesoConfig.data as any, theme));
+		}
+	}, [theme])
+	
+	useEffect(() => {
 		if (props.simulationResult.length === 0) {
-			setConfig(undefined);
+			setMesoConfig(undefined);
 		} else {
 			drawResult()
 		}
 	}, [props.simulationResult])
 	
 	return (
-		<div>
+		<div style={{ width: '100%' }}>
 			{
-				data
+				props.running
 				?
-					<>
-						<span style={{ fontSize: '16px' }}>
-							{numberComma(props.simulationNumber)}개의 {data.itemStarForce}성 <span style={{ fontWeight: 'bold' }}>{data.itemName}</span> 을(를) 제작 하였습니다.
-						</span>
-						<pre>
-							{JSON.stringify(data, undefined, 2)}
-						</pre>
-					</>
-				:
 					<Spin tip={`스타포스 강화 시뮬레이션 중입니다... ${props.progressRate}%`} />
-			}
-			{
-				config
-				?
-					<Column {...config} />
 				:
-					<></>
+					mesoConfig && destroyConfig
+						?
+							<Wrapper>
+								<ChartBlock>
+									<Title level={3}>메소 소모 비용</Title>
+									<Column { ...mesoConfig } />
+								</ChartBlock>
+								<ChartBlock>
+									<Title level={3}>파괴 횟수</Title>
+									<Column { ...destroyConfig } />
+								</ChartBlock>
+							</Wrapper>
+						: <></>
 			}
 			
 		</div>
@@ -196,3 +212,15 @@ const Simulation = (props: Props) => {
 }
 
 export default Simulation
+
+const Wrapper = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+`
+
+const ChartBlock = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: .5rem;
+`
