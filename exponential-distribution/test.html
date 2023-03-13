@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Exponential Distribution</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.1/dist/chart.min.js"></script>
+  <script src="data.js"></script>
+</head>
+<body>
+  <canvas id="myChart" width="400" height="400"></canvas>
+
+  <script>
+
+	const arr = data.map(it => it.usedMeso);
+
+
+    arr.sort((a, b) => a - b);
+
+    // 평균
+    const mean = arr.reduce((acc, curr) => acc + curr, 0) / arr.length;
+
+    // 표준편차
+    const sd = Math.sqrt(arr.reduce((acc, curr) => acc + (curr - mean) ** 2, 0) / arr.length);
+
+    // 나눌 범위
+    const numBins = 50;
+
+    const binSize = (arr[arr.length - 1] - arr[0]) / numBins;
+    console.log(binSize)
+
+    const bins = Array.from({length: numBins}, (_, i) => ({
+      lowerBound: i * binSize,
+      upperBound: (i + 1) * binSize,
+      count: 0
+    }));
+
+    // Count the number of data points that fall into each bin
+    let i = 0;
+    let currBin = bins[i];
+    arr.forEach((x) => {
+      while (x > currBin.upperBound && i < numBins - 1) {
+        i++;
+        currBin = bins[i];
+      }
+      currBin.count++;
+    });
+
+    // Normalize the counts to get the bin heights
+    const binHeights = bins.map((bin) => bin.count / (arr.length * binSize));
+
+    console.log(bins, binHeights)
+
+    // Draw the bar chart using Chart.js
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: bins.map((bin) => `${bin.lowerBound.toFixed(2)} - ${bin.upperBound.toFixed(2)}`),
+        datasets: [{
+          label: 'Exponential Distribution',
+          data: binHeights,
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        },
+        plugins: {
+          title: {
+            display: true,
+            text: `평균 = ${mean.toFixed(2)}, 표준편차 = ${sd.toFixed(2)}`,
+            font: {
+              size: 16
+            }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

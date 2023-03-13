@@ -5,9 +5,9 @@ import {
 	equipmentSubCategoryInfo,
 	metaInfoEquipmentOptionMap,
 	MetaInfoStats,
+	StarForceEventType,
 	Stats
 } from '../model/equipment.model';
-import {StarForceEventType} from '../model/equipment.model';
 
 export const getMaxStarForce = (level: number, isSuperiorItem = false): number => {
 	if (level < 95) {
@@ -91,9 +91,26 @@ const getStarForceUpgradeCost = (item: Equipment, event: StarForceEventType[]) =
 	if (item.starForce < 10) {
 		result = 1000 + (Math.pow(item.level, 3) * (item.starForce + 1)) / 25
 	} else if (item.starForce < 15) {
-		result = 1000 + (Math.pow(item.level, 3) * Math.pow(item.starForce + 1, 2.27)) / 400
+		const divide = () => {
+			switch (item.starForce) {
+				case 10:
+					return 400;
+				case 11:
+					return 220;
+				case 12:
+					return 150;
+				case 13:
+					return 110;
+				case 14:
+					return 70;
+				default:
+					throw Error('not implemented starforce!!')
+			}
+		};
+		
+		result = 1000 + (Math.pow(item.level, 3) * Math.pow(item.starForce + 1, 2.7) / divide())
 	} else {
-		result = 1000 + (Math.pow(item.level, 3) * Math.pow(item.starForce + 1, 2.27)) / 200
+		result = 1000 + (Math.pow(item.level, 3) * Math.pow(item.starForce + 1, 2.7) / 200)
 	}
 	
 	result = Math.round(result / 100) * 100;

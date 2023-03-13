@@ -27,7 +27,7 @@ export const Menu: MenuType[] = [
 		menuIcon: <HomeOutlined />
 	},
 	{
-		path: Path.STAR_FORCE_SIMULATOR,
+		path: Path.EQUIPMENT_ENFORCE_SIMULATOR,
 		label: '장비강화 시뮬레이터',
 		element: <EquipmentEnhancementSimulatorWrapper />,
 		menuIcon: <SkinOutlined />

@@ -3,6 +3,6 @@ export default class Path {
 	static HOMEWORK = '/homework'
 	static BOSS_SOUL_CRYSTAL_CALCULATOR = '/bossSoulCrystalCalculator'
 	static LINK_SKILL = '/linkSkill'
-	static STAR_FORCE_SIMULATOR = '/starforceSimulator'
+	static EQUIPMENT_ENFORCE_SIMULATOR = '/equipmentEnforceSimulator'
 	static COORDINATION_SIMULATOR = '/coordinationSimulator'
 }
