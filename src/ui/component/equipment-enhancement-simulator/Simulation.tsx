@@ -1,7 +1,7 @@
 import {Spin, Typography} from 'antd';
 import {Equipment} from '../../../model/equipment.model';
 import {Dispatch, SetStateAction, useEffect, useState} from 'react';
-import {numberComma, numberToKorean} from '../../../util/common.util';
+import {groupBy, numberComma, numberToKorean} from '../../../util/common.util';
 import {Column, ColumnConfig} from '@ant-design/charts';
 import {useRecoilValue} from 'recoil';
 import {ThemeAtom} from '../../../recoil/theme.atom';
@@ -74,8 +74,7 @@ const Simulation = (props: Props) => {
 		const bins = Array.from({length: numBins}, (_, i) => ({
 			lowerBound: Math.floor(i * binSize),
 			upperBound: Math.floor((i + 1) * binSize),
-			// 최소 10개의 데이터를 가지고 있어야함.
-			count: 10
+			count: 0
 		}));
 		
 		// Count the number of data points that fall into each bin
@@ -89,7 +88,22 @@ const Simulation = (props: Props) => {
 			currBin.count++;
 		});
 		
-		const chartData: { x: string, y: number }[] = bins.map(dt =>({ x: `${numberToKorean(dt.lowerBound)} ~ ${numberToKorean(dt.upperBound)}`, y: dt.count }));
+		let chartData: { x: string, y: number }[] = bins.map(dt =>({ x: `${numberToKorean(dt.lowerBound)} ~ ${numberToKorean(dt.upperBound)}`, y: dt.count }));
+		
+		const slice = (arr: { x: string, y: number }[]) => {
+			const idx = arr.findIndex(item => item.y !== 0)
+			if (idx > 0) {
+				arr = arr.slice(idx)
+			}
+			
+			return arr;
+		}
+		
+		// 일종의 trim 작업
+		chartData = slice(chartData);
+		chartData = chartData.reverse();
+		chartData = slice(chartData);
+		chartData = chartData.reverse();
 		
 		setter(buildConfig(chartData, theme));
 	}
@@ -116,59 +130,17 @@ const Simulation = (props: Props) => {
 			setMesoConfig
 		)
 		
-		draw(
-			result
-				.map(it => {
-					if (it) {
-						return it.destroyedCount
-					}
-					
-					return undefined;
-				}),
-			setDestroyConfig
-		)
-		
-		const arr: any[] = result
-			.map(it => {
-				if (it) {
-					return it.usedMeso
-				}
-				
-				return undefined;
-			})
-			.filter(it => it !== undefined)
-			.sort((a, b) => a! - b!)
-		
-		if (arr.length === 0) {
-			return;
-		}
-		
-		// 나눌 범위
-		const numBins = 30;
-		
-		const binSize = (arr[arr.length - 1] - arr[0]) / numBins;
-		
-		const bins = Array.from({length: numBins}, (_, i) => ({
-			lowerBound: Math.floor(i * binSize),
-			upperBound: Math.floor((i + 1) * binSize),
-			// 최소 10개의 데이터를 가지고 있어야함.
-			count: 10
-		}));
-		
-		// Count the number of data points that fall into each bin
-		let i = 0;
-		let currBin = bins[i];
-		arr.forEach((x) => {
-			while (x > currBin.upperBound && i < numBins - 1) {
-				i++;
-				currBin = bins[i];
-			}
-			currBin.count++;
-		});
-		
-		const chartData: { x: string, y: number }[] = bins.map(dt =>({ x: `${numberToKorean(dt.lowerBound)} ~ ${numberToKorean(dt.upperBound)}`, y: dt.count }));
-		
-		setMesoConfig(buildConfig(chartData, theme));
+		// draw(
+		// 	result
+		// 		.map(it => {
+		// 			if (it) {
+		// 				return it.destroyedCount
+		// 			}
+		//
+		// 			return undefined;
+		// 		}),
+		// 	setDestroyConfig
+		// )
 	}
 	
 	useEffect(() => {
@@ -192,19 +164,22 @@ const Simulation = (props: Props) => {
 				?
 					<Spin tip={`스타포스 강화 시뮬레이션 중입니다... ${props.progressRate}%`} />
 				:
-					mesoConfig && destroyConfig
-						?
-							<Wrapper>
-								<ChartBlock>
-									<Title level={3}>메소 소모 비용</Title>
-									<Column { ...mesoConfig } />
-								</ChartBlock>
-								<ChartBlock>
-									<Title level={3}>파괴 횟수</Title>
-									<Column { ...destroyConfig } />
-								</ChartBlock>
-							</Wrapper>
-						: <></>
+					<Wrapper>
+						{
+							mesoConfig &&
+                <ChartBlock>
+                    <Title level={3}>메소 소모 비용</Title>
+                    <Column { ...mesoConfig } />
+                </ChartBlock>
+						}
+						{
+							destroyConfig &&
+                <ChartBlock>
+                    <Title level={3}>파괴 횟수</Title>
+                    <Column { ...destroyConfig } />
+                </ChartBlock>
+						}
+					</Wrapper>
 			}
 			
 		</div>

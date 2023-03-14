@@ -66,8 +66,7 @@ export const doSimpleStarForce = (item: Equipment, event: StarForceEventType[]):
 	}
 	
 	// 파괴
-	if (Math.floor(Math.random() * 100) <= info.destroyPercentage) {
-		
+	if (info.destroyPercentage !== 0 && Math.floor(Math.random() * 100) <= info.destroyPercentage) {
 		item.starForce = 0;
 		item.starForceFailCount = 0;
 		item.usedMeso = item.usedMeso + info.cost;
@@ -77,13 +76,13 @@ export const doSimpleStarForce = (item: Equipment, event: StarForceEventType[]):
 		return item;
 	}
 	
-	// 실패
-	
+	// 실패 - 스타포스 하락
 	if (isStarForceDown(item)) {
 		item.starForce = item.starForce - 1;
 		item.starForceFailCount = (item.starForceFailCount ?? 0) + 1;
-		item.usedMeso = item.usedMeso + info.cost;
 	}
+	
+	item.usedMeso = item.usedMeso + info.cost;
 	
 	return item;
 }

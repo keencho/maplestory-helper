@@ -27,3 +27,10 @@ export const numberToKorean = (number: number) => {
 	
 	return resultString;
 }
+
+// https://stackoverflow.com/a/64489535/13160032
+export const groupBy = <T>(array: T[], predicate: (value: T, index: number, array: T[]) => any) =>
+	array.reduce((acc, value, index, array) => {
+		(acc[predicate(value, index, array)] ||= []).push(value);
+		return acc;
+	}, {} as { [key: string]: T[] });
