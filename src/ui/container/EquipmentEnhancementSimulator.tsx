@@ -16,9 +16,9 @@ import {Equipment, StarForceEventType} from '../../model/equipment.model';
 import Item from '../component/equipment-enhancement-simulator/Item';
 import {numberComma} from '../../util/common.util';
 import NotificationUtil from '../../util/notification.util';
-import {starForceSimulationWorker} from '../../workers/starforceSimulationWorker'
 import {doStarForce} from '../../util/starforce-util';
 import Simulation from '../component/equipment-enhancement-simulator/Simulation';
+import StarForceSimulationWorker from '../../workers/starforce-simulation.worker.ts?worker';
 
 const { Title } = Typography;
 
@@ -73,6 +73,9 @@ const eventOptions: { label: string, value: StarForceEventType }[] = [
 	{ label: '강화비용 30% 할인', value: StarForceEventType.DISCOUNT_30 },
 	{ label: '5, 10, 15성에서 강화시 성공확률 100%', value: StarForceEventType.PERCENTAGE_100 },
 ];
+
+
+let worker = new StarForceSimulationWorker();
 
 export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	
@@ -180,10 +183,31 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	}
 	
 	const doStarForceSimulating = () => {
+		if (starForceSimulationRunning) {
+			setStarForceSimulationRunning(false);
+			setStarForceSimulationPercentage(0);
+			worker.terminate();
+
+			return;
+		}
+
 		setStarForceSimulationRunning(true);
 		setStarForceSimulationPercentage(0);
 		setRightComponentType('STARFORCE_SIMULATION');
-		starForceSimulationWorker.postMessage({ item: initBasicItem(), simulationNumber: starForceSimulationNumber, targetStarForce: autoStarForceTargetStar })
+		
+		worker = new StarForceSimulationWorker();
+		worker.postMessage({ item: initBasicItem(), simulationNumber: starForceSimulationNumber, targetStarForce: autoStarForceTargetStar })
+		worker.onmessage = ({ data }: { data: Equipment[] | number }) => {
+			if (Array.isArray(data)) {
+				setStarForceSimulationRunning(false);
+				setStarForceSimulationPercentage(0);
+				setStarForceSimulationResult(data);
+			} else {
+				setStarForceSimulationPercentage(data);
+				setStarForceSimulationResult([]);
+			}
+
+		};
 	}
 	
 	const doStarForceOnCurrentItem = () => {
@@ -235,18 +259,6 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	
 	useEffect(() => {
 		
-		starForceSimulationWorker.onmessage = ({ data }: { data: Equipment[] | number }) => {
-			// 시뮬레이션 끝났음을 의미
-			if (Array.isArray(data)) {
-				setStarForceSimulationRunning(false);
-				setStarForceSimulationPercentage(0);
-				setStarForceSimulationResult(data);
-			} else {
-				setStarForceSimulationPercentage(data);
-			}
-			
-		};
-		
 		return () => {
 			stopAutoStarForceRunning();
 		}
@@ -272,7 +284,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 			{/*	closable*/}
 			{/*	style={{ marginBottom: '.5rem' }}*/}
 			{/*/>*/}
-			<CustomRow gutter={0}>
+			<CustomRow gutter={16}>
 				
 				{/* 왼쪽 */}
 				<CustomCol span={16}>
@@ -419,7 +431,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 				
 				{/* 오른쪽 */}
 				<CustomCol span={8}>
-					<FlexBox alignItems={'center'} justifyContent={'center'} flex={1} flexDirection={'column'}>
+					<FlexBox flex={1}>
 						{
 							isLoadingSelectedItem
 							?

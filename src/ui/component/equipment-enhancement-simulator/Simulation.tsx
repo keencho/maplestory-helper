@@ -1,11 +1,13 @@
-import {Spin, Typography} from 'antd';
+import {Alert, Empty, Spin, Typography} from 'antd';
 import {Equipment} from '../../../model/equipment.model';
 import {Dispatch, SetStateAction, useEffect, useState} from 'react';
 import {groupBy, numberComma, numberToKorean} from '../../../util/common.util';
 import {Column, ColumnConfig} from '@ant-design/charts';
 import {useRecoilValue} from 'recoil';
 import {ThemeAtom} from '../../../recoil/theme.atom';
-import styled from 'styled-components';
+import styled, {css} from 'styled-components';
+import {Slider} from '@antv/g2plot/lib/types/slider';
+import {FlexBox} from '../common/element/FlexBox';
 
 const { Title } = Typography;
 
@@ -16,20 +18,11 @@ interface Props {
 	running: boolean
 }
 
-const buildConfig = (data: { x: string, y: number }[], theme: 'light' | 'dark'): ColumnConfig => {
+const buildDefaultConfig = (data: { x: string, y: number}[], theme: 'light' | 'dark'): ColumnConfig => {
 	return {
 		data,
 		xField: 'x',
 		yField: 'y',
-		xAxis: {
-			label: {
-				autoHide: true,
-				autoRotate: false,
-				formatter: (text) => {
-					return text.split('~')[1]
-				}
-			},
-		},
 		yAxis: {
 			label: {
 				formatter: (text) => {
@@ -49,29 +42,61 @@ const buildConfig = (data: { x: string, y: number }[], theme: 'light' | 'dark'):
 	}
 }
 
+const buildUsedMesoConfig = (data: { x: string, y: number }[], theme: 'light' | 'dark'): ColumnConfig => {
+	const df: ColumnConfig = buildDefaultConfig(data, theme);
+	
+	return {
+		...df,
+		xAxis: {
+			label: {
+				autoHide: true,
+				autoRotate: false,
+				formatter: (text) => {
+					return text.split('~')[1]
+				}
+			},
+		},
+	}
+}
+
+const buildDestroyedCountConfig = (data: { x: string, y: number }[], theme: 'light' | 'dark'): ColumnConfig => {
+	const df: ColumnConfig = buildDefaultConfig(data, theme);
+	
+	const slider: Slider = data.length > 50 ? { start: 0, end: 0.5 } : false;
+	
+	return {
+		...df,
+		xAxis: {
+			label: {
+				autoHide: true,
+				autoRotate: false,
+				formatter: (text) => {
+					return text.split('~')[1]
+				}
+			},
+		},
+		slider: slider
+	}
+}
+
 const Simulation = (props: Props) => {
 	
 	const theme = useRecoilValue(ThemeAtom);
 	
-	const [mesoConfig, setMesoConfig] = useState<ColumnConfig | undefined>(undefined);
-	const [destroyConfig, setDestroyConfig] = useState<ColumnConfig | undefined>(undefined);
+	const [usedMesoConfig, setUsedMesoConfig] = useState<ColumnConfig | undefined>(undefined);
+	const [destroyedCountConfig, setDestroyedCountConfig] = useState<ColumnConfig | undefined>(undefined);
 	
-	const draw = (params: (number | undefined)[], setter: Dispatch<SetStateAction<ColumnConfig | undefined>>) => {
-		// @ts-ignore
-		const arr: number[] = params
-			.filter(item => item !== undefined)
-			.sort((a, b) => a! - b!)
-		
+	const drawUsedMeso = (arr: number[]) => {
 		if (arr.length === 0) {
 			return;
 		}
 		
-		// 나눌 범위
-		const numBins = 30;
+		arr = arr.sort((a, b) => a - b);
 		
+		const numBins = 30;
 		const binSize = (arr[arr.length - 1] - arr[0]) / numBins;
 		
-		const bins = Array.from({length: numBins}, (_, i) => ({
+		const bins = Array.from({ length: numBins }, (_, i) => ({
 			lowerBound: Math.floor(i * binSize),
 			upperBound: Math.floor((i + 1) * binSize),
 			count: 0
@@ -105,10 +130,23 @@ const Simulation = (props: Props) => {
 		chartData = slice(chartData);
 		chartData = chartData.reverse();
 		
-		setter(buildConfig(chartData, theme));
+		setUsedMesoConfig(buildUsedMesoConfig(chartData, theme));
 	}
 	
-	const drawResult = () => {
+	const drawDestroyedCount = (arr: number[]) => {
+		if (arr.length === 0) {
+			return;
+		}
+		
+		const groupedArr = groupBy(arr, item => item);
+		const chartData = Object.keys(groupedArr).map(vv => {
+			return { x: vv, y: groupedArr[vv].length };
+		})
+		
+		setDestroyedCountConfig(buildDestroyedCountConfig(chartData, theme));
+	}
+	
+	const controlResult = () => {
 		let result = props.simulationResult;
 		
 		let totalUsedMeso = 0;
@@ -118,80 +156,75 @@ const Simulation = (props: Props) => {
 			totalDestroyedCount += item.destroyedCount;
 		})
 		
-		draw(
-			result
-				.map(it => {
-					if (it) {
-						return it.usedMeso
-					}
-					
-					return undefined;
-				}),
-			setMesoConfig
-		)
+		const mesoArray = result.map(it => it?.usedMeso).filter(it => it !== undefined);
+		const destroyedArray = result.map(it => it?.destroyedCount).filter(it => it !== undefined);
 		
-		// draw(
-		// 	result
-		// 		.map(it => {
-		// 			if (it) {
-		// 				return it.destroyedCount
-		// 			}
-		//
-		// 			return undefined;
-		// 		}),
-		// 	setDestroyConfig
-		// )
+		drawUsedMeso(mesoArray);
+		drawDestroyedCount(destroyedArray);
 	}
 	
 	useEffect(() => {
-		if (mesoConfig) {
-			setMesoConfig(buildConfig(mesoConfig.data as any, theme));
+		if (usedMesoConfig) {
+			setUsedMesoConfig(buildUsedMesoConfig(usedMesoConfig.data as any, theme));
+		}
+		
+		if (destroyedCountConfig) {
+			setDestroyedCountConfig(buildDestroyedCountConfig(destroyedCountConfig.data as any, theme))
 		}
 	}, [theme])
 	
 	useEffect(() => {
-		if (props.simulationResult.length === 0) {
-			setMesoConfig(undefined);
-		} else {
-			drawResult()
+		if (props.simulationResult.length === props.simulationNumber) {
+			controlResult()
 		}
 	}, [props.simulationResult])
 	
 	return (
-		<div style={{ width: '100%' }}>
+		<FlexBox flex={1} alignItems={'center'} justifyContent={'center'}>
 			{
 				props.running
-				?
+					?
 					<Spin tip={`스타포스 강화 시뮬레이션 중입니다... ${props.progressRate}%`} />
-				:
-					<Wrapper>
-						{
-							mesoConfig &&
-                <ChartBlock>
-                    <Title level={3}>메소 소모 비용</Title>
-                    <Column { ...mesoConfig } />
-                </ChartBlock>
-						}
-						{
-							destroyConfig &&
-                <ChartBlock>
-                    <Title level={3}>파괴 횟수</Title>
-                    <Column { ...destroyConfig } />
-                </ChartBlock>
-						}
-					</Wrapper>
+					:
+						usedMesoConfig && destroyedCountConfig
+						?
+							<Wrapper>
+								<Alert showIcon message={`${props.simulationResult[0].starForce}성 '${props.simulationResult[0].itemName}'을(를) ${numberComma(props.simulationNumber)}개 제작 하였습니다.`} type="info" />
+								<BlockWrapper>
+									<ChartBlock>
+										<Title level={3}>메소 소모 비용</Title>
+										<Column { ...usedMesoConfig } />
+									</ChartBlock>
+									<ChartBlock>
+										<Title level={3}>파괴 횟수</Title>
+										<Column { ...destroyedCountConfig } />
+									</ChartBlock>
+								</BlockWrapper>
+							</Wrapper>
+						:
+							<></>
 			}
-			
-		</div>
+			{
+				!props.running && !usedMesoConfig && !destroyedCountConfig && <Empty description={<>시뮬레이션 결과가 없습니다.</>} />
+			}
+		</FlexBox>
 	)
 }
 
 export default Simulation
 
 const Wrapper = styled.div`
+	flex: 1;
 	display: flex;
 	flex-direction: column;
-	gap: 2rem;
+`
+
+const BlockWrapper = styled.div`
+	margin-top: 1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	height: 100%;
 `
 
 const ChartBlock = styled.div`
