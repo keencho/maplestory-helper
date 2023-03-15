@@ -1,4 +1,4 @@
-import {Alert, Empty, Spin, Typography} from 'antd';
+import {Alert, Descriptions, Empty, Spin, Typography} from 'antd';
 import {Equipment} from '../../../model/equipment.model';
 import {Dispatch, SetStateAction, useEffect, useState} from 'react';
 import {groupBy, numberComma, numberToKorean} from '../../../util/common.util';
@@ -8,6 +8,7 @@ import {ThemeAtom} from '../../../recoil/theme.atom';
 import styled, {css} from 'styled-components';
 import {Slider} from '@antv/g2plot/lib/types/slider';
 import {FlexBox} from '../common/element/FlexBox';
+import * as React from 'react';
 
 const { Title } = Typography;
 
@@ -85,6 +86,7 @@ const Simulation = (props: Props) => {
 	
 	const [usedMesoConfig, setUsedMesoConfig] = useState<ColumnConfig | undefined>(undefined);
 	const [destroyedCountConfig, setDestroyedCountConfig] = useState<ColumnConfig | undefined>(undefined);
+	const [statisticalData, setStatisticalData] = useState<{ totalDestroyedCount: number, totalUsedMeso: number } | undefined>(undefined);
 	
 	const drawUsedMeso = (arr: number[]) => {
 		if (arr.length === 0) {
@@ -156,6 +158,8 @@ const Simulation = (props: Props) => {
 			totalDestroyedCount += item.destroyedCount;
 		})
 		
+		setStatisticalData({ totalUsedMeso: totalUsedMeso, totalDestroyedCount: totalDestroyedCount });
+		
 		const mesoArray = result.map(it => it?.usedMeso).filter(it => it !== undefined);
 		const destroyedArray = result.map(it => it?.destroyedCount).filter(it => it !== undefined);
 		
@@ -180,23 +184,35 @@ const Simulation = (props: Props) => {
 	}, [props.simulationResult])
 	
 	return (
-		<FlexBox flex={1} alignItems={'center'} justifyContent={'center'}>
+		<FlexBox flex={1} overflowY={'hidden'}>
 			{
 				props.running
 					?
-					<Spin tip={`스타포스 강화 시뮬레이션 중입니다... ${props.progressRate}%`} />
+					<FlexBox alignItems={'center'} justifyContent={'center'} flex={1}>
+						<Spin tip={`스타포스 강화 시뮬레이션 중입니다... ${props.progressRate}%`} />
+					</FlexBox>
 					:
 						usedMesoConfig && destroyedCountConfig
 						?
 							<Wrapper>
-								<Alert showIcon message={`${props.simulationResult[0].starForce}성 '${props.simulationResult[0].itemName}'을(를) ${numberComma(props.simulationNumber)}개 제작 하였습니다.`} type="info" />
+								<div>
+									<Alert showIcon message={`${props.simulationResult[0].starForce}성 '${props.simulationResult[0].itemName}'을(를) ${numberComma(props.simulationNumber)}개 제작 하였습니다.`} type="info" />
+									
+									<Descriptions bordered column={2} size={'small'} style={{ marginTop: '.5rem' }}>
+										<Descriptions.Item label="총 소모 메소" span={2}>{numberToKorean(statisticalData?.totalUsedMeso)}메소</Descriptions.Item>
+										<Descriptions.Item label="총 파괴 횟수" span={2}>{numberToKorean(statisticalData?.totalDestroyedCount)}회</Descriptions.Item>
+										<Descriptions.Item label="평균 소모 메소">{statisticalData ? numberToKorean(statisticalData.totalUsedMeso / props.simulationNumber) : ''}메소</Descriptions.Item>
+										<Descriptions.Item label="평균 파괴 횟수">{statisticalData ? numberToKorean(statisticalData.totalDestroyedCount / props.simulationNumber) : ''}회</Descriptions.Item>
+									</Descriptions>
+									
+								</div>
 								<BlockWrapper>
 									<ChartBlock>
-										<Title level={3}>메소 소모 비용</Title>
+										<Title level={3}>메소 소모 통계</Title>
 										<Column { ...usedMesoConfig } />
 									</ChartBlock>
 									<ChartBlock>
-										<Title level={3}>파괴 횟수</Title>
+										<Title level={3}>파괴 횟수 통계</Title>
 										<Column { ...destroyedCountConfig } />
 									</ChartBlock>
 								</BlockWrapper>
@@ -205,7 +221,10 @@ const Simulation = (props: Props) => {
 							<></>
 			}
 			{
-				!props.running && !usedMesoConfig && !destroyedCountConfig && <Empty description={<>시뮬레이션 결과가 없습니다.</>} />
+				!props.running && !usedMesoConfig && !destroyedCountConfig &&
+          <FlexBox alignItems={'center'} justifyContent={'center'} flex={1}>
+						<Empty description={<>시뮬레이션 결과가 없습니다.</>} />
+          </FlexBox>
 			}
 		</FlexBox>
 	)
@@ -217,6 +236,7 @@ const Wrapper = styled.div`
 	flex: 1;
 	display: flex;
 	flex-direction: column;
+	overflow: hidden;
 `
 
 const BlockWrapper = styled.div`
@@ -224,7 +244,7 @@ const BlockWrapper = styled.div`
 	display: flex;
 	flex-direction: column;
 	gap: 1rem;
-	height: 100%;
+	overflow: scroll;
 `
 
 const ChartBlock = styled.div`

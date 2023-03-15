@@ -431,19 +431,21 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 				
 				{/* 오른쪽 */}
 				<CustomCol span={8}>
-					<FlexBox flex={1}>
+					<FlexBox flex={1} overflowY={'auto'}>
 						{
-							isLoadingSelectedItem
-							?
-								<Spin tip="아이템을 불러오는 중입니다..." size={'large'} />
-							:
 								rightComponentType === 'ITEM'
 									?
-									<Item
-										item={item}
-										isAutoRunning={autoStarForceRunning}
-										event={event}
-									/>
+										isLoadingSelectedItem
+										?
+											<FlexBox alignItems={'center'} justifyContent={'center'} flex={1}>
+												<Spin tip="아이템을 불러오는 중입니다..." size={'large'} />
+											</FlexBox>
+										:
+										<Item
+											item={item}
+											isAutoRunning={autoStarForceRunning}
+											event={event}
+										/>
 									:
 									<Simulation
 										simulationNumber={starForceSimulationNumber}

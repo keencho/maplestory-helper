@@ -2,8 +2,8 @@ export const numberComma = (number: number) => {
 	return number.toLocaleString('ko-KR');
 }
 
-export const numberToKorean = (number: number) => {
-	if (number <= 0) {
+export const numberToKorean = (number: number | undefined) => {
+	if (number === undefined || number <= 0) {
 		return number;
 	}
 	const unitWords    = ['', '만', '억', '조', '경'];
