@@ -102,8 +102,7 @@ const Item = ({ item, isAutoRunning, event }: { item: Equipment | undefined, isA
 	}
 	
 	return (
-		<FlexBox flexDirection={'column'} alignItems={'center'} width={'90%'}>
-			
+		<FlexBox flexDirection={'column'} alignItems={'center'} justifyContent={'center'} flex={1}>
 			{
 				item.isAvailableStarForce === true
 					?
