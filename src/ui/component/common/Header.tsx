@@ -28,8 +28,7 @@ const Header = () => {
 			ghost={false}
 			style={{
 				position: 'sticky',
-				top: 0,
-				zIndex: 9999
+				top: 0
 			}}
 		/>
 	)

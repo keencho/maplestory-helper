@@ -1,5 +1,5 @@
 import {FlexBox} from '../common/element/FlexBox';
-import {Alert, Spin, Typography} from 'antd';
+import {Alert, Button, Spin, Typography} from 'antd';
 import {
 	getMaxStarForce,
 	getStarForceUpgradeInfo,
@@ -64,7 +64,13 @@ const SummaryItem = styled.div`
 	align-items: center;
 `
 
-const Item = ({ item, isAutoRunning, event }: { item: Equipment | undefined, isAutoRunning: boolean, event: StarForceEventType[] }) => {
+type Props = {
+	item: Equipment | undefined
+	isAutoRunning: boolean
+	event: StarForceEventType[]
+}
+
+const Item = ({ item, isAutoRunning, event }: Props) => {
 	
 	if (!item) return <></>;
 	

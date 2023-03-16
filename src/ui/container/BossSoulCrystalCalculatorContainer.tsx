@@ -116,7 +116,7 @@ export const BossSoulCrystalCalculatorContainer = () => {
 	const onEdit = (e: React.MouseEvent | React.KeyboardEvent | string, action: 'add' | 'remove') => {
 		if (action === 'add') {
 			if (tabData.length >= 5) {
-				NotificationUtil.fire('error', '추가 실패', '최대 5개의 캐릭터 탭을 만들 수 있습니다.');
+				NotificationUtil.fire('error', '추가 실패', { description: '최대 5개의 캐릭터 탭을 만들 수 있습니다.' });
 				return;
 			}
 			
@@ -126,7 +126,7 @@ export const BossSoulCrystalCalculatorContainer = () => {
 			setActiveTabKey(activeKey)
 		} else {
 			if (tabData.length === 1) {
-				NotificationUtil.fire('error', '삭제 실패', '최소 1개의 캐릭터 탭이 존재해야 합니다.');
+				NotificationUtil.fire('error', '삭제 실패', { description: '최소 1개의 캐릭터 탭이 존재해야 합니다.' });
 				return;
 			}
 			
@@ -165,12 +165,12 @@ export const BossSoulCrystalCalculatorContainer = () => {
 				})
 		})
 		
-		NotificationUtil.fire('success', '초기화 완료', '현재 탭이 초기화 되었습니다.')
+		NotificationUtil.fire('success', '초기화 완료', { description: '현재 탭이 초기화 되었습니다.' })
 	}
 	
 	const copyCurrentTab = () => {
 		if (tabData.length >= 5) {
-			NotificationUtil.fire('error', '복사 실패', '최대 5개의 캐릭터 탭을 만들 수 있습니다.');
+			NotificationUtil.fire('error', '복사 실패', { description: '최대 5개의 캐릭터 탭을 만들 수 있습니다.' });
 			return;
 		}
 		

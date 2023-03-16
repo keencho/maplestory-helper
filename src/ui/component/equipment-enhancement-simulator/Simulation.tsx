@@ -1,14 +1,14 @@
 import {Alert, Descriptions, Empty, Spin, Typography} from 'antd';
 import {Equipment} from '../../../model/equipment.model';
-import {Dispatch, SetStateAction, useEffect, useState} from 'react';
+import * as React from 'react';
+import {useEffect, useState} from 'react';
 import {groupBy, numberComma, numberToKorean} from '../../../util/common.util';
 import {Column, ColumnConfig} from '@ant-design/charts';
 import {useRecoilValue} from 'recoil';
 import {ThemeAtom} from '../../../recoil/theme.atom';
-import styled, {css} from 'styled-components';
+import styled from 'styled-components';
 import {Slider} from '@antv/g2plot/lib/types/slider';
 import {FlexBox} from '../common/element/FlexBox';
-import * as React from 'react';
 
 const { Title } = Typography;
 
@@ -188,7 +188,7 @@ const Simulation = (props: Props) => {
 			{
 				props.running
 					?
-					<FlexBox alignItems={'center'} justifyContent={'center'} flex={1}>
+					<FlexBox alignItems={'center'} justifyContent={'center'} flex={1} flexDirection={'column'} gap={'.5rem'}>
 						<Spin tip={`스타포스 강화 시뮬레이션 중입니다... ${props.progressRate}%`} />
 					</FlexBox>
 					:
