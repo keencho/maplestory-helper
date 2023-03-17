@@ -86,7 +86,7 @@ const Simulation = (props: Props) => {
 	
 	const [usedMesoConfig, setUsedMesoConfig] = useState<ColumnConfig | undefined>(undefined);
 	const [destroyedCountConfig, setDestroyedCountConfig] = useState<ColumnConfig | undefined>(undefined);
-	const [statisticalData, setStatisticalData] = useState<{ totalDestroyedCount: number, totalUsedMeso: number } | undefined>(undefined);
+	const [statisticalData, setStatisticalData] = useState<{ totalDestroyedCount: number, totalUsedMeso: number, itemName: string, itemStarForce: number, simulationNumber: number } | undefined>(undefined);
 	
 	const drawUsedMeso = (arr: number[]) => {
 		if (arr.length === 0) {
@@ -158,7 +158,13 @@ const Simulation = (props: Props) => {
 			totalDestroyedCount += item.destroyedCount;
 		})
 		
-		setStatisticalData({ totalUsedMeso: totalUsedMeso, totalDestroyedCount: totalDestroyedCount });
+		setStatisticalData({
+			totalUsedMeso: totalUsedMeso,
+			totalDestroyedCount: totalDestroyedCount,
+			itemName: props.simulationResult[0].itemName,
+			itemStarForce: props.simulationResult[0].starForce,
+			simulationNumber: props.simulationNumber
+		});
 		
 		const mesoArray = result.map(it => it?.usedMeso).filter(it => it !== undefined);
 		const destroyedArray = result.map(it => it?.destroyedCount).filter(it => it !== undefined);
@@ -192,17 +198,17 @@ const Simulation = (props: Props) => {
 						<Spin tip={`스타포스 강화 시뮬레이션 중입니다... ${props.progressRate}%`} />
 					</FlexBox>
 					:
-						usedMesoConfig && destroyedCountConfig
+						usedMesoConfig && destroyedCountConfig && statisticalData
 						?
 							<Wrapper>
 								<div>
-									<Alert showIcon message={`${props.simulationResult[0].starForce}성 '${props.simulationResult[0].itemName}'을(를) ${numberComma(props.simulationNumber)}개 제작 하였습니다.`} type="info" />
+									<Alert showIcon message={`${statisticalData.itemStarForce}성 '${statisticalData.itemName}'을(를) ${numberComma(statisticalData.simulationNumber)}개 제작 하였습니다.`} type="info" />
 									
 									<Descriptions bordered column={2} size={'small'} style={{ marginTop: '.5rem' }}>
-										<Descriptions.Item label="총 소모 메소" span={2}>{numberToKorean(statisticalData?.totalUsedMeso)}메소</Descriptions.Item>
-										<Descriptions.Item label="총 파괴 횟수" span={2}>{numberToKorean(statisticalData?.totalDestroyedCount)}회</Descriptions.Item>
-										<Descriptions.Item label="평균 소모 메소">{statisticalData ? numberToKorean(statisticalData.totalUsedMeso / props.simulationNumber) : ''}메소</Descriptions.Item>
-										<Descriptions.Item label="평균 파괴 횟수">{statisticalData ? numberToKorean(statisticalData.totalDestroyedCount / props.simulationNumber) : ''}회</Descriptions.Item>
+										<Descriptions.Item label="총 소모 메소" span={2}>{numberToKorean(statisticalData.totalUsedMeso)}메소</Descriptions.Item>
+										<Descriptions.Item label="총 파괴 횟수" span={2}>{numberToKorean(statisticalData.totalDestroyedCount)}회</Descriptions.Item>
+										<Descriptions.Item label="평균 소모 메소">{numberToKorean(statisticalData.totalUsedMeso / props.simulationNumber)}메소</Descriptions.Item>
+										<Descriptions.Item label="평균 파괴 횟수">{numberToKorean(statisticalData.totalDestroyedCount / props.simulationNumber)}회</Descriptions.Item>
 									</Descriptions>
 									
 								</div>

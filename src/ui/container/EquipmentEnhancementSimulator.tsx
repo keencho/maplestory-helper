@@ -88,6 +88,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	const [autoStarForce, setAutoStarForce] = useState<boolean>(false);
 	const [autoStarForceRunning, setAutoStarForceRunning] = useState<boolean>(false);
 	const [autoStarForceTargetStar, setAutoStarForceTargetStar] = useState<number>(22);
+	const [simulationStartStarForce, setSimulationStartStarForce] = useState<number>(0);
 	const autoStarForceRef = useRef<NodeJS.Timeout | null>(null);
 	
 	const [starForceSimulationRunning, setStarForceSimulationRunning] = useState<boolean>(false);
@@ -198,13 +199,21 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 
 			return;
 		}
+		
+		if (simulationStartStarForce >= autoStarForceTargetStar) {
+			NotificationUtil.fire('error', '시뮬레이션 불가', { description: '시뮬레이션 시작 스타포스는 목표 스타포스보다 작아야 합니다.' });
+			return;
+		}
 
 		setStarForceSimulationRunning(true);
 		setStarForceSimulationPercentage(0);
 		setRightComponentType('STARFORCE_SIMULATION');
 		
+		const item = initBasicItem();
+		item.starForce = simulationStartStarForce;
+		
 		worker = new StarForceSimulationWorker();
-		worker.postMessage({ item: initBasicItem(), simulationNumber: starForceSimulationNumber, targetStarForce: autoStarForceTargetStar })
+		worker.postMessage({ item: item, simulationNumber: starForceSimulationNumber, targetStarForce: autoStarForceTargetStar })
 		worker.onmessage = ({ data }: { data: Equipment[] | number }) => {
 			if (Array.isArray(data)) {
 				setStarForceSimulationRunning(false);
@@ -335,6 +344,16 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 									/>
 								</FlexBox>
 								<FlexBox flex={1} flexDirection={'column'}>
+									<Title level={5}>시뮬레이션 시작 스타포스</Title>
+									<InputNumber
+										value={simulationStartStarForce}
+										onChange={(value) => setSimulationStartStarForce(value ?? 0)}
+										style={{ marginBottom: '1rem', width: '100%' }}
+										min={0}
+										max={25}
+										disabled={autoStarForceRunning || starForceSimulationRunning}
+									/>
+									
 									<Title level={5}>목표 스타포스</Title>
 									<InputNumber
 										value={autoStarForceTargetStar}
@@ -344,20 +363,18 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 										max={25}
 										disabled={autoStarForceRunning || starForceSimulationRunning}
 									/>
-									
-									<Title level={5}>자동강화</Title>
+								</FlexBox>
+							</FlexBox>
+							
+							<FlexBox gap={'1rem'} justifyContent={'center'} margin={'auto 0 0 0'}>
+								<FlexBox width={'50%'} gap={'1rem'} alignItems={'center'}>
 									<Checkbox
 										onChange={(e) => setAutoStarForce(e.target.checked)}
 										checked={autoStarForce}
 										disabled={autoStarForceRunning || starForceSimulationRunning}
 									>
-										활성화
+										자동강화
 									</Checkbox>
-								</FlexBox>
-							</FlexBox>
-							
-							<FlexBox gap={'1rem'} justifyContent={'center'} margin={'auto 0 0 0'}>
-								<FlexBox width={'50%'} gap={'1rem'}>
 									
 									<Button type={'primary'} disabled={!(item && item.isAvailableStarForce) || starForceSimulationRunning} style={{ flex: 1 }} onClick={autoStarForceRunning ? stopAutoStarForceRunning : onClickStarForce}>
 										{

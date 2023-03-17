@@ -7,7 +7,7 @@ export default class NotificationUtil {
 			top: 75,
 			message: message,
 			description: options?.description,
-			duration: options?.duration ?? 3,
+			duration: options?.duration ?? 2,
 			placement: options?.placement ?? 'topRight'
 		});
 	}
