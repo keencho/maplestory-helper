@@ -1,5 +1,5 @@
 import PageTitle from '../component/common/PageTitle';
-import {Button, Checkbox, Input, InputNumber, Radio, Result, Spin, Switch, Typography} from 'antd';
+import {Button, Checkbox, Drawer, Input, InputNumber, Radio, Result, Spin, Typography} from 'antd';
 import {CustomCol, CustomRow} from '../component/common/element/CustomRowCol';
 import React, {useEffect, useRef, useState} from 'react';
 import {FlexBox} from '../component/common/element/FlexBox';
@@ -8,7 +8,7 @@ import {getAllItems, getItem, getItemIcon} from '../../api/maplestory-io.api';
 import styled from 'styled-components';
 import {useRecoilValue} from 'recoil';
 import {ThemeAtom} from '../../recoil/theme.atom';
-import {BACKGROUND, HOVER} from '../../model/color.model';
+import {HOVER} from '../../model/color.model';
 import {cacheName, region, version} from '../../model/maplestory-io.model';
 import AsyncCacheImage from '../component/common/element/AsyncCacheImage';
 import {buildStats, isAvailableStarForce} from '../../util/equipment.util';
@@ -75,7 +75,7 @@ const eventOptions: { label: string, value: StarForceEventType }[] = [
 ];
 
 
-let worker = new StarForceSimulationWorker();
+let worker: Worker = new StarForceSimulationWorker();
 
 export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	
@@ -88,6 +88,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	const [autoStarForce, setAutoStarForce] = useState<boolean>(false);
 	const [autoStarForceRunning, setAutoStarForceRunning] = useState<boolean>(false);
 	const [autoStarForceTargetStar, setAutoStarForceTargetStar] = useState<number>(22);
+	const [simulationStartStarForce, setSimulationStartStarForce] = useState<number>(0);
 	const autoStarForceRef = useRef<NodeJS.Timeout | null>(null);
 	
 	const [starForceSimulationRunning, setStarForceSimulationRunning] = useState<boolean>(false);
@@ -156,6 +157,9 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 		if (autoStarForceRunning) {
 			stopAutoStarForceRunning()
 		}
+		
+		setRightComponentType('ITEM')
+		
 		initItem()
 		NotificationUtil.fire('success', '아이템이 초기화 되었습니다.');
 	}
@@ -173,13 +177,18 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	const onClickStarForce = () => {
 		if (autoStarForce) {
 			if (item!.starForce >= autoStarForceTargetStar) {
-				NotificationUtil.fire('error', '자동강화 불가', '목표 스타포스를 조정하거나 아이템을 초기화 해 주세요.')
+				NotificationUtil.fire('error', '자동강화 불가', { description: '목표 스타포스를 조정하거나 아이템을 초기화 해 주세요.' })
 				return;
 			}
+			
+			setRightComponentType('ITEM')
+			
 			setAutoStarForceRunning(true);
-		} else {
-			doStarForceOnCurrentItem();
+			
+			return;
 		}
+		
+		doStarForceOnCurrentItem();
 	}
 	
 	const doStarForceSimulating = () => {
@@ -190,13 +199,21 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 
 			return;
 		}
+		
+		if (simulationStartStarForce >= autoStarForceTargetStar) {
+			NotificationUtil.fire('error', '시뮬레이션 불가', { description: '시뮬레이션 시작 스타포스는 목표 스타포스보다 작아야 합니다.' });
+			return;
+		}
 
 		setStarForceSimulationRunning(true);
 		setStarForceSimulationPercentage(0);
 		setRightComponentType('STARFORCE_SIMULATION');
 		
+		const item = initBasicItem();
+		item.starForce = simulationStartStarForce;
+		
 		worker = new StarForceSimulationWorker();
-		worker.postMessage({ item: initBasicItem(), simulationNumber: starForceSimulationNumber, targetStarForce: autoStarForceTargetStar })
+		worker.postMessage({ item: item, simulationNumber: starForceSimulationNumber, targetStarForce: autoStarForceTargetStar })
 		worker.onmessage = ({ data }: { data: Equipment[] | number }) => {
 			if (Array.isArray(data)) {
 				setStarForceSimulationRunning(false);
@@ -211,6 +228,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	}
 	
 	const doStarForceOnCurrentItem = () => {
+		setRightComponentType('ITEM');
 		setItem(pv => doStarForce(pv!, event));
 	}
 	
@@ -231,6 +249,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	useEffect(() => {
 		if (selectedItemId) {
 			fetchItem(selectedItemId)
+			setRightComponentType('ITEM');
 		}
 	}, [selectedItemId])
 	
@@ -251,16 +270,16 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 			if (item.starForce < autoStarForceTargetStar) {
 				autoStarForceRef.current = setTimeout(doStarForceOnCurrentItem, 25);
 			} else {
-				NotificationUtil.fire('success', '강화 완료', `${autoStarForceTargetStar}성 강화가 완료되었습니다.`)
+				NotificationUtil.fire('success', '강화 완료', { description: `${autoStarForceTargetStar}성 강화가 완료되었습니다.` })
 				stopAutoStarForceRunning();
 			}
 		}
 	}, [autoStarForceRunning, item])
 	
 	useEffect(() => {
-		
 		return () => {
 			stopAutoStarForceRunning();
+			worker.terminate()
 		}
 	}, []);
 	
@@ -271,9 +290,9 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 				marginBottom={'.5rem'}
 				extraContents={
 					<FlexBox alignItems={'center'} gap={'.5rem'}>
-						<Button type={'primary'} disabled={autoStarForceRunning} onClick={() => setShowSearchItemBox(!showSearchItemBox)}>아이템 검색</Button>
-						<Button type={'primary'} onClick={resetItem}>아이템 초기화</Button>
-						<Switch checked={rightComponentType === 'ITEM'} onChange={(checked) => {setRightComponentType(checked ? 'ITEM' : 'STARFORCE_SIMULATION')}} />
+						<Button type={'primary'} disabled={autoStarForceRunning || starForceSimulationRunning} onClick={() => setShowSearchItemBox(true)}>아이템 검색</Button>
+						<Button type={'primary'} disabled={autoStarForceRunning || starForceSimulationRunning} onClick={resetItem}>아이템 초기화</Button>
+						<Button type={'primary'} disabled={autoStarForceRunning || starForceSimulationRunning} onClick={() => setRightComponentType(rightComponentType === 'ITEM' ? 'STARFORCE_SIMULATION' : 'ITEM')}>{rightComponentType === 'ITEM' ? '시뮬레이션' : '아이템 강화' }</Button>
 					</FlexBox>
 				}
 			/>
@@ -325,6 +344,16 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 									/>
 								</FlexBox>
 								<FlexBox flex={1} flexDirection={'column'}>
+									<Title level={5}>시뮬레이션 시작 스타포스</Title>
+									<InputNumber
+										value={simulationStartStarForce}
+										onChange={(value) => setSimulationStartStarForce(value ?? 0)}
+										style={{ marginBottom: '1rem', width: '100%' }}
+										min={0}
+										max={25}
+										disabled={autoStarForceRunning || starForceSimulationRunning}
+									/>
+									
 									<Title level={5}>목표 스타포스</Title>
 									<InputNumber
 										value={autoStarForceTargetStar}
@@ -334,20 +363,18 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 										max={25}
 										disabled={autoStarForceRunning || starForceSimulationRunning}
 									/>
-									
-									<Title level={5}>자동강화</Title>
+								</FlexBox>
+							</FlexBox>
+							
+							<FlexBox gap={'1rem'} justifyContent={'center'} margin={'auto 0 0 0'}>
+								<FlexBox width={'50%'} gap={'1rem'} alignItems={'center'}>
 									<Checkbox
 										onChange={(e) => setAutoStarForce(e.target.checked)}
 										checked={autoStarForce}
 										disabled={autoStarForceRunning || starForceSimulationRunning}
 									>
-										활성화
+										자동강화
 									</Checkbox>
-								</FlexBox>
-							</FlexBox>
-							
-							<FlexBox gap={'1rem'} justifyContent={'center'} margin={'auto 0 0 0'}>
-								<FlexBox width={'50%'} gap={'1rem'}>
 									
 									<Button type={'primary'} disabled={!(item && item.isAvailableStarForce) || starForceSimulationRunning} style={{ flex: 1 }} onClick={autoStarForceRunning ? stopAutoStarForceRunning : onClickStarForce}>
 										{
@@ -380,19 +407,19 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 					
 					{/* 아이템 검색 박스 */}
 					{
-						showSearchItemBox
-						?
-							<SearchBoxWrapper theme={theme} show={showSearchItemBox}>
-								<FlexBox justifyContent={'space-between'} alignItems={'center'}>
-									<Title level={5}>아이템 검색</Title>
-									<Radio.Group onChange={(e) => setSearchSort(e.target.value)} value={searchSort}>
-										<Radio value={'LEVEL'}>레벨순 정렬</Radio>
-										<Radio value={'NAME'}>이름순 정렬</Radio>
-									</Radio.Group>
-								</FlexBox>
-								
+						<Drawer
+							title={'아이템 검색'}
+							placement={'right'}
+							open={showSearchItemBox}
+							onClose={() => setShowSearchItemBox(false)}
+							closable={false}
+						>
+							<Wrapper>
+								<Radio.Group onChange={(e) => setSearchSort(e.target.value)} value={searchSort}>
+									<Radio value={'LEVEL'}>레벨순 정렬</Radio>
+									<Radio value={'NAME'}>이름순 정렬</Radio>
+								</Radio.Group>
 								<Input autoFocus placeholder={'아이템 이름을 입력해주세요.'} value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)} style={{ marginTop: '.5rem' }} />
-								
 								{
 									searchKeyword && searchedItem.length > 0
 										?
@@ -422,9 +449,8 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 										</SearchBox>
 										: <></>
 								}
-							</SearchBoxWrapper>
-						:
-							<></>
+							</Wrapper>
+						</Drawer>
 					}
 					
 				</CustomCol>
@@ -462,39 +488,17 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	)
 }
 
-const SearchBoxWrapper = styled.div<{ theme: 'light' | 'dark', show: boolean }>`
-	position: absolute;
-	width: 50%;
-	height: 50%;
-	background-color: ${props => BACKGROUND(props.theme)};
-	border: 1px solid rgba(140, 140, 140, 0.35);
-	border-radius: 8px;
-	padding: 1rem;
+const Wrapper = styled.div`
+	overflow: hidden;
 	display: flex;
 	flex-direction: column;
-	right: 0;
-	opacity: 1;
-
-	//@keyframes frames {
-	//	from {
-	//		opacity: 0;
-	//		right: -50%;
-	//	}
-	//	to {
-	//		opacity: 1;
-	//		right: 0;
-	//	}
-	//}
-	//
-	//animation-name: frames;
-	//animation-duration: .3s;
+	height: 100%;
 `
 
-const SearchBox = styled.div<{ theme: 'light' | 'dark' }>`
+const SearchBox = styled.div`
 	margin-top: .5rem;
 	overflow-y: auto;
 	width: 100%;
-	background-color: ${props => BACKGROUND(props.theme)};
 `
 
 const SearchBoxItem = styled.div<{ theme: 'light' | 'dark' }>`

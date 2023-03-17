@@ -169,13 +169,13 @@ export const HomeworkContainer = () => {
 	const saveMyRoutine = () => {
 		localStorage.setItem(MY_ROUTINE_KEY, myRoutine);
 		
-		NotificationUtil.fire('success', '저장 완료', '나만의 루틴이 저장되었습니다.');
+		NotificationUtil.fire('success', '저장 완료', { description: '나만의 루틴이 저장되었습니다.' });
 	}
 	
 	const onEditTab = (e: React.MouseEvent | React.KeyboardEvent | string, action: 'add' | 'remove') => {
 		if (action === 'add') {
 			if (tabData.length >= 5) {
-				NotificationUtil.fire('error', '추가 실패', '최대 5개의 캐릭터 탭을 만들 수 있습니다.');
+				NotificationUtil.fire('error', '추가 실패', { description: '최대 5개의 캐릭터 탭을 만들 수 있습니다.' });
 				return;
 			}
 			
@@ -195,7 +195,7 @@ export const HomeworkContainer = () => {
 			
 		} else {
 			if (tabData.length === 1) {
-				NotificationUtil.fire('error', '삭제 실패', '최소 1개의 캐릭터 탭이 존재해야 합니다.');
+				NotificationUtil.fire('error', '삭제 실패', { description: '최소 1개의 캐릭터 탭이 존재해야 합니다.' });
 				return;
 			}
 
@@ -301,7 +301,7 @@ export const HomeworkContainer = () => {
 				})
 		})
 		
-		NotificationUtil.fire('success', '초기화 완료', '달성 여부가 모두 초기화 되었습니다.')
+		NotificationUtil.fire('success', '초기화 완료', { description: '달성 여부가 모두 초기화 되었습니다.' })
 	}
 	
 	return (
