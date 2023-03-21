@@ -25,7 +25,7 @@ export const numberToKorean = (number: number | undefined) => {
 		resultString = String(numberComma(resultArray[i])) + unitWords[i] + ' ' + resultString;
 	}
 	
-	return resultString;
+	return resultString.trim();
 }
 
 // https://stackoverflow.com/a/64489535/13160032

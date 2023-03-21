@@ -80,13 +80,22 @@ const buildDestroyedCountConfig = (data: { x: string, y: number }[], theme: 'lig
 	}
 }
 
+type StatisticalData = {
+	totalDestroyedCount: number,
+	totalUsedMeso: number,
+	mesoWon: number,
+	itemName: string,
+	itemStarForce: number,
+	simulationNumber: number
+}
+
 const Simulation = (props: Props) => {
 	
 	const theme = useRecoilValue(ThemeAtom);
 	
 	const [usedMesoConfig, setUsedMesoConfig] = useState<ColumnConfig | undefined>(undefined);
 	const [destroyedCountConfig, setDestroyedCountConfig] = useState<ColumnConfig | undefined>(undefined);
-	const [statisticalData, setStatisticalData] = useState<{ totalDestroyedCount: number, totalUsedMeso: number, itemName: string, itemStarForce: number, simulationNumber: number } | undefined>(undefined);
+	const [statisticalData, setStatisticalData] = useState<StatisticalData | undefined>(undefined);
 	
 	const drawUsedMeso = (arr: number[]) => {
 		if (arr.length === 0) {
@@ -163,7 +172,8 @@ const Simulation = (props: Props) => {
 			totalDestroyedCount: totalDestroyedCount,
 			itemName: props.simulationResult[0].itemName,
 			itemStarForce: props.simulationResult[0].starForce,
-			simulationNumber: props.simulationNumber
+			simulationNumber: props.simulationNumber,
+			mesoWon: Math.round(totalUsedMeso / props.simulationResult[0].mesoWon),
 		});
 		
 		const mesoArray = result.map(it => it?.usedMeso).filter(it => it !== undefined);
@@ -207,6 +217,7 @@ const Simulation = (props: Props) => {
 									<Descriptions bordered column={2} size={'small'} style={{ marginTop: '.5rem' }}>
 										<Descriptions.Item label="총 소모 메소" span={2}>{numberToKorean(statisticalData.totalUsedMeso)}메소</Descriptions.Item>
 										<Descriptions.Item label="총 파괴 횟수" span={2}>{numberToKorean(statisticalData.totalDestroyedCount)}회</Descriptions.Item>
+										<Descriptions.Item label="총 소모 현금" span={2}>{numberToKorean(statisticalData.mesoWon)}원</Descriptions.Item>
 										<Descriptions.Item label="평균 소모 메소">{numberToKorean(statisticalData.totalUsedMeso / props.simulationNumber)}메소</Descriptions.Item>
 										<Descriptions.Item label="평균 파괴 횟수">{numberToKorean(statisticalData.totalDestroyedCount / props.simulationNumber)}회</Descriptions.Item>
 									</Descriptions>
