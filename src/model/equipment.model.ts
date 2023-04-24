@@ -26,6 +26,7 @@ export const equipmentGroupName: Record<EquipmentGroup, string> = {
 }
 
 export type EquipmentCategory =
+	| 'Character'
 	| 'One-Handed Weapon'
 	| 'Two-Handed Weapon'
 	| 'Secondary Weapon'
@@ -35,6 +36,7 @@ export type EquipmentCategory =
 	| 'Other'
 
 export const equipmentCategoryName: Record<EquipmentCategory, string> = {
+	'Character'               : '캐릭터',
 	'One-Handed Weapon'       : '한손무기',
 	'Two-Handed Weapon'       : '두손무기',
 	'Secondary Weapon'        : '보조무기',
@@ -45,6 +47,11 @@ export const equipmentCategoryName: Record<EquipmentCategory, string> = {
 }
 
 export type EquipmentSubCategory =
+	| 'Face'
+	| 'Hair'
+	// | 'Head'
+	| 'Chair'
+	
 	| 'Badge'
 	| 'Belt'
 	| 'Earrings'
@@ -143,6 +150,10 @@ export type EquipmentSubCategory =
 
 
 export const equipmentSubCategoryInfo: [EquipmentCategory, EquipmentSubCategory, string][] = [
+	[ 'Character', 'Face', '얼굴' ],
+	[ 'Character', 'Hair', '헤어' ],
+	[ 'Character', 'Chair', '의자' ],
+	
 	[ 'Accessory', 'Badge', '뱃지' ],
 	[ 'Accessory', 'Belt', '벨트' ],
 	[ 'Accessory', 'Earrings', '귀고리' ],
