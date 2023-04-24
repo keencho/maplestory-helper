@@ -6,9 +6,33 @@ const getCacheName = (name: string) => `${cachePrefix}-${name}`;
 export const doCacheFetch = async(url: string, cacheName: string): Promise<any> => {
 	const confirmedCacheName = getCacheName(cacheName);
 	
-	// TODO: expiration period 리서치
 	const cacheStorage = await caches.open(confirmedCacheName);
 	let cachedRes = await cacheStorage.match(url);
+	
+	// 만약 캐시된 데이터가 3일이 지났으면 다시 불러온다.
+	if (cachedRes && cachedRes.ok) {
+		const cachedTime = cachedRes.headers.get('date') || cachedRes.headers.get('last-modified');
+		
+		if (cachedTime) {
+			const contentType = cachedRes.headers.get('content-type');
+			const diff = Number(new Date()) - Number(new Date(cachedTime));
+			const diffDay = Math.floor(diff / 86400000);
+			
+			// 이미지는 7일
+			if (contentType?.includes('image')) {
+				if (diffDay > 7) {
+					cachedRes = undefined;
+				}	
+			}
+			
+			// json은 3일
+			else {
+				if (diffDay > 3) {
+					cachedRes = undefined;
+				}
+			}
+		}
+	}
 	
 	if (!cachedRes || !cachedRes.ok) {
 		await cacheStorage.add(url);
