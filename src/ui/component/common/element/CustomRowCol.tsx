@@ -22,7 +22,7 @@ export const CustomRow = (props: RowProps) => {
 }
 
 interface ColProps {
-	children: ReactNode,
+	children?: ReactNode,
 	span?: number | string
 	height?: number | string
 }

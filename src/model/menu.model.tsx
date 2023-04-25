@@ -5,7 +5,7 @@ import {BossSoulCrystalCalculatorContainer} from '../ui/container/BossSoulCrysta
 import LinkSkillContainer from '../ui/container/LinkSkillContainer';
 import {HomeworkContainer} from '../ui/container/HomeworkContainer';
 import {EquipmentEnhancementSimulatorWrapper} from '../ui/container/EquipmentEnhancementSimulator';
-import CoordinationSimulatorContainer from '../ui/container/CoordinationSimulatorContainer';
+import CoordinationSimulatorContainerWrapper from '../ui/container/CoordinationSimulatorContainerWrapper';
 
 export interface MenuType {
 	path: string,
@@ -36,7 +36,7 @@ export const Menu: MenuType[] = [
 	{
 		path: Path.COORDINATION_SIMULATOR,
 		label: '코디 시뮬레이터',
-		element: <CoordinationSimulatorContainer />,
+		element: <CoordinationSimulatorContainerWrapper />,
 		menuIcon: <SkinOutlined />
 	},
 	{

@@ -4,7 +4,7 @@ import {CustomCol, CustomRow} from '../component/common/element/CustomRowCol';
 import React, {useEffect, useRef, useState} from 'react';
 import {FlexBox} from '../component/common/element/FlexBox';
 import useMapleFetch from '../../hooks/useMapleFetch';
-import {getAllItems, getItem, getItemIcon} from '../../api/maplestory-io.api';
+import {getAllEquipment, getItem, getItemIcon} from '../../api/maplestory-io.api';
 import styled from 'styled-components';
 import {useRecoilValue} from 'recoil';
 import {ThemeAtom} from '../../recoil/theme.atom';
@@ -32,7 +32,7 @@ const LoadingBox = styled(FlexBox)`
 export const EquipmentEnhancementSimulatorWrapper = () => {
 	
 	const [items, errors, isLoading] = useMapleFetch({
-		apiURL: getAllItems,
+		apiURL: getAllEquipment,
 		filter: (data: any) => data
 			.filter((item: any) => item.name && item.requiredLevel)
 			.filter(function(this: any, item: any) {
