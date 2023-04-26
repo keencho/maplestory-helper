@@ -1,10 +1,10 @@
-import {Select} from "antd";
+import {Button, Input, Select} from "antd";
 import React, {useEffect, useState} from "react";
 import {
-  EquipmentCategory,
-  equipmentCategoryName,
-  EquipmentSubCategory,
-  equipmentSubCategoryInfo
+    EquipmentCategory,
+    equipmentCategoryName,
+    EquipmentSubCategory,
+    equipmentSubCategoryInfo
 } from "../../../model/equipment.model";
 import AsyncCacheImage from "../common/element/AsyncCacheImage";
 import {getItemIcon} from "../../../api/maplestory-io.api";
@@ -28,23 +28,34 @@ const equipmentCategoryOptions: { value: EquipmentCategory, label: string }[] = 
 
 const equipmentSubCategoryOptions: { category: EquipmentCategory, value: EquipmentSubCategory, label: string }[] = equipmentSubCategoryInfo.map(item => ( { category: item[0], value: item[1], label: item[2] }) )
 
-const Items = ({ items }: { items: any }) => {
+const Items = ({ items, onClickItem }: { items: any, onClickItem: (item: any) => void }) => {
 
     const defaultSearchItemCount = 50;
     const [searchItemCount, setSearchItemCount] = useState<number>(defaultSearchItemCount);
     const [searchedItem, setSearchedItem] = useState<any[]>([]);
+    const [searchKeyword, setSearchKeyword] = useState<string>('');
 
-    const [equipmentCategory, setEquipmentCategory] = useState(equipmentCategoryOptions[0].value)
+    const [equipmentCategory, setEquipmentCategory] = useState<EquipmentCategory | '카테고리를 선택하세요.'>(equipmentCategoryOptions[0].value)
     const [equipmentSubCategoryList, setEquipmentSubCategoryList] = useState(equipmentSubCategoryOptions.filter(item => item.category === equipmentCategory))
-    const [equipmentSubCategory, setEquipmentSubCategory] = useState(equipmentSubCategoryList[0].value)
+    const [equipmentSubCategory, setEquipmentSubCategory] = useState<EquipmentSubCategory | ''>(equipmentSubCategoryList.length > 0 ? equipmentSubCategoryList[0].value : '')
     const [categoryItems, setCategoryItems] = useState<any[]>([]);
 
     useEffect(() => {
-        const filteredItems = items.filter((item: any) => item.typeInfo.subCategory === equipmentSubCategory);
+        const filteredItems = items.filter((item: any) => searchKeyword.length === 0
+            ? item.typeInfo.subCategory === equipmentSubCategory
+            : item.name.includes(searchKeyword)
+        );
 
         setCategoryItems(filteredItems);
         setSearchedItem(filteredItems.slice(0, searchItemCount))
-    }, [equipmentCategory, equipmentSubCategory])
+
+    }, [equipmentCategory, equipmentSubCategory, searchKeyword])
+
+    useEffect(() => {
+        if (searchItemCount === defaultSearchItemCount) return;
+
+        setSearchedItem(categoryItems.slice(0, searchItemCount))
+    }, [searchItemCount])
 
     return (
         <Wrapper>
@@ -55,25 +66,62 @@ const Items = ({ items }: { items: any }) => {
                         const list = equipmentSubCategoryOptions.filter((item: any) => item.category === value);
                         setEquipmentSubCategoryList(list)
                         setEquipmentSubCategory(list[0].value)
+                        setSearchKeyword('')
                     }}
                     value={equipmentCategory}
                     options={equipmentCategoryOptions}
                 />
                 <Select
-                    onChange={value => setEquipmentSubCategory(value)}
+                    onChange={value => {
+                        setEquipmentSubCategory(value)
+                        setSearchKeyword('')
+                    }}
                     value={equipmentSubCategory}
                     options={equipmentSubCategoryList}
+                />
+                <Input
+                    placeholder="카테고리와 관계 없이 모든 아이템이 검색 됩니다."
+                    value={searchKeyword}
+                    onChange={(e) => {
+                        const value = e.target.value;
+                        setSearchKeyword(value)
+
+                        if (value.length > 0) {
+                            setEquipmentCategory('카테고리를 선택하세요.')
+                            setEquipmentSubCategory('')
+                            setEquipmentSubCategoryList([])
+                        } else {
+                            const v = equipmentCategoryOptions[0].value
+                            const sl = equipmentSubCategoryOptions.filter(item => item.category === v);
+                            setEquipmentCategory(v)
+                            setEquipmentSubCategoryList(sl)
+                            setEquipmentSubCategory(sl[0].value)
+                        }
+                    }}
                 />
             </SearchBox>
 
             <ItemBox>
                 {
                     searchedItem.map((item: any) => (
-                        <Item key={item.id}>
+                        <Item key={item.id} onClick={() => onClickItem(item)}>
                             <AsyncCacheImage src={getItemIcon(region, version, item.id)} cacheName={cacheName} alt={item.name} style={{ width: '30px' }} />
                             <ItemName>{item.name}</ItemName>
                         </Item>
                     ))
+                }
+                {
+                    searchedItem.length !== categoryItems.length
+                    ?
+                        <Button
+                            type='primary'
+                            style={{ borderRadius: 0, width: '100%', marginTop: '.5rem' }}
+                            onClick={() => setSearchItemCount(searchItemCount + defaultSearchItemCount)}
+                        >
+                            더보기
+                        </Button>
+                    :
+                        <></>
                 }
             </ItemBox>
         </Wrapper>
@@ -108,7 +156,6 @@ const Item = styled.div`
 
   transition: transform 0.5s;
   transform-style: preserve-3d;
-  //perspective: 500px;
   
   padding: .5rem;
   
@@ -119,11 +166,11 @@ const Item = styled.div`
   }
   
   &:nth-child(odd) {
-    padding-right: 1rem;
+    padding-right: .5rem;
   }
   
   &:nth-child(even) {
-    padding-left: 1rem;
+    padding-left: .5rem;
   }
   
 `
