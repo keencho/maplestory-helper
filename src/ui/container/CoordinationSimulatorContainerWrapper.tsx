@@ -27,6 +27,7 @@ const CoordinationSimulatorContainerWrapper = () => {
 const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
 
 	const [selectedItems, setSelectedItems] = useState<{ key: string, value: any }[]>([]);
+	const [character, setCharacter] = useState<any>(undefined);
 
 	const onClickItem = (item: any) => {
 		const subCategory = item.typeInfo.subCategory;
@@ -41,15 +42,20 @@ const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
 	useEffect(() => {
 		if (selectedItems.length === 0) return;
 
-		const arr: any = selectedItems.map(item => ( { itemId: item.value.id, region: region, version: version  } ));
-		// arr.push({ itemId: 1012050, animationName: 'default', region: region, version: version });
+		const arr: any = selectedItems.map(item => ( { itemId: item.value.id, region: region, version: version  } ))
+		
+		//////////////////////////// 이 2개는 필수 ////////////////////////////
+		// 머리
+		arr.push({ itemId: 12000, region: region, version: version });
+		// 몸통
+		arr.push({ itemId: 2000, region: region, version: version });
+		/////////////////////////////////////////////////////////////////////
+		
 		const str = encodeURIComponent(JSON.stringify(arr).slice(1, -1));
 
-		console.log(JSON.stringify(str))
-		console.log(str)
-
 		fetch(getCharacter(str))
-			.then((res) => console.log(res));
+			.then((res) => res.blob())
+			.then(blob => setCharacter(URL.createObjectURL(blob)));
 	}, [selectedItems])
 
 	return (
@@ -62,9 +68,11 @@ const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
 				
 				{/* 왼쪽 캔버스 */}
 				<CustomCol span={18}>
-					<pre>
-						{JSON.stringify(selectedItems, undefined, 4)}
-					</pre>
+					<img
+						src={character}
+						alt={'캐릭터'}
+						style={{ width: '100px' }}
+					/>
 				</CustomCol>
 
 				{/* 오른쪽 코디 검색 */}
