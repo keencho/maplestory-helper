@@ -34,7 +34,7 @@ const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
 		const subCategory = item.typeInfo.subCategory;
 
 		if (selectedItems.some(item => item.key === subCategory)) {
-			setSelectedItems(pv => [ ...selectedItems.filter(item => item.key !== subCategory), { key: subCategory, value: item } ]);
+			setSelectedItems(pv => [ ...pv.filter(item => item.key !== subCategory), { key: subCategory, value: item } ]);
 		} else {
 			setSelectedItems(pv => [ ...pv, { key: subCategory, value: item } ]);
 		}

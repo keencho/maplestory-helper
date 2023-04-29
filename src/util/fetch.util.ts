@@ -1,6 +1,10 @@
+import DateTimeUtils from './date-time.util';
+
 export const cachePrefix = 'keencho-maplestory';
 
 const getCacheName = (name: string) => `${cachePrefix}-${name}`;
+
+const cachedTimeKey = 'cached-time';
 
 // 예외처리는 각각의 서비스 / 훅에서 진행하도록
 export const doCacheFetch = async(url: string, cacheName: string): Promise<any> => {
@@ -9,9 +13,8 @@ export const doCacheFetch = async(url: string, cacheName: string): Promise<any> 
 	const cacheStorage = await caches.open(confirmedCacheName);
 	let cachedRes = await cacheStorage.match(url);
 	
-	// 만약 캐시된 데이터가 3일이 지났으면 다시 불러온다.
 	if (cachedRes && cachedRes.ok) {
-		const cachedTime = cachedRes.headers.get('date') || cachedRes.headers.get('last-modified');
+		const cachedTime = cachedRes.headers.get(cachedTimeKey);
 		
 		if (cachedTime) {
 			const contentType = cachedRes.headers.get('content-type');
@@ -22,7 +25,7 @@ export const doCacheFetch = async(url: string, cacheName: string): Promise<any> 
 			if (contentType?.includes('image')) {
 				if (diffDay > 7) {
 					cachedRes = undefined;
-				}	
+				}
 			}
 			
 			// json은 3일
@@ -34,8 +37,14 @@ export const doCacheFetch = async(url: string, cacheName: string): Promise<any> 
 		}
 	}
 	
+	// 캐시 스토리지에 값이 없다면 새롭게 fetch 한다.
 	if (!cachedRes || !cachedRes.ok) {
-		await cacheStorage.add(url);
+		const res = await fetch(url);
+		const newHeaders = new Headers(res.headers);
+		newHeaders.set(cachedTimeKey, DateTimeUtils.getNow());
+		const newResponse = new Response(res.body, { headers: newHeaders });
+		
+		await cacheStorage.put(url, newResponse.clone());
 		
 		cachedRes = await doCacheFetch(url, cacheName);
 		
