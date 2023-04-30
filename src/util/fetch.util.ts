@@ -70,9 +70,9 @@ const deleteOldCache = async(cacheName: string) => {
 	const keys = await caches.keys();
 	
 	for (const key of keys) {
-		const isOurCache = key.startsWith(cachePrefix);
+		const isMyCache = key.startsWith(cachePrefix);
 		
-		if (confirmedCacheName === key || !isOurCache) {
+		if (confirmedCacheName === key || !isMyCache) {
 			continue;
 		}
 		

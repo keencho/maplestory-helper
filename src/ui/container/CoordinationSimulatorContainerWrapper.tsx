@@ -25,43 +25,39 @@ const CoordinationSimulatorContainerWrapper = () => {
 	return <CoordinationSimulatorContainer items={items} />
 }
 
-const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
+const initDefaultCharacter = () => {
+	const arr: any[] = [];
+	
+	// 머리
+	arr.push({ itemId: 12000, region: region, version: version });
+	// 몸통
+	arr.push({ itemId: 2000, region: region, version: version });
+	
+	return arr;
+}
 
-	const [selectedItems, setSelectedItems] = useState<{ key: string, value: any }[]>([]);
-	const [characterSrc, setCharacterSrc] = useState<any>(undefined);
+const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
+	const [characters, setCharacters] = useState<{ key: string, value: any }[][]>([...Array(1)].map(_ => initDefaultCharacter()));
+	const [activeCharacterIdx, setActiveCharacterIdx] = useState<number>(0);
 
 	const onClickItem = (item: any) => {
+		let character = characters[activeCharacterIdx];
 		const subCategory = item.typeInfo.subCategory;
-
-		if (selectedItems.some(item => item.key === subCategory)) {
-			setSelectedItems(pv => [ ...pv.filter(item => item.key !== subCategory), { key: subCategory, value: item } ]);
+		const newItem = { key: subCategory, value: item };
+		
+		if (character.some(item => item.key === subCategory)) {
+			character = character.filter(item => item.key !== subCategory);
+			character.push(newItem)
 		} else {
-			setSelectedItems(pv => [ ...pv, { key: subCategory, value: item } ]);
+			character.push(newItem);
 		}
+		
+		setCharacters(pv => pv.filter((it, idx) => idx === activeCharacterIdx ? character : it));
 	}
 	
-	const onClickDeleteItem = (key: string) => {
-		setSelectedItems(pv => pv.filter(item => item.key !== key))
+	const addCharacter = () => {
+		setCharacters(pv => [ ...pv, initDefaultCharacter() ])
 	}
-
-	useEffect(() => {
-		// if (selectedItems.length === 0) return;
-		const arr: any = selectedItems.map(item => ( { itemId: item.value.id, region: region, version: version  } ))
-		
-		//////////////////////////// 이 2개는 필수 ////////////////////////////
-		// 머리
-		arr.push({ itemId: 12000, region: region, version: version });
-		// 몸통
-		arr.push({ itemId: 2000, region: region, version: version });
-		/////////////////////////////////////////////////////////////////////
-		
-		const str = encodeURIComponent(JSON.stringify(arr).slice(1, -1));
-		
-		fetch(getCharacter(str))
-			.then((res) => res.blob())
-			.then(blob => setCharacterSrc(URL.createObjectURL(blob)));
-		
-	}, [selectedItems])
 
 	return (
 		<>
@@ -74,9 +70,9 @@ const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
 				{/* 왼쪽 캔버스 */}
 				<CustomCol span={18}>
 					<Characters
-						selectedItems={selectedItems}
-						characterSrc={characterSrc}
-						onClickDeleteItem={onClickDeleteItem}
+						characters={characters}
+						setActiveCharacterIdx={setActiveCharacterIdx}
+						addCharacter={addCharacter}
 					/>
 				</CustomCol>
 
