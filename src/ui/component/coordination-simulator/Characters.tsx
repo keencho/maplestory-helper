@@ -1,16 +1,28 @@
 import React, {Dispatch, SetStateAction, useEffect, useRef, useState} from 'react';
-import {Button} from 'antd';
+import {Button, List} from 'antd';
 import styled from 'styled-components';
 import Draggable from 'react-draggable';
-import {PlusOutlined} from '@ant-design/icons';
+import {CloseOutlined, PlusOutlined} from '@ant-design/icons';
 import {getCharacter} from '../../../api/maplestory-io.api';
 import AsyncCacheImage from '../common/element/AsyncCacheImage';
 import {cacheName, region, version} from '../../../model/maplestory-io.model';
+import AsyncImage from '../common/element/AsyncImage';
+import {equipmentSubCategoryInfo} from '../../../model/equipment.model';
+import {FlexBox} from '../common/element/FlexBox';
 
 const Container = styled.div`
 	border: 1px solid white;
 	width: 100%;
 	height: 100%;
+`
+
+const ImageWrapper = styled.div`
+	position: absolute;
+	cursor: move;
+	display: flex;
+	justify-content: center;
+	align-content: center;
+	z-index: 999;
 `
 
 // https://codepen.io/jkasun/pen/QrLjXP
@@ -79,75 +91,69 @@ const Characters = (
 	{
 		characters,
 		setActiveCharacterIdx,
-		addCharacter
+		activeCharacterIdx,
+		addCharacter,
+		deleteCharacter
 	}:
 		{
 			characters: { key: string, value: any }[][],
+			activeCharacterIdx: number,
 			setActiveCharacterIdx: Dispatch<SetStateAction<number>>,
-			addCharacter: () => void
+			addCharacter: () => void,
+			deleteCharacter: () => void
 		}
 ) => {
 	
+	const [isDragging, setIsDragging] = useState<boolean>(false);
+	
 	const getSrc = (character: { key: string, value: any }[]) => {
-		const arr = character.map((item: any) => {
-			if (!item.hasOwnProperty('key')) {
-				return item;
-			}
-			
-			return { itemId: item.value.id, region: region, version: version }
-		})
+		const arr = character.map((item: any) => ({ itemId: item.value.id, region: region, version: version }))
 		
-		// console.log(arr)
+		// 머리
+		arr.push({ itemId: 12000, region: region, version: version });
+		// 몸통
+		arr.push({ itemId: 2000, region: region, version: version });
 		
 		const str = encodeURIComponent(JSON.stringify(arr).slice(1, -1));
 		
 		return getCharacter(str)
 	}
 	
+	const eventControl = (event: { type: any }, info: any) => {
+		if (event.type === 'mousemove' || event.type === 'touchmove') {
+			setIsDragging(true)
+		}
+		
+		if (event.type === 'mouseup' || event.type === 'touchend') {
+			setTimeout(() => {
+				setIsDragging(false);
+			}, 100);
+			
+		}
+	}
+	
 	return (
 		<Container>
 				{
 					characters.map((character, idx) => (
-						<Draggable bounds={'parent'} key={idx}>
-							<div
-								style={{ border: '1px solid red', position: 'absolute', cursor: 'move' }}
-								onClick={() => setActiveCharacterIdx(idx)}
-							>
-								<img src={getSrc(character)}
+						<Draggable
+							bounds={'parent'}
+							key={idx}
+							onDrag={eventControl}
+							onStop={eventControl}
+						>
+							<ImageWrapper onClick={() => isDragging ? undefined : setActiveCharacterIdx(idx)}>
+								<AsyncImage src={getSrc(character)}
 								     alt={'캐릭터'}
-								     style={{ minWidth: '100px', minHeight: '158px' }}
+								     style={{
+											 filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none',
+											}}
 								     draggable={false}
 						     />
-							</div>
+							</ImageWrapper>
 						</Draggable>
 					))
 				}
-				{/*<div*/}
-				{/*	style={{ border: '1px solid red', position: 'absolute', cursor: 'move' }}*/}
-				{/*>*/}
-					{/*<img src={characterSrc}*/}
-					{/*     alt={'캐릭터'}*/}
-					{/*     style={{ minWidth: '100px', minHeight: '158px' }}*/}
-					{/*     draggable={false}*/}
-					{/*/>*/}
-					{/*<div>*/}
-					{/*	{*/}
-					{/*		selectedItems.map((item) => (*/}
-					{/*			<div key={item.key}>*/}
-					{/*				{item.value.name}*/}
-					{/*				<Button*/}
-					{/*					size={'small'}*/}
-					{/*					type={'primary'}*/}
-					{/*					onClick={() => onClickDeleteItem(item.key)}*/}
-					{/*					danger*/}
-					{/*				>*/}
-					{/*					삭제*/}
-					{/*				</Button>*/}
-					{/*			</div>*/}
-					{/*		))*/}
-					{/*	}*/}
-					{/*</div>*/}
-				{/*</div>*/}
 			<Button
 				type="primary"
 				shape="circle"
@@ -158,8 +164,51 @@ const Characters = (
 					height: '64px',
 					position: 'absolute',
 					bottom: 15,
-					right: 20
+					left: 20
 			}} />
+			<List
+				size="small"
+				header={
+					<FlexBox>
+						캐릭터 정보
+						<Button
+							size={'small'}
+							type={'primary'}
+							style={{ marginLeft: 'auto' }}
+							danger
+							onClick={deleteCharacter}
+						>
+							삭제
+						</Button>
+					</FlexBox>
+				}
+				bordered
+				dataSource={characters[activeCharacterIdx]}
+				renderItem={item => (
+					<List.Item>
+						<List.Item.Meta
+							title={item.value.name}
+							description={equipmentSubCategoryInfo.find(info => info[1] === item.key)![2]}
+						/>
+						<Button
+							size={'small'}
+							type={'primary'}
+							danger
+						>
+							<CloseOutlined />
+						</Button>
+					</List.Item>)
+				}
+				style={{
+					position: 'absolute',
+					bottom: 15,
+					right: 20,
+					maxHeight: '300px',
+					minWidth: '250px',
+					maxWidth: '250px',
+					overflowY: 'scroll'
+				}}
+			/>
 		</Container>
 	)
 }

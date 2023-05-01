@@ -1,11 +1,11 @@
 import PageTitle from '../component/common/PageTitle';
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import useMapleFetch from '../../hooks/useMapleFetch';
-import {getAllItems, getCharacter} from '../../api/maplestory-io.api';
+import {getAllItems} from '../../api/maplestory-io.api';
 import {CustomCol, CustomRow} from "../component/common/element/CustomRowCol";
 import Items from "../component/coordination-simulator/Items";
-import {region, version} from "../../model/maplestory-io.model";
 import Characters from '../component/coordination-simulator/Characters';
+import NotificationUtil from '../../util/notification.util';
 
 const CoordinationSimulatorContainerWrapper = () => {
 
@@ -25,19 +25,8 @@ const CoordinationSimulatorContainerWrapper = () => {
 	return <CoordinationSimulatorContainer items={items} />
 }
 
-const initDefaultCharacter = () => {
-	const arr: any[] = [];
-	
-	// 머리
-	arr.push({ itemId: 12000, region: region, version: version });
-	// 몸통
-	arr.push({ itemId: 2000, region: region, version: version });
-	
-	return arr;
-}
-
 const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
-	const [characters, setCharacters] = useState<{ key: string, value: any }[][]>([...Array(1)].map(_ => initDefaultCharacter()));
+	const [characters, setCharacters] = useState<{ key: string, value: any }[][]>([...Array(1)].map(_ => []));
 	const [activeCharacterIdx, setActiveCharacterIdx] = useState<number>(0);
 
 	const onClickItem = (item: any) => {
@@ -52,11 +41,29 @@ const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
 			character.push(newItem);
 		}
 		
-		setCharacters(pv => pv.filter((it, idx) => idx === activeCharacterIdx ? character : it));
+		setCharacters(pv => pv.map((it, idx) => idx === activeCharacterIdx ? character : it));
 	}
 	
 	const addCharacter = () => {
-		setCharacters(pv => [ ...pv, initDefaultCharacter() ])
+		const MAX_CHARACTER = 10;
+		
+		if (characters.length >= MAX_CHARACTER) {
+			NotificationUtil.fire('error', `최대 ${MAX_CHARACTER}개의 캐릭터만 생성할 수 있습니다.`);
+			return;
+		}
+		
+		setCharacters(pv => [ ...pv, [] ])
+	}
+	
+	const deleteCharacter = () => {
+		if (characters.length === 1) {
+			NotificationUtil.fire('error', `최소 1개의 캐릭터가 존재해야 합니다.`);
+			return;
+		}
+		
+		const newCharacters = characters.filter((it, idx) => idx !== activeCharacterIdx);
+		setCharacters(newCharacters)
+		// setActiveCharacterIdx(0)
 	}
 
 	return (
@@ -71,8 +78,10 @@ const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
 				<CustomCol span={18}>
 					<Characters
 						characters={characters}
+						activeCharacterIdx={activeCharacterIdx}
 						setActiveCharacterIdx={setActiveCharacterIdx}
 						addCharacter={addCharacter}
+						deleteCharacter={deleteCharacter}
 					/>
 				</CustomCol>
 

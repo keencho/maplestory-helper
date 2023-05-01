@@ -47,6 +47,8 @@ export const equipmentCategoryName: Record<EquipmentCategory, string> = {
 }
 
 export type EquipmentSubCategory =
+	| 'Cash'
+	
 	| 'Face'
 	| 'Hair'
 	// | 'Head'
@@ -150,6 +152,8 @@ export type EquipmentSubCategory =
 
 
 export const equipmentSubCategoryInfo: [EquipmentCategory, EquipmentSubCategory, string][] = [
+	[ 'Other', 'Cash', '캐시 아이템'],
+	
 	[ 'Character', 'Face', '얼굴' ],
 	[ 'Character', 'Hair', '헤어' ],
 	[ 'Character', 'Chair', '의자' ],
