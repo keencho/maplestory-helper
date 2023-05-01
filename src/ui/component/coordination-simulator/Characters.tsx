@@ -2,13 +2,16 @@ import React, {Dispatch, SetStateAction, useEffect, useRef, useState} from 'reac
 import {Button, List} from 'antd';
 import styled from 'styled-components';
 import Draggable from 'react-draggable';
-import {CloseOutlined, PlusOutlined} from '@ant-design/icons';
-import {getCharacter} from '../../../api/maplestory-io.api';
+import {CloseOutlined, DeleteOutlined, PlusOutlined, UndoOutlined} from '@ant-design/icons';
+import {getCharacter, getItemIcon} from '../../../api/maplestory-io.api';
 import AsyncCacheImage from '../common/element/AsyncCacheImage';
 import {cacheName, region, version} from '../../../model/maplestory-io.model';
 import AsyncImage from '../common/element/AsyncImage';
 import {equipmentSubCategoryInfo} from '../../../model/equipment.model';
 import {FlexBox} from '../common/element/FlexBox';
+import {it} from 'node:test';
+import {Simulate} from 'react-dom/test-utils';
+import reset = Simulate.reset;
 
 const Container = styled.div`
 	border: 1px solid white;
@@ -93,20 +96,25 @@ const Characters = (
 		setActiveCharacterIdx,
 		activeCharacterIdx,
 		addCharacter,
-		deleteCharacter
+		deleteCharacter,
+		resetCharacter,
+		deleteItem
 	}:
 		{
 			characters: { key: string, value: any }[][],
 			activeCharacterIdx: number,
 			setActiveCharacterIdx: Dispatch<SetStateAction<number>>,
 			addCharacter: () => void,
-			deleteCharacter: () => void
+			deleteCharacter: () => void,
+			resetCharacter: () => void,
+			deleteItem: (key: string) => void
 		}
 ) => {
 	
+	const containerRef = useRef(null)
 	const [isDragging, setIsDragging] = useState<boolean>(false);
 	
-	const getSrc = (character: { key: string, value: any }[]) => {
+	const getCharacterSrc = (character: { key: string, value: any }[]) => {
 		const arr = character.map((item: any) => ({ itemId: item.value.id, region: region, version: version }))
 		
 		// 머리
@@ -132,8 +140,29 @@ const Characters = (
 		}
 	}
 	
+	const getDescriptionByKey = (key: string) => {
+		const matchedItem = equipmentSubCategoryInfo.find(info => info[1] === key);
+		
+		if (!matchedItem) {
+			return '기타'
+		}
+		return matchedItem[2];
+	}
+	
+	const getPosition = (): { x: number, y: number } => {
+		const current: any = containerRef.current;
+		
+		if (current) {
+			const width = current.offsetWidth;
+			const height = current.offsetHeight;
+			
+			return { x: width / 2, y: height / 2 }
+		}
+		return { x: 0, y: 0 }
+	}
+	
 	return (
-		<Container>
+		<Container ref={containerRef}>
 				{
 					characters.map((character, idx) => (
 						<Draggable
@@ -141,9 +170,10 @@ const Characters = (
 							key={idx}
 							onDrag={eventControl}
 							onStop={eventControl}
+							defaultPosition={getPosition()}
 						>
 							<ImageWrapper onClick={() => isDragging ? undefined : setActiveCharacterIdx(idx)}>
-								<AsyncImage src={getSrc(character)}
+								<AsyncImage src={getCharacterSrc(character)}
 								     alt={'캐릭터'}
 								     style={{
 											 filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none',
@@ -171,15 +201,27 @@ const Characters = (
 				header={
 					<FlexBox>
 						캐릭터 정보
-						<Button
-							size={'small'}
-							type={'primary'}
-							style={{ marginLeft: 'auto' }}
-							danger
-							onClick={deleteCharacter}
-						>
-							삭제
-						</Button>
+						<div style={{ marginLeft: 'auto' }}>
+							<Button
+								size={'small'}
+								type={'primary'}
+								shape={'circle'}
+								danger
+								onClick={resetCharacter}
+							>
+								<UndoOutlined />
+							</Button>
+							<Button
+								size={'small'}
+								type={'primary'}
+								style={{ marginLeft: '.5rem' }}
+								shape={'circle'}
+								danger
+								onClick={deleteCharacter}
+							>
+								<DeleteOutlined />
+							</Button>
+						</div>
 					</FlexBox>
 				}
 				bordered
@@ -187,13 +229,20 @@ const Characters = (
 				renderItem={item => (
 					<List.Item>
 						<List.Item.Meta
+							avatar={
+								<FlexBox alignItems={'center'} justifyContent={'center'} height={'100%'}>
+									<AsyncCacheImage src={getItemIcon(region, version, item.value.id)} cacheName={cacheName} alt={item.value.name} style={{ width: '30px' }} />
+								</FlexBox>
+							}
 							title={item.value.name}
-							description={equipmentSubCategoryInfo.find(info => info[1] === item.key)![2]}
+							description={getDescriptionByKey(item.key)}
 						/>
 						<Button
 							size={'small'}
+							shape={'circle'}
 							type={'primary'}
 							danger
+							onClick={() => deleteItem(item.key)}
 						>
 							<CloseOutlined />
 						</Button>

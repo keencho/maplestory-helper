@@ -1,5 +1,5 @@
 import PageTitle from '../component/common/PageTitle';
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import useMapleFetch from '../../hooks/useMapleFetch';
 import {getAllItems} from '../../api/maplestory-io.api';
 import {CustomCol, CustomRow} from "../component/common/element/CustomRowCol";
@@ -61,9 +61,22 @@ const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
 			return;
 		}
 		
-		const newCharacters = characters.filter((it, idx) => idx !== activeCharacterIdx);
-		setCharacters(newCharacters)
-		// setActiveCharacterIdx(0)
+		setCharacters(pv => pv.filter((it, idx) => idx !== activeCharacterIdx))
+		setActiveCharacterIdx(0)
+	}
+	
+	const resetCharacter = () => {
+		setCharacters(pv => pv.map((it, idx) => idx === activeCharacterIdx ? [] : it))
+	}
+	
+	const deleteItem = (key: string) => {
+		setCharacters(pv => pv.map((it, idx) => {
+			if (idx !== activeCharacterIdx) {
+				return it;
+			}
+			
+			return it.filter(it2 => it2.key !== key);
+		}))
 	}
 
 	return (
@@ -82,6 +95,8 @@ const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
 						setActiveCharacterIdx={setActiveCharacterIdx}
 						addCharacter={addCharacter}
 						deleteCharacter={deleteCharacter}
+						resetCharacter={resetCharacter}
+						deleteItem={deleteItem}
 					/>
 				</CustomCol>
 
