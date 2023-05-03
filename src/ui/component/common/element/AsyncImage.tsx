@@ -17,7 +17,7 @@ const AsyncImage = (props: { src: string, alt?: string, style?: React.CSSPropert
 		return <img src={loadedSrc} alt={props.alt} style={props.style} draggable={props.draggable} />;
 	}
 	
-	return <Spin size={'large'} tip={'로딩중...'}/>;
+	return <Spin size={'large'} tip={'로딩중...'} />;
 };
 
 export default AsyncImage

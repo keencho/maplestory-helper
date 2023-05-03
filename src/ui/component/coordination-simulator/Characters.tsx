@@ -1,15 +1,15 @@
-import React, {Dispatch, SetStateAction, useRef, useState} from 'react';
+import React, {Dispatch, SetStateAction, useEffect, useRef, useState} from 'react';
 import {Button, List} from 'antd';
 import styled from 'styled-components';
-import Draggable from 'react-draggable';
-import {CloseOutlined, DeleteOutlined, PlusOutlined, UndoOutlined} from '@ant-design/icons';
+import {CloseOutlined, PlusOutlined} from '@ant-design/icons';
 import {getCharacter, getItemIcon} from '../../../api/maplestory-io.api';
 import AsyncCacheImage from '../common/element/AsyncCacheImage';
 import {cacheName, region, version} from '../../../model/maplestory-io.model';
-import AsyncImage from '../common/element/AsyncImage';
 import {equipmentSubCategoryInfo} from '../../../model/equipment.model';
 import {FlexBox} from '../common/element/FlexBox';
-import {Simulate} from 'react-dom/test-utils';
+import {Rnd} from "react-rnd";
+import AsyncImage from "../common/element/AsyncImage";
+import {BLUE} from "../../../model/color.model";
 
 const Container = styled.div`
 	border: 1px solid white;
@@ -25,68 +25,6 @@ const ImageWrapper = styled.div`
 	align-content: center;
 	z-index: 999;
 `
-
-// https://codepen.io/jkasun/pen/QrLjXP
-// const ResizableDiv = () => {
-// 	const [width, setWidth] = useState(200);
-// 	const [height, setHeight] = useState(200);
-// 	const [dragging, setDragging] = useState(false);
-// 	const [initialX, setInitialX] = useState(0);
-// 	const [initialY, setInitialY] = useState(0);
-// 	const ref = useRef(null);
-//
-// 	useEffect(() => {
-// 		if (dragging) {
-// 			function handleMouseMove(event) {
-// 				const deltaX = event.clientX - initialX;
-// 				const deltaY = event.clientY - initialY;
-// 				setWidth((prevWidth) => prevWidth + deltaX);
-// 				setHeight((prevHeight) => prevHeight + deltaY);
-// 				setInitialX(event.clientX);
-// 				setInitialY(event.clientY);
-// 			}
-//
-// 			function handleMouseUp() {
-// 				setDragging(false);
-// 			}
-//
-// 			document.addEventListener("mousemove", handleMouseMove);
-// 			document.addEventListener("mouseup", handleMouseUp);
-//
-// 			return () => {
-// 				document.removeEventListener("mousemove", handleMouseMove);
-// 				document.removeEventListener("mouseup", handleMouseUp);
-// 			};
-// 		}
-// 	}, [dragging, initialX, initialY]);
-//
-// 	function handleMouseDown(event) {
-// 		setDragging(true);
-// 		setInitialX(event.clientX);
-// 		setInitialY(event.clientY);
-// 	}
-//
-// 	return (
-// 		<div
-// 			ref={ref}
-// 			style={{ width: `${width}px`, height: `${height}px`, border: "1px solid black", position: "relative", minHeight:'300px', backgroundColor: 'red', minWidth: '300px', maxHeight: '600px', maxWidth: '600px' }}
-// 		>
-// 			<div
-// 				style={{
-// 					position: "absolute",
-// 					bottom: 0,
-// 					right: 0,
-// 					width: "10px",
-// 					height: "10px",
-// 					border: "1px solid black",
-// 					backgroundColor: "white",
-// 					cursor: "se-resize",
-// 				}}
-// 				onMouseDown={handleMouseDown}
-// 			/>
-// 		</div>
-// 	);
-// }
 
 const Characters = (
 	{
@@ -111,6 +49,7 @@ const Characters = (
 	
 	const containerRef = useRef(null)
 	const [isDragging, setIsDragging] = useState<boolean>(false);
+	const [refLoaded, setRefLoaded] = useState<boolean>(false);
 	
 	const getCharacterSrc = (character: { key: string, value: any }[]) => {
 		const arr = character.map((item: any) => ({ itemId: item.value.id, region: region, version: version }))
@@ -125,16 +64,15 @@ const Characters = (
 		return getCharacter(str)
 	}
 	
-	const eventControl = (event: { type: any }, info: any) => {
-		if (event.type === 'mousemove' || event.type === 'touchmove') {
+	const eventControl = (event: { type: any }) => {
+		if (event.type === 'mousemove') {
 			setIsDragging(true)
 		}
-		
-		if (event.type === 'mouseup' || event.type === 'touchend') {
+
+		if (event.type === 'mouseup') {
 			setTimeout(() => {
 				setIsDragging(false);
 			}, 100);
-			
 		}
 	}
 	
@@ -147,41 +85,65 @@ const Characters = (
 		return matchedItem[2];
 	}
 	
-	const getPosition = (): { x: number, y: number } => {
+	const getPosition = (idx: number): { x: number, y: number } => {
 		const current: any = containerRef.current;
 		
 		if (current) {
-			const width = current.offsetWidth;
+			// const width = current.offsetWidth;
 			const height = current.offsetHeight;
 			
-			return { x: width / 2, y: height / 2 }
+			return { x: 30 + (idx * 50), y: height / 2.5 }
 		}
 		return { x: 0, y: 0 }
 	}
+
+	useEffect(() => {
+		if (containerRef.current) {
+			setRefLoaded(true)
+		}
+	}, [containerRef])
 	
 	return (
 		<Container ref={containerRef}>
-				{
-					characters.map((character, idx) => (
-						<Draggable
-							bounds={'parent'}
-							key={character.key}
-							onDrag={eventControl}
-							onStop={eventControl}
-							defaultPosition={getPosition()}
-						>
-							<ImageWrapper onClick={() => isDragging ? undefined : setActiveCharacterIdx(idx)}>
-								<AsyncImage src={getCharacterSrc(character.data)}
-								     alt={'캐릭터'}
-								     style={{
-											 filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none',
-											}}
-								     draggable={false}
-						     />
-							</ImageWrapper>
-						</Draggable>
-					))
-				}
+			{
+				refLoaded && characters.map((character, idx) => (
+					<Rnd
+						default={{
+							x: 0,
+							y: 0,
+							width: 45,
+							height: 70,
+						}}
+						bounds={'parent'}
+						enableResizing={{
+							bottomRight: true
+						}}
+						resizeHandleStyles={{
+							bottomRight: {
+								width: '10px',
+								height: '10px',
+								borderRadius: '10px',
+								backgroundColor: BLUE
+							}
+						}}
+						onDragStart={eventControl}
+						onDragStop={eventControl}
+						onDrag={eventControl}
+						minWidth={45}
+						minHeight={70}
+						maxWidth={135}
+						maxHeight={210}
+					>
+						<ImageWrapper onClick={() => isDragging ? undefined : setActiveCharacterIdx(idx)} style={{ width: '100%', height: '100%' }}>
+							<AsyncImage src={getCharacterSrc(character.data)}
+								 alt={'캐릭터'}
+								 style={{ filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none' }}
+								 draggable={false}
+							/>
+						</ImageWrapper>
+					</Rnd>
+				))
+			}
 			<Button
 				type="primary"
 				shape="circle"
@@ -203,21 +165,19 @@ const Characters = (
 							<Button
 								size={'small'}
 								type={'primary'}
-								shape={'circle'}
 								danger
 								onClick={resetCharacter}
 							>
-								<UndoOutlined />
+								초기화
 							</Button>
 							<Button
 								size={'small'}
 								type={'primary'}
 								style={{ marginLeft: '.5rem' }}
-								shape={'circle'}
 								danger
 								onClick={deleteCharacter}
 							>
-								<DeleteOutlined />
+								삭제
 							</Button>
 						</div>
 					</FlexBox>
