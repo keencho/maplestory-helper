@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {doCacheFetch} from '../../../../util/fetch.util';
 
-const AsyncCacheImage = (props: { src: string, cacheName: string, alt?: string, style?: React.CSSProperties }) => {
+const AsyncCacheImage = (props: { src: string, cacheName: string, alt?: string, style?: React.CSSProperties, draggable?: boolean }) => {
 	const [loadedSrc, setLoadedSrc] = useState<string>('');
 	
 	useEffect(() => {
@@ -15,7 +15,7 @@ const AsyncCacheImage = (props: { src: string, cacheName: string, alt?: string, 
 	
 	if (loadedSrc) {
 		return (
-			<img src={loadedSrc} alt={props.alt} style={props.style} />
+			<img src={loadedSrc} alt={props.alt} style={props.style} draggable={props.draggable} />
 		);
 	}
 	

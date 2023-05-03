@@ -1,17 +1,50 @@
+import DateTimeUtils from './date-time.util';
+
 export const cachePrefix = 'keencho-maplestory';
 
 const getCacheName = (name: string) => `${cachePrefix}-${name}`;
+
+const cachedTimeKey = 'cached-time';
 
 // 예외처리는 각각의 서비스 / 훅에서 진행하도록
 export const doCacheFetch = async(url: string, cacheName: string): Promise<any> => {
 	const confirmedCacheName = getCacheName(cacheName);
 	
-	// TODO: expiration period 리서치
 	const cacheStorage = await caches.open(confirmedCacheName);
 	let cachedRes = await cacheStorage.match(url);
 	
+	if (cachedRes && cachedRes.ok) {
+		const cachedTime = cachedRes.headers.get(cachedTimeKey);
+		
+		if (cachedTime) {
+			const contentType = cachedRes.headers.get('content-type');
+			const diff = Number(new Date()) - Number(new Date(cachedTime));
+			const diffDay = Math.floor(diff / 86400000);
+			
+			// 이미지는 7일
+			if (contentType?.includes('image')) {
+				if (diffDay > 7) {
+					cachedRes = undefined;
+				}
+			}
+			
+			// json은 3일
+			else {
+				if (diffDay > 3) {
+					cachedRes = undefined;
+				}
+			}
+		}
+	}
+	
+	// 캐시 스토리지에 값이 없다면 새롭게 fetch 한다.
 	if (!cachedRes || !cachedRes.ok) {
-		await cacheStorage.add(url);
+		const res = await fetch(url);
+		const newHeaders = new Headers(res.headers);
+		newHeaders.set(cachedTimeKey, DateTimeUtils.getNow());
+		const newResponse = new Response(res.body, { headers: newHeaders });
+		
+		await cacheStorage.put(url, newResponse.clone());
 		
 		cachedRes = await doCacheFetch(url, cacheName);
 		
@@ -37,9 +70,9 @@ const deleteOldCache = async(cacheName: string) => {
 	const keys = await caches.keys();
 	
 	for (const key of keys) {
-		const isOurCache = key.startsWith(cachePrefix);
+		const isMyCache = key.startsWith(cachePrefix);
 		
-		if (confirmedCacheName === key || !isOurCache) {
+		if (confirmedCacheName === key || !isMyCache) {
 			continue;
 		}
 		

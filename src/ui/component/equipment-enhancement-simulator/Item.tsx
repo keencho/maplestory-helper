@@ -78,7 +78,7 @@ const Item = ({ item, isAutoRunning, event }: Props) => {
 	
 	const getStarForceElement = (): JSX.Element => {
 		if (!item.isAvailableStarForce) return <></>
-		if (item.destroyed === true) return <></>
+		if (item.destroyed) return <></>
 		
 		const arr: JSX.Element[] = [];
 		

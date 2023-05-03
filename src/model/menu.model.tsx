@@ -1,10 +1,11 @@
 import Path from './path.model';
 import React from 'react';
-import {DollarCircleOutlined, HomeOutlined, LinkOutlined, SkinOutlined} from '@ant-design/icons';
+import {DollarCircleOutlined, HomeOutlined, LinkOutlined, SkinOutlined, ToolOutlined} from '@ant-design/icons';
 import {BossSoulCrystalCalculatorContainer} from '../ui/container/BossSoulCrystalCalculatorContainer';
 import LinkSkillContainer from '../ui/container/LinkSkillContainer';
 import {HomeworkContainer} from '../ui/container/HomeworkContainer';
 import {EquipmentEnhancementSimulatorWrapper} from '../ui/container/EquipmentEnhancementSimulator';
+import CoordinationSimulatorContainerWrapper from '../ui/container/CoordinationSimulatorContainerWrapper';
 
 export interface MenuType {
 	path: string,
@@ -30,6 +31,12 @@ export const Menu: MenuType[] = [
 		path: Path.EQUIPMENT_ENFORCE_SIMULATOR,
 		label: '장비강화 시뮬레이터',
 		element: <EquipmentEnhancementSimulatorWrapper />,
+		menuIcon: <ToolOutlined />
+	},
+	{
+		path: Path.COORDINATION_SIMULATOR,
+		label: '코디 시뮬레이터',
+		element: <CoordinationSimulatorContainerWrapper />,
 		menuIcon: <SkinOutlined />
 	},
 	{
