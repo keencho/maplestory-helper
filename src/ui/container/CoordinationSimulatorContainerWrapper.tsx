@@ -26,20 +26,23 @@ const CoordinationSimulatorContainerWrapper = () => {
 }
 
 const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
-	const [characters, setCharacters] = useState<{ key: string, value: any }[][]>([...Array(1)].map(_ => []));
+	const [characters, setCharacters] = useState<{ key: string, data: { key: string, value: any }[] }[]>([{
+		key: crypto.randomUUID(),
+		data: []
+	}]);
+
 	const [activeCharacterIdx, setActiveCharacterIdx] = useState<number>(0);
 
 	const onClickItem = (item: any) => {
 		let character = characters[activeCharacterIdx];
 		const subCategory = item.typeInfo.subCategory;
 		const newItem = { key: subCategory, value: item };
-		
-		if (character.some(item => item.key === subCategory)) {
-			character = character.filter(item => item.key !== subCategory);
-			character.push(newItem)
-		} else {
-			character.push(newItem);
+
+		if (character.data.some(item => item.key === subCategory)) {
+			character.data = character.data.filter(item => item.key !== subCategory)
 		}
+
+		character.data.push(newItem);
 		
 		setCharacters(pv => pv.map((it, idx) => idx === activeCharacterIdx ? character : it));
 	}
@@ -51,8 +54,8 @@ const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
 			NotificationUtil.fire('error', `최대 ${MAX_CHARACTER}개의 캐릭터만 생성할 수 있습니다.`);
 			return;
 		}
-		
-		setCharacters(pv => [ ...pv, [] ])
+
+		setCharacters(pv => [ ...pv, { key: crypto.randomUUID(), data: [] } ])
 	}
 	
 	const deleteCharacter = () => {
@@ -66,7 +69,15 @@ const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
 	}
 	
 	const resetCharacter = () => {
-		setCharacters(pv => pv.map((it, idx) => idx === activeCharacterIdx ? [] : it))
+		setCharacters(pv => {
+			return pv.map((it, idx) => {
+				if (idx === activeCharacterIdx) {
+					it.data = [];
+				}
+
+				return it;
+			})
+		})
 	}
 	
 	const deleteItem = (key: string) => {
@@ -74,8 +85,10 @@ const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
 			if (idx !== activeCharacterIdx) {
 				return it;
 			}
+
+			it.data = it.data.filter(it2 => it2.key !== key);
 			
-			return it.filter(it2 => it2.key !== key);
+			return it;
 		}))
 	}
 

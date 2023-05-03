@@ -1,4 +1,4 @@
-import React, {Dispatch, SetStateAction, useEffect, useRef, useState} from 'react';
+import React, {Dispatch, SetStateAction, useRef, useState} from 'react';
 import {Button, List} from 'antd';
 import styled from 'styled-components';
 import Draggable from 'react-draggable';
@@ -9,9 +9,7 @@ import {cacheName, region, version} from '../../../model/maplestory-io.model';
 import AsyncImage from '../common/element/AsyncImage';
 import {equipmentSubCategoryInfo} from '../../../model/equipment.model';
 import {FlexBox} from '../common/element/FlexBox';
-import {it} from 'node:test';
 import {Simulate} from 'react-dom/test-utils';
-import reset = Simulate.reset;
 
 const Container = styled.div`
 	border: 1px solid white;
@@ -101,7 +99,7 @@ const Characters = (
 		deleteItem
 	}:
 		{
-			characters: { key: string, value: any }[][],
+			characters: { key: string, data: { key: string, value: any }[] }[],
 			activeCharacterIdx: number,
 			setActiveCharacterIdx: Dispatch<SetStateAction<number>>,
 			addCharacter: () => void,
@@ -167,13 +165,13 @@ const Characters = (
 					characters.map((character, idx) => (
 						<Draggable
 							bounds={'parent'}
-							key={idx}
+							key={character.key}
 							onDrag={eventControl}
 							onStop={eventControl}
 							defaultPosition={getPosition()}
 						>
 							<ImageWrapper onClick={() => isDragging ? undefined : setActiveCharacterIdx(idx)}>
-								<AsyncImage src={getCharacterSrc(character)}
+								<AsyncImage src={getCharacterSrc(character.data)}
 								     alt={'캐릭터'}
 								     style={{
 											 filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none',
@@ -225,7 +223,7 @@ const Characters = (
 					</FlexBox>
 				}
 				bordered
-				dataSource={characters[activeCharacterIdx]}
+				dataSource={characters[activeCharacterIdx].data}
 				renderItem={item => (
 					<List.Item>
 						<List.Item.Meta
