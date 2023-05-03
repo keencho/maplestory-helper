@@ -12,7 +12,6 @@ import AsyncImage from "../common/element/AsyncImage";
 import {BLUE} from "../../../model/color.model";
 
 const Container = styled.div`
-	border: 1px solid white;
 	width: 100%;
 	height: 100%;
 `
