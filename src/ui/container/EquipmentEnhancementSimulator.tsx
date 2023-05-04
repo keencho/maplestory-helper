@@ -10,7 +10,6 @@ import {useRecoilValue} from 'recoil';
 import {ThemeAtom} from '../../recoil/theme.atom';
 import {HOVER} from '../../model/color.model';
 import {cacheName, region, version} from '../../model/maplestory-io.model';
-import AsyncCacheImage from '../component/common/element/AsyncCacheImage';
 import {buildStats, isAvailableStarForce} from '../../util/equipment.util';
 import {Equipment, StarForceEventType} from '../../model/equipment.model';
 import Item from '../component/equipment-enhancement-simulator/Item';
@@ -19,6 +18,7 @@ import NotificationUtil from '../../util/notification.util';
 import {doStarForce} from '../../util/starforce-util';
 import Simulation from '../component/equipment-enhancement-simulator/Simulation';
 import StarForceSimulationWorker from '../../workers/starforce-simulation.worker.ts?worker';
+import AsyncImage from "../component/common/element/AsyncImage";
 
 const { Title } = Typography;
 
@@ -73,7 +73,6 @@ const eventOptions: { label: string, value: StarForceEventType }[] = [
 	{ label: '강화비용 30% 할인', value: StarForceEventType.DISCOUNT_30 },
 	{ label: '5, 10, 15성에서 강화시 성공확률 100%', value: StarForceEventType.PERCENTAGE_100 },
 ];
-
 
 let worker: Worker = new StarForceSimulationWorker();
 
@@ -433,7 +432,12 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 															setShowSearchItemBox(false)
 														}}>
 															<FlexBox alignItems={'center'} gap={'.75rem'}>
-																<AsyncCacheImage src={getItemIcon(region, version, item.id)} cacheName={cacheName} alt={item.name} style={{ width: '30px' }} />
+																<AsyncImage
+																	src={getItemIcon(region, version, item.id)}
+																	cache={{ cacheName: cacheName }}
+																	alt={item.name}
+																	style={{ width: '30px' }}
+																/>
 																<span>{item.name}</span>
 																<span style={{ marginLeft: 'auto' }}>{item.requiredLevel} lv</span>
 															</FlexBox>

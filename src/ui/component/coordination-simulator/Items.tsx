@@ -6,11 +6,11 @@ import {
     EquipmentSubCategory,
     equipmentSubCategoryInfo
 } from "../../../model/equipment.model";
-import AsyncCacheImage from "../common/element/AsyncCacheImage";
 import {getItemIcon} from "../../../api/maplestory-io.api";
 import {cacheName, region, version} from "../../../model/maplestory-io.model";
 import styled from "styled-components";
 import {BLUE} from '../../../model/color.model';
+import AsyncImage from "../common/element/AsyncImage";
 
 const equipmentCategorySortMap: Map<EquipmentCategory, number> = new Map([
     ['Character', 0],
@@ -105,7 +105,16 @@ const Items = ({ items, onClickItem }: { items: any, onClickItem: (item: any) =>
                 {
                     searchedItem.map((item: any) => (
                         <Item key={item.id} onClick={() => onClickItem(item)}>
-                            <AsyncCacheImage src={getItemIcon(region, version, item.id)} cacheName={cacheName} alt={item.name} style={{ width: '30px' }} />
+                            <AsyncImage
+                                src={getItemIcon(region, version, item.id)}
+                                cache={{ cacheName: cacheName }}
+                                alt={item.name}
+                                style={{
+                                    width: 'auto',
+                                    height: 'auto',
+                                    maxWidth: '35px'
+                                }}
+                            />
                             <ItemName>{item.name}</ItemName>
                         </Item>
                     ))
@@ -153,6 +162,7 @@ const Item = styled.div`
   flex: 0 0 50%;
   text-align: center;
   display: flex;
+  align-items: center;
 
   transition: transform 0.5s;
   transform-style: preserve-3d;
@@ -177,7 +187,9 @@ const Item = styled.div`
 
 const ItemName = styled.span`
   margin-left: auto;
-  
+  word-break: keep-all;
+  max-width: 75%;
+  text-align: right;
 `
 
 export default Items

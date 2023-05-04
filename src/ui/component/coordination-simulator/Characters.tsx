@@ -3,7 +3,6 @@ import {Button, List} from 'antd';
 import styled from 'styled-components';
 import {CloseOutlined, PlusOutlined} from '@ant-design/icons';
 import {getCharacter, getItemIcon} from '../../../api/maplestory-io.api';
-import AsyncCacheImage from '../common/element/AsyncCacheImage';
 import {cacheName, region, version} from '../../../model/maplestory-io.model';
 import {equipmentSubCategoryInfo} from '../../../model/equipment.model';
 import {FlexBox} from '../common/element/FlexBox';
@@ -22,7 +21,6 @@ const ImageWrapper = styled.div`
 	display: flex;
 	justify-content: center;
 	align-content: center;
-	z-index: 999;
 `
 
 const Characters = (
@@ -132,12 +130,14 @@ const Characters = (
 						minHeight={70}
 						maxWidth={135}
 						maxHeight={210}
+						style={{ zIndex: 999 }}
 					>
 						<ImageWrapper onClick={() => isDragging ? undefined : setActiveCharacterIdx(idx)} style={{ width: '100%', height: '100%' }}>
 							<AsyncImage src={getCharacterSrc(character.data)}
-								 alt={'캐릭터'}
-								 style={{ filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none' }}
-								 draggable={false}
+										alt={'캐릭터'}
+										style={{ filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none' }}
+										draggable={false}
+										loadingTip={'Loading...'}
 							/>
 						</ImageWrapper>
 					</Rnd>
@@ -188,7 +188,12 @@ const Characters = (
 						<List.Item.Meta
 							avatar={
 								<FlexBox alignItems={'center'} justifyContent={'center'} height={'100%'}>
-									<AsyncCacheImage src={getItemIcon(region, version, item.value.id)} cacheName={cacheName} alt={item.value.name} style={{ width: '30px' }} />
+									<AsyncImage
+										src={getItemIcon(region, version, item.value.id)}
+										cache={{ cacheName: cacheName }}
+										alt={item.value.name}
+										style={{ width: '30px' }}
+									/>
 								</FlexBox>
 							}
 							title={item.value.name}
