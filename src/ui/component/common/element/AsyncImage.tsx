@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {Spin} from 'antd';
-import {doCacheFetch} from "../../../../util/fetch.util";
+import {Empty, Spin} from 'antd';
+import {doCacheFetch, doFetch} from "../../../../util/fetch.util";
 
 interface Props {
 	src: string
@@ -19,13 +19,13 @@ const AsyncImage = (props: Props) => {
 	
 	useEffect(() => {
 		setLoadedSrc('');
-		
+
 		if (props.src) {
-			if (useCache === true) {
-				doCacheFetch(props.src, props.cache!.cacheName).then(setLoadedSrc)
-			} else {
-				fetch(props.src).then(res => res.blob()).then(src => setLoadedSrc(URL.createObjectURL(src)))
-			}
+			const fetch = useCache
+				? doCacheFetch(props.src, props.cache!.cacheName)
+				: doFetch(props.src, 'IMG')
+
+			fetch.then(setLoadedSrc)
 		}
 		
 	}, [props.src]);

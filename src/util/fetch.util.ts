@@ -79,3 +79,17 @@ const deleteOldCache = async(cacheName: string) => {
 		caches.delete(key);
 	}
 }
+
+export const doFetch = async(url: string, type: 'JSON' | 'IMG' = 'JSON') => {
+	const res = await fetch(url);
+
+	let data;
+	if (type === 'JSON') {
+		data = await res.json()
+	} else {
+		data = await res.blob();
+		data = URL.createObjectURL(data);
+	}
+
+	return data;
+}

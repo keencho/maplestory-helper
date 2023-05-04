@@ -9,6 +9,7 @@ import NotificationUtil from '../../util/notification.util';
 import styled from "styled-components";
 import {FlexBox} from "../component/common/element/FlexBox";
 import {Spin} from "antd";
+import {EquipmentSubCategory} from "../../model/equipment.model";
 
 const LoadingBox = styled(FlexBox)`
 	width: 100%;
@@ -40,7 +41,7 @@ const CoordinationSimulatorContainerWrapper = () => {
 }
 
 const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
-	const [characters, setCharacters] = useState<{ key: string, data: { key: string, value: any }[] }[]>([{
+	const [characters, setCharacters] = useState<{ key: string, data: { key: EquipmentSubCategory, value: any }[] }[]>([{
 		key: crypto.randomUUID(),
 		data: []
 	}]);

@@ -51,7 +51,7 @@ export type EquipmentSubCategory =
 	
 	| 'Face'
 	| 'Hair'
-	// | 'Head'
+	| 'Head'
 	| 'Chair'
 	
 	| 'Badge'
@@ -156,6 +156,7 @@ export const equipmentSubCategoryInfo: [EquipmentCategory, EquipmentSubCategory,
 	
 	[ 'Character', 'Face', '얼굴' ],
 	[ 'Character', 'Hair', '헤어' ],
+	[ 'Character', 'Head', '피부' ],
 	[ 'Character', 'Chair', '의자' ],
 	
 	[ 'Accessory', 'Badge', '뱃지' ],
