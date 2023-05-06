@@ -3,9 +3,8 @@ import {Button, List} from 'antd';
 import styled from 'styled-components';
 import {CloseOutlined, PlusOutlined} from '@ant-design/icons';
 import {getCharacter, getItemIcon} from '../../../api/maplestory-io.api';
-import AsyncCacheImage from '../common/element/AsyncCacheImage';
 import {cacheName, region, version} from '../../../model/maplestory-io.model';
-import {equipmentSubCategoryInfo} from '../../../model/equipment.model';
+import {EquipmentSubCategory, equipmentSubCategoryInfo} from '../../../model/equipment.model';
 import {FlexBox} from '../common/element/FlexBox';
 import {Rnd} from "react-rnd";
 import AsyncImage from "../common/element/AsyncImage";
@@ -21,8 +20,9 @@ const ImageWrapper = styled.div`
 	cursor: move;
 	display: flex;
 	justify-content: center;
-	align-content: center;
-	z-index: 999;
+	align-items: center;
+	width: 100%;
+	height: 100%;
 `
 
 const Characters = (
@@ -36,7 +36,7 @@ const Characters = (
 		deleteItem
 	}:
 		{
-			characters: { key: string, data: { key: string, value: any }[] }[],
+			characters: { key: string, data: { key: EquipmentSubCategory, value: any }[] }[],
 			activeCharacterIdx: number,
 			setActiveCharacterIdx: Dispatch<SetStateAction<number>>,
 			addCharacter: () => void,
@@ -50,14 +50,22 @@ const Characters = (
 	const [isDragging, setIsDragging] = useState<boolean>(false);
 	const [refLoaded, setRefLoaded] = useState<boolean>(false);
 	
-	const getCharacterSrc = (character: { key: string, value: any }[]) => {
-		const arr = character.map((item: any) => ({ itemId: item.value.id, region: region, version: version }))
-		
-		// 머리
-		arr.push({ itemId: 12000, region: region, version: version });
-		// 몸통
-		arr.push({ itemId: 2000, region: region, version: version });
-		
+	const getCharacterSrc = (character: { key: EquipmentSubCategory, value: any }[]) => {
+		let arr = character.map((item: any) => (item.value.id))
+
+		// 피부인 경우 '얼굴 피부' 만 대상이기 때문에 몸통에도 똑같이 적용한다.
+		if (character.some(item => item.key === 'Head')) {
+			const id = character.find(item => item.key === 'Head')!.value.id;
+			arr.push(Number(id.toString().substring(1)))
+		} else {
+			// 머리
+			arr.push(12000);
+			// 몸통
+			arr.push(2000);
+		}
+
+		arr = arr.map(id => ( { itemId: id, region: region, version: version } ));
+
 		const str = encodeURIComponent(JSON.stringify(arr).slice(1, -1));
 		
 		return getCharacter(str)
@@ -107,6 +115,7 @@ const Characters = (
 			{
 				refLoaded && characters.map((character, idx) => (
 					<Rnd
+						key={character.key}
 						default={{
 							x: 0,
 							y: 0,
@@ -132,12 +141,16 @@ const Characters = (
 						minHeight={70}
 						maxWidth={135}
 						maxHeight={210}
+						style={{
+							zIndex: 999
+						}}
 					>
-						<ImageWrapper onClick={() => isDragging ? undefined : setActiveCharacterIdx(idx)} style={{ width: '100%', height: '100%' }}>
+						<ImageWrapper onClick={() => isDragging ? undefined : setActiveCharacterIdx(idx)}>
 							<AsyncImage src={getCharacterSrc(character.data)}
-								 alt={'캐릭터'}
-								 style={{ filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none' }}
-								 draggable={false}
+										alt={'캐릭터'}
+										style={{ filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none' }}
+										draggable={false}
+										loadingTip={'Loading...'}
 							/>
 						</ImageWrapper>
 					</Rnd>
@@ -188,7 +201,12 @@ const Characters = (
 						<List.Item.Meta
 							avatar={
 								<FlexBox alignItems={'center'} justifyContent={'center'} height={'100%'}>
-									<AsyncCacheImage src={getItemIcon(region, version, item.value.id)} cacheName={cacheName} alt={item.value.name} style={{ width: '30px' }} />
+									<AsyncImage
+										src={getItemIcon(region, version, item.value.id)}
+										cache={{ cacheName: cacheName }}
+										alt={item.value.name}
+										style={{ width: '30px' }}
+									/>
 								</FlexBox>
 							}
 							title={item.value.name}

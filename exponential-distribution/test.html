@@ -26,7 +26,6 @@
     const numBins = 50;
 
     const binSize = (arr[arr.length - 1] - arr[0]) / numBins;
-    console.log(binSize)
 
     const bins = Array.from({length: numBins}, (_, i) => ({
       lowerBound: i * binSize,
@@ -47,9 +46,6 @@
 
     // Normalize the counts to get the bin heights
     const binHeights = bins.map((bin) => bin.count / (arr.length * binSize));
-
-    console.log(bins, binHeights)
-
     // Draw the bar chart using Chart.js
     const ctx = document.getElementById('myChart').getContext('2d');
     const myChart = new Chart(ctx, {

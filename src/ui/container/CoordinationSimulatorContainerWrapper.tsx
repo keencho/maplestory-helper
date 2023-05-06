@@ -6,6 +6,17 @@ import {CustomCol, CustomRow} from "../component/common/element/CustomRowCol";
 import Items from "../component/coordination-simulator/Items";
 import Characters from '../component/coordination-simulator/Characters';
 import NotificationUtil from '../../util/notification.util';
+import styled from "styled-components";
+import {FlexBox} from "../component/common/element/FlexBox";
+import {Spin} from "antd";
+import {EquipmentSubCategory} from "../../model/equipment.model";
+
+const LoadingBox = styled(FlexBox)`
+	width: 100%;
+	height: 100%;
+	align-items: center;
+	justify-content: center;
+`
 
 const CoordinationSimulatorContainerWrapper = () => {
 
@@ -19,14 +30,18 @@ const CoordinationSimulatorContainerWrapper = () => {
 	});
 
 	if ((!items || items.length === 0) || isLoading) {
-		return <>로딩중...</>
+		return (
+			<LoadingBox>
+				<Spin size={'large'} tip={'로딩중 입니다...'} />
+			</LoadingBox>
+		)
 	}
 
 	return <CoordinationSimulatorContainer items={items} />
 }
 
 const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
-	const [characters, setCharacters] = useState<{ key: string, data: { key: string, value: any }[] }[]>([{
+	const [characters, setCharacters] = useState<{ key: string, data: { key: EquipmentSubCategory, value: any }[] }[]>([{
 		key: crypto.randomUUID(),
 		data: []
 	}]);
