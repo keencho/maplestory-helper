@@ -148,7 +148,7 @@ const Characters = (
 						<ImageWrapper onClick={() => isDragging ? undefined : setActiveCharacterIdx(idx)}>
 							<AsyncImage src={getCharacterSrc(character.data)}
 										alt={'캐릭터'}
-										style={{ filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none' }}
+										style={{ filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none', width: '100%' }}
 										draggable={false}
 										loadingTip={'Loading...'}
 							/>

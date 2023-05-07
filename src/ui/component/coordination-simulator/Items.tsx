@@ -1,4 +1,4 @@
-import {Button, Input, Select} from "antd";
+import {Button, Checkbox, Input, Select} from "antd";
 import React, {useEffect, useState} from "react";
 import {
     EquipmentCategory,
@@ -11,6 +11,7 @@ import {cacheName, region, version} from "../../../model/maplestory-io.model";
 import styled from "styled-components";
 import {BLUE} from '../../../model/color.model';
 import AsyncImage from "../common/element/AsyncImage";
+import {FlexBox} from '../common/element/FlexBox';
 
 const equipmentCategorySortMap: Map<EquipmentCategory, number> = new Map([
     ['Character', 0],
@@ -34,6 +35,7 @@ const Items = ({ items, onClickItem }: { items: any, onClickItem: (item: any) =>
     const [searchItemCount, setSearchItemCount] = useState<number>(defaultSearchItemCount);
     const [searchedItem, setSearchedItem] = useState<any[]>([]);
     const [searchKeyword, setSearchKeyword] = useState<string>('');
+    const [onlyCash, setOnlyCash] = useState<boolean>(false)
 
     const [equipmentCategory, setEquipmentCategory] = useState<EquipmentCategory | '카테고리를 선택하세요.'>(equipmentCategoryOptions[0].value)
     const [equipmentSubCategoryList, setEquipmentSubCategoryList] = useState(equipmentSubCategoryOptions.filter(item => item.category === equipmentCategory))
@@ -41,15 +43,20 @@ const Items = ({ items, onClickItem }: { items: any, onClickItem: (item: any) =>
     const [categoryItems, setCategoryItems] = useState<any[]>([]);
 
     useEffect(() => {
-        const filteredItems = items.filter((item: any) => searchKeyword.length === 0
+        let filteredItems = items.filter((item: any) => searchKeyword.length === 0
             ? item.typeInfo.subCategory === equipmentSubCategory
             : item.name.includes(searchKeyword)
         );
+        
+        if (onlyCash) {
+          filteredItems = filteredItems.filter((item: any) => item.isCash === true)
+        }
 
         setCategoryItems(filteredItems);
-        setSearchedItem(filteredItems.slice(0, searchItemCount))
+        setSearchedItem(filteredItems.slice(0, defaultSearchItemCount))
+        setSearchItemCount(defaultSearchItemCount)
 
-    }, [equipmentCategory, equipmentSubCategory, searchKeyword])
+    }, [equipmentCategory, equipmentSubCategory, searchKeyword, onlyCash])
 
     useEffect(() => {
         if (searchItemCount === defaultSearchItemCount) return;
@@ -79,26 +86,36 @@ const Items = ({ items, onClickItem }: { items: any, onClickItem: (item: any) =>
                     value={equipmentSubCategory}
                     options={equipmentSubCategoryList}
                 />
-                <Input
-                    placeholder="카테고리와 관계 없이 모든 아이템이 검색 됩니다."
+                <FlexBox gap={'.5rem'} alignItems={'center'}>
+                  <Input
+                    placeholder="아이템명 입력"
                     value={searchKeyword}
                     onChange={(e) => {
-                        const value = e.target.value;
-                        setSearchKeyword(value)
-
-                        if (value.length > 0) {
-                            setEquipmentCategory('카테고리를 선택하세요.')
-                            setEquipmentSubCategory('')
-                            setEquipmentSubCategoryList([])
-                        } else {
-                            const v = equipmentCategoryOptions[0].value
-                            const sl = equipmentSubCategoryOptions.filter(item => item.category === v);
-                            setEquipmentCategory(v)
-                            setEquipmentSubCategoryList(sl)
-                            setEquipmentSubCategory(sl[0].value)
-                        }
+                      const value = e.target.value;
+                      setSearchKeyword(value)
+                      
+                      if (value.length > 0) {
+                        setEquipmentCategory('카테고리를 선택하세요.')
+                        setEquipmentSubCategory('')
+                        setEquipmentSubCategoryList([])
+                      } else {
+                        const v = equipmentCategoryOptions[0].value
+                        const sl = equipmentSubCategoryOptions.filter(item => item.category === v);
+                        setEquipmentCategory(v)
+                        setEquipmentSubCategoryList(sl)
+                        setEquipmentSubCategory(sl[0].value)
+                      }
                     }}
-                />
+                    style={{ flex: 2 }}
+                  />
+                  <Checkbox
+                    onChange={(e) => setOnlyCash(e.target.checked)}
+                    checked={onlyCash}
+                    style={{ flex: 1, marginLeft: 'auto', display: 'flex', justifyContent: 'end' }}
+                  >
+                    캐시아이템만
+                  </Checkbox>
+                </FlexBox>
             </SearchBox>
 
             <ItemBox>
