@@ -28,8 +28,6 @@ const CoordinationSimulatorContainerWrapper = () => {
 				return !this.has(item.name) && this.add(item.name)
 			}, new Set)
 	});
-	
-	console.log(items)
 
 	if ((!items || items.length === 0) || isLoading) {
 		return (
