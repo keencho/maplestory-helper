@@ -15,19 +15,19 @@ export const doCacheFetch = async(url: string, cacheName: string): Promise<any> 
 	
 	if (cachedRes && cachedRes.ok) {
 		const cachedTime = cachedRes.headers.get(cachedTimeKey);
-		
+
 		if (cachedTime) {
 			const contentType = cachedRes.headers.get('content-type');
 			const diff = Number(new Date()) - Number(new Date(cachedTime));
 			const diffDay = Math.floor(diff / 86400000);
-			
+
 			// 이미지는 7일
 			if (contentType?.includes('image')) {
 				if (diffDay > 7) {
 					cachedRes = undefined;
 				}
 			}
-			
+
 			// json은 3일
 			else {
 				if (diffDay > 3) {
@@ -48,7 +48,7 @@ export const doCacheFetch = async(url: string, cacheName: string): Promise<any> 
 		
 		cachedRes = await doCacheFetch(url, cacheName);
 		
-		await deleteOldCache(cacheName);
+		deleteOldCache(cacheName);
 		
 		return cachedRes;
 	}
