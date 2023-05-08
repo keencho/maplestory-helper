@@ -9,6 +9,7 @@ import {FlexBox} from '../common/element/FlexBox';
 import {Rnd} from "react-rnd";
 import AsyncImage from "../common/element/AsyncImage";
 import {BLUE} from "../../../model/color.model";
+import SkinDefault from '../../../assets/icon/items/skin_default.png';
 
 const Container = styled.div`
 	width: 100%;
@@ -30,19 +31,13 @@ const Characters = (
 		characters,
 		setActiveCharacterIdx,
 		activeCharacterIdx,
-		addCharacter,
-		deleteCharacter,
-		resetCharacter,
-		deleteItem
+		doAction
 	}:
 		{
 			characters: { key: string, data: { key: EquipmentSubCategory, value: any }[] }[],
 			activeCharacterIdx: number,
 			setActiveCharacterIdx: Dispatch<SetStateAction<number>>,
-			addCharacter: () => void,
-			deleteCharacter: () => void,
-			resetCharacter: () => void,
-			deleteItem: (key: string) => void
+			doAction: (type: 'ADD' | 'COPY' | 'RESET' | 'DELETE' | 'DELETE_ITEM', ...args: any) => void
 		}
 ) => {
 	
@@ -54,9 +49,9 @@ const Characters = (
 		let arr = character.map((item: any) => (item.value.id))
 
 		// 피부인 경우 '얼굴 피부' 만 대상이기 때문에 몸통에도 똑같이 적용한다.
-		if (character.some(item => item.key === 'Head')) {
-			const id = character.find(item => item.key === 'Head')!.value.id;
-			arr.push(Number(id.toString().substring(1)))
+		const head = character.find(item => item.key === 'Head')
+		if (head) {
+			arr.push(Number(head.value.id.toString().substring(1)))
 		} else {
 			// 머리
 			arr.push(12000);
@@ -148,7 +143,7 @@ const Characters = (
 						<ImageWrapper onClick={() => isDragging ? undefined : setActiveCharacterIdx(idx)}>
 							<AsyncImage src={getCharacterSrc(character.data)}
 										alt={'캐릭터'}
-										style={{ filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none' }}
+										style={{ filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none', width: '100%' }}
 										draggable={false}
 										loadingTip={'Loading...'}
 							/>
@@ -160,7 +155,7 @@ const Characters = (
 				type="primary"
 				shape="circle"
 				icon={<PlusOutlined />}
-				onClick={addCharacter}
+				onClick={() => doAction('ADD')}
 				style={{
 					width: '64px',
 					height: '64px',
@@ -173,25 +168,31 @@ const Characters = (
 				header={
 					<FlexBox>
 						캐릭터 정보
-						<div style={{ marginLeft: 'auto' }}>
+						<FlexBox margin={'0 0 0 auto'} gap={'.5rem'}>
+							<Button
+								size={'small'}
+								type={'primary'}
+								onClick={() => doAction('COPY')}
+							>
+								복사
+							</Button>
 							<Button
 								size={'small'}
 								type={'primary'}
 								danger
-								onClick={resetCharacter}
+								onClick={() => doAction('RESET')}
 							>
 								초기화
 							</Button>
 							<Button
 								size={'small'}
 								type={'primary'}
-								style={{ marginLeft: '.5rem' }}
 								danger
-								onClick={deleteCharacter}
+								onClick={() => doAction('DELETE')}
 							>
 								삭제
 							</Button>
-						</div>
+						</FlexBox>
 					</FlexBox>
 				}
 				bordered
@@ -201,12 +202,22 @@ const Characters = (
 						<List.Item.Meta
 							avatar={
 								<FlexBox alignItems={'center'} justifyContent={'center'} height={'100%'}>
-									<AsyncImage
-										src={getItemIcon(region, version, item.value.id)}
-										cache={{ cacheName: cacheName }}
-										alt={item.value.name}
-										style={{ width: '30px' }}
-									/>
+									{
+										item.value.typeInfo.subCategory === 'Head'
+										?
+											<img
+												src={SkinDefault}
+												style={{ width: '30px' }}
+												alt={'피부'}
+											/>
+										:
+											<AsyncImage
+												src={getItemIcon(region, version, item.value.id)}
+												cache={{ cacheName: cacheName }}
+												alt={item.value.name}
+												style={{ width: '30px' }}
+											/>
+									}
 								</FlexBox>
 							}
 							title={item.value.name}
@@ -217,7 +228,7 @@ const Characters = (
 							shape={'circle'}
 							type={'primary'}
 							danger
-							onClick={() => deleteItem(item.key)}
+							onClick={() => doAction('DELETE_ITEM', item.key)}
 						>
 							<CloseOutlined />
 						</Button>
@@ -228,8 +239,8 @@ const Characters = (
 					bottom: 15,
 					right: 20,
 					maxHeight: '300px',
-					minWidth: '250px',
-					maxWidth: '250px',
+					minWidth: '325px',
+					maxWidth: '325px',
 					overflowY: 'scroll'
 				}}
 			/>
