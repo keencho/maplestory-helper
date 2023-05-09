@@ -6,10 +6,13 @@ import {getCharacter, getItemIcon} from '../../../api/maplestory-io.api';
 import {cacheName, region, version} from '../../../model/maplestory-io.model';
 import {EquipmentSubCategory, equipmentSubCategoryInfo} from '../../../model/equipment.model';
 import {FlexBox} from '../common/element/FlexBox';
-import {Rnd} from "react-rnd";
+import {DraggableData, Rnd, RndDragEvent} from "react-rnd";
 import AsyncImage from "../common/element/AsyncImage";
 import {BLUE} from "../../../model/color.model";
 import SkinDefault from '../../../assets/icon/items/skin_default.png';
+import {DraggableEvent} from 'react-draggable';
+import {CharactersModel} from '../../../model/coordination-simulator.model';
+import CustomPopConfirm from '../common/element/CustomPopConfirm';
 
 const Container = styled.div`
 	width: 100%;
@@ -34,10 +37,10 @@ const Characters = (
 		doAction
 	}:
 		{
-			characters: { key: string, data: { key: EquipmentSubCategory, value: any }[] }[],
+			characters: CharactersModel[],
 			activeCharacterIdx: number,
 			setActiveCharacterIdx: Dispatch<SetStateAction<number>>,
-			doAction: (type: 'ADD' | 'COPY' | 'RESET' | 'DELETE' | 'DELETE_ITEM', ...args: any) => void
+			doAction: (type: 'ADD' | 'COPY' | 'RESET' | 'DELETE' | 'DELETE_ITEM' | 'HANDLE_RESIZE' | 'HANDLE_POSITION', ...args: any) => void
 		}
 ) => {
 	
@@ -66,13 +69,16 @@ const Characters = (
 		return getCharacter(str)
 	}
 	
-	const eventControl = (event: { type: any }) => {
+	const dragControl = (event: DraggableEvent, data: DraggableData, ...args: any) => {
 		if (event.type === 'mousemove') {
 			setIsDragging(true)
 		}
 
 		if (event.type === 'mouseup') {
 			setTimeout(() => {
+				if (args && args.length > 0) {
+					doAction('HANDLE_POSITION', { x: data.x, y: data.y, key: args[0] })
+				}
 				setIsDragging(false);
 			}, 100);
 		}
@@ -85,18 +91,6 @@ const Characters = (
 			return '기타'
 		}
 		return matchedItem[2];
-	}
-	
-	const getPosition = (idx: number): { x: number, y: number } => {
-		const current: any = containerRef.current;
-		
-		if (current) {
-			// const width = current.offsetWidth;
-			const height = current.offsetHeight;
-			
-			return { x: 30 + (idx * 50), y: height / 2.5 }
-		}
-		return { x: 0, y: 0 }
 	}
 
 	useEffect(() => {
@@ -112,10 +106,14 @@ const Characters = (
 					<Rnd
 						key={character.key}
 						default={{
-							x: 0,
-							y: 0,
-							width: 45,
-							height: 70,
+							x: character.x,
+							y: character.y,
+							width: character.width,
+							height: character.height,
+						}}
+						size={{
+							width: character.width,
+							height: character.height
 						}}
 						bounds={'parent'}
 						enableResizing={{
@@ -129,9 +127,10 @@ const Characters = (
 								backgroundColor: BLUE
 							}
 						}}
-						onDragStart={eventControl}
-						onDragStop={eventControl}
-						onDrag={eventControl}
+						onResizeStop={(e, dir, ref) => doAction('HANDLE_RESIZE', character.key, { width: ref.offsetWidth, height: ref.offsetHeight })}
+						onDragStart={dragControl}
+						onDragStop={(e, data) => dragControl(e, data, character.key)}
+						onDrag={dragControl}
 						minWidth={45}
 						minHeight={70}
 						maxWidth={135}
@@ -162,7 +161,8 @@ const Characters = (
 					position: 'absolute',
 					bottom: 15,
 					left: 20
-			}} />
+				}}
+			/>
 			<List
 				size="small"
 				header={
@@ -176,22 +176,20 @@ const Characters = (
 							>
 								복사
 							</Button>
-							<Button
-								size={'small'}
-								type={'primary'}
-								danger
-								onClick={() => doAction('RESET')}
+							<CustomPopConfirm
+								placement={'top'}
+								title={'선택된 캐릭터를 초기화 하시겠습니까?'}
+								onConfirm={() => doAction('RESET')}
 							>
-								초기화
-							</Button>
-							<Button
-								size={'small'}
-								type={'primary'}
-								danger
-								onClick={() => doAction('DELETE')}
+								<Button type={'primary'} size={'small'} danger>초기화</Button>
+							</CustomPopConfirm>
+							<CustomPopConfirm
+								placement={'top'}
+								title={'선택된 캐릭터를 삭제 하시겠습니까?'}
+								onConfirm={() => doAction('DELETE')}
 							>
-								삭제
-							</Button>
+								<Button type={'primary'} size={'small'} danger>삭제</Button>
+							</CustomPopConfirm>
 						</FlexBox>
 					</FlexBox>
 				}
