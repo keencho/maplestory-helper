@@ -6,6 +6,7 @@ export interface CommonStyle {
 	margin?: Property.Margin
 	padding?: Property.Padding
 	border?: Property.Border
+	borderBottom?: Property.BorderBottom
 	fontSize?: Property.FontSize
 	fontWeight?: Property.FontWeight
 	height?: Property.Height

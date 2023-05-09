@@ -44,7 +44,11 @@ export const doCacheFetch = async(url: string, cacheName: string): Promise<any> 
 		newHeaders.set(cachedTimeKey, DateTimeUtils.getNow());
 		const newResponse = new Response(res.body, { headers: newHeaders });
 		
+		console.log('dma.')
+		
 		await cacheStorage.put(url, newResponse.clone());
+		
+		console.log('dma.2')
 		
 		cachedRes = await doCacheFetch(url, cacheName);
 		

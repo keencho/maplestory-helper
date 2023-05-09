@@ -1,5 +1,16 @@
 import {EquipmentSubCategory} from './equipment.model';
 
+export type ActionType =
+	| 'ADD'
+	| 'COPY'
+	| 'RESET'
+	| 'DELETE'
+	| 'DELETE_ITEM'
+	| 'HANDLE_RESIZE'
+	| 'HANDLE_POSITION'
+	| 'RESET_ENTIRE_CHARACTERS'
+	| 'SHARE_CODI'
+
 export type CharactersModel = {
 	key: string,
 	width: number,
