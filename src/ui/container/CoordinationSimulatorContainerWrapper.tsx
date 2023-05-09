@@ -9,8 +9,9 @@ import NotificationUtil from '../../util/notification.util';
 import styled from "styled-components";
 import {FlexBox} from "../component/common/element/FlexBox";
 import {Button, Spin, Switch} from "antd";
-import {EquipmentSubCategory} from "../../model/equipment.model";
 import {CommonStyledSpan} from '../../model/style.model';
+import {CharactersModel, hasAllKeys} from '../../model/coordination-simulator.model';
+import CustomPopConfirm from '../component/common/element/CustomPopConfirm';
 
 const LoadingBox = styled(FlexBox)`
 	width: 100%;
@@ -29,8 +30,36 @@ const CoordinationSimulatorContainerWrapper = () => {
 				return !this.has(item.name) && this.add(item.name)
 			}, new Set)
 	});
-
-	if ((!items || items.length === 0) || isLoading) {
+	
+	const [characters, setCharacters] = useState<undefined | CharactersModel[]>(undefined);
+	
+	useEffect(() => {
+		let autoSavedData: string | null | CharactersModel[] = window.localStorage.getItem(AUTO_SAVE_DATA);
+		
+		try {
+			if (autoSavedData === null) {
+				autoSavedData = initDefaultCharacters();
+			} else {
+				autoSavedData = JSON.parse(autoSavedData);
+				if (!Array.isArray(autoSavedData)) {
+					throw Error ('saved data is not array');
+				}
+				
+				autoSavedData.forEach(data => {
+					if (!hasAllKeys(data)) {
+						throw Error ('saved data not contains all key. maybe new keys are added')
+					}
+				})
+			}
+		} catch (e) {
+			NotificationUtil.fire('warning', '저장된 데이터를 불러올수 없어 새로운 캐릭터 셋을 불러옵니다.', { duration: 5 } );
+			autoSavedData = initDefaultCharacters();
+		} finally {
+			setCharacters(autoSavedData as CharactersModel[])
+		}
+	}, [])
+	
+	if ((!items || items.length === 0) || isLoading || !characters) {
 		return (
 			<LoadingBox>
 				<Spin size={'large'} tip={'로딩중 입니다...'} />
@@ -38,25 +67,22 @@ const CoordinationSimulatorContainerWrapper = () => {
 		)
 	}
 
-	return <CoordinationSimulatorContainer items={items} />
+	return <CoordinationSimulatorContainer items={items} charactersModel={characters} />
 }
 
 const AUTO_SAVE_KEY = 'CODI_SIMULATOR_AUTO_SAVE';
 const AUTO_SAVE_DATA = 'CODI_SIMULATOR_AUTO_SAVE_DATA';
 const MAX_CHARACTER = 10;
 
-const initDefaultCharacters = (): { key: string, data: { key: EquipmentSubCategory, value: any }[] }[] => {
-	return [{ key: crypto.randomUUID(), data: [] }]
+const DEFAULT_SIZE = { width: 45, height: 70 };
+
+const initDefaultCharacters = (): CharactersModel[] => {
+	return [{ ...DEFAULT_SIZE, key: crypto.randomUUID(), x: 0, y: 0, data: [] }]
 }
 
-const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
-	const autoSavedData = window.localStorage.getItem(AUTO_SAVE_DATA);
-	const [characters, setCharacters] = useState<{ key: string, data: { key: EquipmentSubCategory, value: any }[] }[]>(
-		autoSavedData === null
-		? initDefaultCharacters()
-		: JSON.parse(autoSavedData)
-	);
-
+const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any, charactersModel: CharactersModel[] }) => {
+	
+	const [characters, setCharacters] = useState<CharactersModel[]>(charactersModel);
 	const [activeCharacterIdx, setActiveCharacterIdx] = useState<number>(0);
 	
 	const autoSaved = window.localStorage.getItem(AUTO_SAVE_KEY);
@@ -85,11 +111,7 @@ const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
 		return true;
 	}
 	
-	const resetEntireCharacters = () => {
-		setCharacters(initDefaultCharacters())
-	}
-	
-	const doAction = (type: 'ADD' | 'COPY' | 'RESET' | 'DELETE' | 'DELETE_ITEM', ...args: any) => {
+	const doAction = (type: 'ADD' | 'COPY' | 'RESET' | 'DELETE' | 'DELETE_ITEM' | 'HANDLE_RESIZE' | 'HANDLE_POSITION' | 'RESET_ENTIRE_CHARACTERS', ...args: any) => {
 		switch (type) {
 			
 			// 캐릭터 추가
@@ -98,7 +120,8 @@ const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
 					return;
 				}
 				
-				setCharacters(pv => [ ...pv, { key: crypto.randomUUID(), data: [] } ])
+				setCharacters(pv => [ ...pv, initDefaultCharacters()[0] ])
+				setActiveCharacterIdx(characters.length)
 				break;
 				
 			// 캐릭터 복사
@@ -110,7 +133,9 @@ const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
 				let newCharacter = characters[activeCharacterIdx];
 				newCharacter = {
 					...newCharacter,
-					key: crypto.randomUUID()
+					key: crypto.randomUUID(),
+					x: 0,
+					y: 0
 				}
 				
 				const newCharacters = [ ...characters, newCharacter ];
@@ -124,7 +149,7 @@ const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
 				setCharacters(pv => {
 					return pv.map((it, idx) => {
 						if (idx === activeCharacterIdx) {
-							it.data = [];
+							it = { ...it, ...DEFAULT_SIZE, data: [] }
 						}
 						
 						return it;
@@ -161,6 +186,46 @@ const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
 				}))
 				break;
 				
+			// 전체 캐릭터 초기화
+			case 'RESET_ENTIRE_CHARACTERS':
+				setCharacters(initDefaultCharacters())
+				break;
+				
+			// 캐릭터 사이즈 핸들링
+			case 'HANDLE_RESIZE':
+				if (!args || !args[0] || !args[1]) {
+					return;
+				}
+				
+				const key = args[0];
+				const size = args[1];
+				setCharacters(pv => pv.map( it => {
+					if (it.key !== key) {
+						return it;
+					}
+					
+					return { ...it, ...size }
+				}))
+				
+				break;
+				
+				// 캐릭터 위치 핸들링
+			case 'HANDLE_POSITION':
+				if (!args || !args[0]) {
+					return;
+				}
+				
+				const data: { key: string, x: number, y: number } = args[0];
+				setCharacters(pv => pv.map( it => {
+					if (it.key !== data.key) {
+						return it;
+					}
+					
+					return { ...it, ...data }
+				}))
+				
+				break;
+				
 			default:
 				NotificationUtil.fire('error', `구현되지 않은 액션입니다.`);
 				throw Error('not implemented action')
@@ -187,7 +252,13 @@ const CoordinationSimulatorContainer = ({ items }: { items: any }) => {
 						<FlexBox alignItems={'center'} gap={'.5rem'}>
 							<CommonStyledSpan fontSize={'14px'} fontWeight={600}>자동저장</CommonStyledSpan>
 							<Switch checked={autoSave} onChange={setAutoSave} />
-							<Button type={'primary'} size={'small'} onClick={resetEntireCharacters} danger>전체 캐릭터 초기화</Button>
+							<CustomPopConfirm
+								placement={'left'}
+								title={'전체 캐릭터를 초기화 하시겠습니까?'}
+								onConfirm={() => doAction('RESET_ENTIRE_CHARACTERS')}
+							>
+								<Button type={'primary'} size={'small'} danger>전체 캐릭터 초기화</Button>
+							</CustomPopConfirm>
 						</FlexBox>
 					</>
 				}
