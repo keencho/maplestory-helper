@@ -11,7 +11,7 @@ import AsyncImage from "../common/element/AsyncImage";
 import {BLUE} from "../../../model/color.model";
 import SkinDefault from '../../../assets/icon/items/skin_default.png';
 import {DraggableEvent} from 'react-draggable';
-import {CharactersModel} from '../../../model/coordination-simulator.model';
+import {ActionType, CharactersModel} from '../../../model/coordination-simulator.model';
 import CustomPopConfirm from '../common/element/CustomPopConfirm';
 
 const Container = styled.div`
@@ -40,7 +40,7 @@ const Characters = (
 			characters: CharactersModel[],
 			activeCharacterIdx: number,
 			setActiveCharacterIdx: Dispatch<SetStateAction<number>>,
-			doAction: (type: 'ADD' | 'COPY' | 'RESET' | 'DELETE' | 'DELETE_ITEM' | 'HANDLE_RESIZE' | 'HANDLE_POSITION', ...args: any) => void
+			doAction: (type: ActionType, ...args: any) => void
 		}
 ) => {
 	
