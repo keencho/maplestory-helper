@@ -13,6 +13,7 @@ export type ActionType =
 	| 'SHARE_CODI'
     | 'HAIR_CUSTOM_MIX_SET_COLOR'
     | 'HAIR_CUSTOM_MIX_BASE_COLOR_RATIO'
+    | 'RESET_HAIR_CUSTOM_MIX'
 
 export const BaseColorMin = 0;
 export const BaseColorMax = 100;

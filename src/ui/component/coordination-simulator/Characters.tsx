@@ -1,5 +1,5 @@
 import React, {Dispatch, SetStateAction, useEffect, useRef, useState} from 'react';
-import {Alert, Button, Card, InputNumber, List, Slider, Tooltip} from 'antd';
+import {Alert, Button, Card, InputNumber, List, Slider, Tooltip, Typography} from 'antd';
 import styled from 'styled-components';
 import {CheckOutlined, CloseOutlined, PlusOutlined} from '@ant-design/icons';
 import {getCharacter, getItemIcon} from '../../../api/maplestory-io.api';
@@ -25,6 +25,8 @@ import CustomPopConfirm from '../common/element/CustomPopConfirm';
 import {ResetButton} from "../common/element/ResetButton";
 import {useRecoilValue} from "recoil";
 import {ThemeAtom} from "../../../recoil/theme.atom";
+
+const { Title } = Typography;
 
 const Container = styled.div`
 	width: 100%;
@@ -303,6 +305,12 @@ const Characters = (
                     activeCharacter.data.some(item => item.value.typeInfo.subCategory === 'Hair')
                     ?
                         <CustomMixBoxWrapper theme={theme}>
+                            <Title
+                                level={5}
+                                style={{ textAlign: 'center' }}
+                            >
+                                커스텀 믹스염색
+                            </Title>
                             <CustomMixBox>
                                 
                                 {/* 베이스 컬러 */}
@@ -406,6 +414,13 @@ const Characters = (
                                             onChange={(value) => doAction('HAIR_CUSTOM_MIX_BASE_COLOR_RATIO', value)}
                                             value={activeCharacter.hairCustomMix.baseColorRatio}
                                         />
+                                        <CustomPopConfirm
+                                            placement={'top'}
+                                            title={'커스텀 믹스염색을 초기화 하시겠습니까?'}
+                                            onConfirm={() => doAction('RESET_HAIR_CUSTOM_MIX')}
+                                        >
+                                            <Button type={'primary'} size={'middle'} style={{ width: '100%' }}>초기화</Button>
+                                        </CustomPopConfirm>
                                     </>
                                 :
                                     <div style={{ textAlign: 'center', marginTop: '1rem' }}>

@@ -343,51 +343,51 @@ const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any
                 
                 break;
                 
-                // 헤어 커믹 변경
-                case 'HAIR_CUSTOM_MIX_SET_COLOR':
-                    if (!args || !args[0] || !args[1]) {
-                        return;
-                    }
+            // 헤어 커믹 변경
+            case 'HAIR_CUSTOM_MIX_SET_COLOR':
+                if (!args || !args[0] || !args[1]) {
+                    return;
+                }
+                
+                const type = args[0]
+                const color = args[1];
+                
+                const colorArr = Object.keys(ColorInfo);
+                
+                if (!colorArr.includes(color) || ( type !== 'BASE' && type !== 'MIX' )) {
+                    return;
+                }
+                
+                const character = characters[activeCharacterIdx];
+                const intfKey = type === 'BASE' ? 'baseColor' : 'mixColor';
+                const oIntfKey = type === 'BASE' ? 'mixColor' : 'baseColor';
+                
+                // 반대쪽 색상이 현재 변경하려는 색상과 일치하는지 검증
+                if (character.hairCustomMix) {
+                    const oColor = character.hairCustomMix[oIntfKey];
                     
-                    const type = args[0]
-                    const color = args[1];
-                    
-                    const colorArr = Object.keys(ColorInfo);
-                    
-                    if (!colorArr.includes(color) || ( type !== 'BASE' && type !== 'MIX' )) {
-                        return;
-                    }
-                    
-                    const character = characters[activeCharacterIdx];
-                    const intfKey = type === 'BASE' ? 'baseColor' : 'mixColor';
-                    const oIntfKey = type === 'BASE' ? 'mixColor' : 'baseColor';
-                    
-                    // 반대쪽 색상이 현재 변경하려는 색상과 일치하는지 검증
-                    if (character.hairCustomMix) {
-                        const oColor = character.hairCustomMix[oIntfKey];
-                        
-                        if (oColor) {
-                            if (color === oColor) {
-                                NotificationUtil.fire('error', '베이스 컬러와 믹스 컬러는 서로 달라야 합니다.');
-                                return;
-                            }
+                    if (oColor) {
+                        if (color === oColor) {
+                            NotificationUtil.fire('error', '베이스 컬러와 믹스 컬러는 서로 달라야 합니다.');
+                            return;
                         }
                     }
+                }
+                
+                
+                setCharacters(pv => pv.map( (it, idx) => {
+                    if (idx !== activeCharacterIdx) {
+                        return it;
+                    }
                     
+                    if (it.hairCustomMix && it.hairCustomMix[oIntfKey] && !it.hairCustomMix.baseColorRatio) {
+                        it.hairCustomMix = { ...it.hairCustomMix, baseColorRatio: (BaseColorMin + BaseColorMax) / 2 }
+                    }
                     
-                    setCharacters(pv => pv.map( (it, idx) => {
-                        if (idx !== activeCharacterIdx) {
-                            return it;
-                        }
-                        
-                        if (it.hairCustomMix && it.hairCustomMix[oIntfKey] && !it.hairCustomMix.baseColorRatio) {
-                            it.hairCustomMix = { ...it.hairCustomMix, baseColorRatio: (BaseColorMin + BaseColorMax) / 2 }
-                        }
-                        
-                        return { ...it, hairCustomMix: { ...it.hairCustomMix, [intfKey]: color } }
-                    }))
-                    
-                break;
+                    return { ...it, hairCustomMix: { ...it.hairCustomMix, [intfKey]: color } }
+                }))
+                
+            break;
             
             // 헤어 커믹 비율 변경
             case 'HAIR_CUSTOM_MIX_BASE_COLOR_RATIO':
@@ -401,6 +401,18 @@ const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any
                     }
 
                     return { ...it, hairCustomMix: { ...it.hairCustomMix, baseColorRatio: args[0] } }
+                }))
+                
+                break;
+                
+            // 헤어 커믹 리셋
+            case 'RESET_HAIR_CUSTOM_MIX':
+                setCharacters(pv => pv.map( (it, idx) => {
+                    if (idx !== activeCharacterIdx) {
+                        return it;
+                    }
+                    
+                    return { ...it, hairCustomMix: undefined }
                 }))
                 
                 break;
