@@ -10,7 +10,13 @@ import styled from "styled-components";
 import {FlexBox} from "../component/common/element/FlexBox";
 import {Button, Spin, Switch} from "antd";
 import {CommonStyledSpan} from '../../model/style.model';
-import {ActionType, CharactersModel, ColorInfo, hasAllKey} from '../../model/coordination-simulator.model';
+import {
+    ActionType, BaseColorMax,
+    BaseColorMin,
+    CharactersModel,
+    ColorInfo,
+    hasAllKey
+} from '../../model/coordination-simulator.model';
 import CustomPopConfirm from '../component/common/element/CustomPopConfirm';
 import {compress, deCompress} from '../../util/compress.util';
 import useModal from '../../hooks/useModal';
@@ -226,6 +232,10 @@ const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any
 					}
 
 					it.data = it.data.filter(it2 => it2.key !== args[0]);
+                    
+                    if (args[0] === 'Hair') {
+                        it.hairCustomMix = undefined;
+                    }
 
 					return it;
 				}))
@@ -370,9 +380,29 @@ const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any
                             return it;
                         }
                         
+                        if (it.hairCustomMix && it.hairCustomMix[oIntfKey] && !it.hairCustomMix.baseColorRatio) {
+                            it.hairCustomMix = { ...it.hairCustomMix, baseColorRatio: (BaseColorMin + BaseColorMax) / 2 }
+                        }
+                        
                         return { ...it, hairCustomMix: { ...it.hairCustomMix, [intfKey]: color } }
                     }))
                     
+                break;
+            
+            // 헤어 커믹 비율 변경
+            case 'HAIR_CUSTOM_MIX_BASE_COLOR_RATIO':
+                if (!args || !args[0]) {
+                    return;
+                }
+                
+                setCharacters(pv => pv.map( (it, idx) => {
+                    if (idx !== activeCharacterIdx) {
+                        return it;
+                    }
+
+                    return { ...it, hairCustomMix: { ...it.hairCustomMix, baseColorRatio: args[0] } }
+                }))
+                
                 break;
 				
 			default:

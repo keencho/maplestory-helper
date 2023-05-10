@@ -12,8 +12,10 @@ export type ActionType =
 	| 'RESET_ENTIRE_CHARACTERS'
 	| 'SHARE_CODI'
     | 'HAIR_CUSTOM_MIX_SET_COLOR'
+    | 'HAIR_CUSTOM_MIX_BASE_COLOR_RATIO'
 
-export type BaseColorRange = IntRange<0, 100>
+export const BaseColorMin = 0;
+export const BaseColorMax = 100;
 
 export type Color =
 	| 'YELLOW'
@@ -57,7 +59,7 @@ export type CharactersModel = {
 	hairCustomMix?: {
         baseColor?: Color
         mixColor?: Color
-        baseColorRatio?: BaseColorRange
+        baseColorRatio?: number
     }
 	data: {
 		key: EquipmentSubCategory,

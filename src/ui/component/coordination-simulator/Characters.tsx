@@ -1,5 +1,5 @@
 import React, {Dispatch, SetStateAction, useEffect, useRef, useState} from 'react';
-import {Button, Card, List, Tooltip} from 'antd';
+import {Alert, Button, Card, InputNumber, List, Slider, Tooltip} from 'antd';
 import styled from 'styled-components';
 import {CheckOutlined, CloseOutlined, PlusOutlined} from '@ant-design/icons';
 import {getCharacter, getItemIcon} from '../../../api/maplestory-io.api';
@@ -13,14 +13,16 @@ import SkinDefault from '../../../assets/icon/items/skin_default.png';
 import {DraggableEvent} from 'react-draggable';
 import {
     ActionType,
+    BaseColorMax,
+    BaseColorMin,
     CharactersModel,
     Color,
     ColorInfo,
-    ColorInfoType, SortedColorInfo
+    ColorInfoType,
+    SortedColorInfo
 } from '../../../model/coordination-simulator.model';
 import CustomPopConfirm from '../common/element/CustomPopConfirm';
 import {ResetButton} from "../common/element/ResetButton";
-import NotificationUtil from "../../../util/notification.util";
 import {useRecoilValue} from "recoil";
 import {ThemeAtom} from "../../../recoil/theme.atom";
 
@@ -50,13 +52,14 @@ const CharacterInfoBox = styled.div`
 
 const CustomMixBoxWrapper = styled.div<{ theme: 'light' | 'dark' }>`
     border: 1px solid ${props => BORDER(props.theme)};
-    padding: .5rem 1rem;
+    border-radius: 4px;
+    padding: .5rem .5rem;
 `
 
 const CustomMixBox = styled.div`
     display: flex;
     flex-direction: row;
-    gap: 1rem;
+    gap: .5rem;
 `
 
 const CustomMixColorBox = styled.div`
@@ -82,6 +85,16 @@ const CustomMixColor = styled(ResetButton)<{ color: string }>`
     }
 `
 
+const CustomMixColorInputBox = styled.div`
+    margin-top: .5rem;
+    display: flex;
+    gap: .5rem;
+    
+    div {
+       flex: 1;
+    }
+`
+
 const Characters = (
 	{
 		characters,
@@ -98,12 +111,33 @@ const Characters = (
 ) => {
     
     const theme = useRecoilValue(ThemeAtom);
+    const activeCharacter = characters[activeCharacterIdx];
 	const containerRef = useRef(null)
 	const [isDragging, setIsDragging] = useState<boolean>(false);
 	const [refLoaded, setRefLoaded] = useState<boolean>(false);
+    
+    const isUseHairCustomMixColor = (character: CharactersModel): boolean => {
+        return character.hairCustomMix !== undefined && character.hairCustomMix.baseColor !== undefined && character.hairCustomMix.mixColor !== undefined && character.hairCustomMix.baseColorRatio !== undefined;
+    }
 	
-	const getCharacterSrc = (character: { key: EquipmentSubCategory, value: any }[]) => {
+	const getCharacterSrc = (character: { key: EquipmentSubCategory, value: any }[], hairCustomMixColor?: Color) => {
 		let arr = character.map((item: any) => (item.value.id))
+        
+        // 헤어 커믹 적용
+        if (hairCustomMixColor) {
+            // 기존 헤어 검색
+            const hair = character.find(item => item.key === 'Hair');
+            if (hair) {
+                const hairId = hair.value.id
+                // 기존 헤어 제거
+                arr = arr.filter(id => id !== hairId);
+                
+                const hairWithoutColorId = hairId.toString().slice(0, -1);
+                const mapleIoIdx = ColorInfo[hairCustomMixColor].ioIdx;
+                
+                arr.push(hairWithoutColorId + mapleIoIdx.toString())
+            }
+        }
 		
 		// 피부인 경우 '얼굴 피부' 만 대상이기 때문에 몸통에도 똑같이 적용한다.
 		const head = character.find(item => item.key === 'Head')
@@ -116,7 +150,7 @@ const Characters = (
 			arr.push(2000);
 		}
 		
-		arr = arr.map(id => ({itemId: id, region: region, version: version}));
+		arr = arr.map(id => ({ itemId: id, region: region, version: version }));
 		
 		const str = encodeURIComponent(JSON.stringify(arr).slice(1, -1));
 		
@@ -149,15 +183,13 @@ const Characters = (
     
     const isHairCustomMixMatch = (type: 'BASE' | 'MIX', color: Color): boolean => {
         
-        const character = characters[activeCharacterIdx];
-        
-        if (!character.hairCustomMix) return false;
+        if (!activeCharacter.hairCustomMix) return false;
         
         const key = type === 'BASE' ? 'baseColor' : 'mixColor';
         
-        if (!character.hairCustomMix[key]) return false;
+        if (!activeCharacter.hairCustomMix[key]) return false;
         
-        if (character.hairCustomMix[key] !== color) return false;
+        if (activeCharacter.hairCustomMix[key] !== color) return false;
         
         return true;
     }
@@ -212,15 +244,43 @@ const Characters = (
 						}}
 					>
 						<ImageWrapper onClick={() => isDragging ? undefined : setActiveCharacterIdx(idx)}>
-							<AsyncImage src={getCharacterSrc(character.data)}
-							            alt={'캐릭터'}
-							            style={{
-								            filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none',
-								            width: '100%'
-							            }}
-							            draggable={false}
-							            loadingTip={'Loading...'}
-							/>
+                            {
+                                isUseHairCustomMixColor(character)
+                                ?
+                                    <>
+                                        <AsyncImage src={getCharacterSrc( character.data, character.hairCustomMix!.baseColor! )}
+                                                    alt={'캐릭터'}
+                                                    style={{
+                                                        filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none',
+                                                        width: '100%',
+                                                        position: 'absolute'
+                                                    }}
+                                                    draggable={false}
+                                                    loadingTip={'Loading...'}
+                                        />
+                                        <AsyncImage src={getCharacterSrc( character.data, character.hairCustomMix!.mixColor! )}
+                                                    alt={'캐릭터'}
+                                                    style={{
+                                                        width: '100%',
+                                                        position: 'absolute',
+                                                        opacity: (BaseColorMax - character.hairCustomMix!.baseColorRatio!) / 100
+                                                    }}
+                                                    draggable={false}
+                                                    loadingTip={'Loading...'}
+                                                    displayEmptyOnLoading={true}
+                                        />
+                                    </>
+                                :
+                                    <AsyncImage src={getCharacterSrc(character.data)}
+                                                alt={'캐릭터'}
+                                                style={{
+                                                    filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none',
+                                                    width: '100%'
+                                                }}
+                                                draggable={false}
+                                                loadingTip={'Loading...'}
+                                    />
+                            }
 						</ImageWrapper>
 					</Rnd>
 				))
@@ -240,7 +300,7 @@ const Characters = (
 			/>
             <CharacterInfoBox>
                 {
-                    characters[activeCharacterIdx].data.some(item => item.value.typeInfo.subCategory === 'Hair')
+                    activeCharacter.data.some(item => item.value.typeInfo.subCategory === 'Hair')
                     ?
                         <CustomMixBoxWrapper theme={theme}>
                             <CustomMixBox>
@@ -319,6 +379,40 @@ const Characters = (
                                 </Card>
                                 
                             </CustomMixBox>
+                            
+                            {
+                                activeCharacter.hairCustomMix && activeCharacter.hairCustomMix.baseColorRatio
+                                ?
+                                    <>
+                                        <CustomMixColorInputBox>
+                                            <InputNumber
+                                                size="small"
+                                                min={BaseColorMin}
+                                                max={BaseColorMax}
+                                                value={activeCharacter.hairCustomMix.baseColorRatio}
+                                                onChange={(value) => doAction('HAIR_CUSTOM_MIX_BASE_COLOR_RATIO', value)}
+                                            />
+                                            <InputNumber
+                                                size="small"
+                                                min={BaseColorMin}
+                                                max={BaseColorMax}
+                                                value={BaseColorMax - activeCharacter.hairCustomMix.baseColorRatio}
+                                                onChange={(value) => doAction('HAIR_CUSTOM_MIX_BASE_COLOR_RATIO', value ? BaseColorMax - value : null)}
+                                            />
+                                        </CustomMixColorInputBox>
+                                        <Slider
+                                            min={BaseColorMin}
+                                            max={BaseColorMax}
+                                            onChange={(value) => doAction('HAIR_CUSTOM_MIX_BASE_COLOR_RATIO', value)}
+                                            value={activeCharacter.hairCustomMix.baseColorRatio}
+                                        />
+                                    </>
+                                :
+                                    <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                                        <Alert message="컬러를 선택해주세요." type="info" />
+                                    </div>
+                            }
+                            
                         </CustomMixBoxWrapper>
                     :
                         <></>
@@ -354,7 +448,7 @@ const Characters = (
                         </FlexBox>
                     }
                     bordered
-                    dataSource={characters[activeCharacterIdx].data}
+                    dataSource={activeCharacter.data}
                     renderItem={item => (
                         <List.Item>
                             <List.Item.Meta

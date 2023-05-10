@@ -12,6 +12,7 @@ interface Props {
 	cache?: {
 		cacheName: string
 	}
+    displayEmptyOnLoading?: boolean
 }
 
 const AsyncImage = (props: Props) => {
@@ -39,7 +40,11 @@ const AsyncImage = (props: Props) => {
 	}
 	
 	if (!loadedSrc) {
-		return <Spin size={'small'} tip={props.loadingTip} />
+        if (props.displayEmptyOnLoading === true) {
+            return <></>
+        } else {
+            return <Spin size={'small'} tip={props.loadingTip} />
+        }
 	}
 	
 	return <img src={loadedSrc} alt={props.alt} style={props.style} draggable={props.draggable} />
