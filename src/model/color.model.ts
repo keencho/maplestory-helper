@@ -12,3 +12,7 @@ export const BACKGROUND = (theme: 'light' | 'dark') => {
 export const HOVER = (theme: 'light' | 'dark') => {
 	return theme === 'dark' ? '#262626' : '#fafafa';
 }
+
+export const BORDER = (theme: 'light' | 'dark') => {
+    return theme === 'dark' ? '#6f6c6c' : '#d9d9d9'
+}
