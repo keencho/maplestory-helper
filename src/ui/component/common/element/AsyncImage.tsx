@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Empty, Spin} from 'antd';
 import {doCacheFetch, doFetch} from "../../../../util/fetch.util";
+import {ExclamationCircleOutlined} from '@ant-design/icons';
 
 interface Props {
 	src: string
@@ -11,11 +12,13 @@ interface Props {
 	cache?: {
 		cacheName: string
 	}
+    displayEmptyOnLoading?: boolean
 }
 
 const AsyncImage = (props: Props) => {
 	const useCache = props.cache !== undefined && props.cache.cacheName.length > 0;
 	const [loadedSrc, setLoadedSrc] = useState<string>('');
+	const [error, setError] = useState<boolean>(false)
 	
 	useEffect(() => {
 		setLoadedSrc('');
@@ -25,16 +28,26 @@ const AsyncImage = (props: Props) => {
 				? doCacheFetch(props.src, props.cache!.cacheName)
 				: doFetch(props.src, 'IMG')
 
-			fetch.then(setLoadedSrc)
+			fetch
+				.then(setLoadedSrc)
+				.catch(() => setError(true))
 		}
 		
 	}, [props.src]);
 	
-	if (loadedSrc) {
-		return <img src={loadedSrc} alt={props.alt} style={props.style} draggable={props.draggable} />;
+	if (error) {
+		return <ExclamationCircleOutlined />
 	}
 	
-	return <Spin size={'small'} tip={props.loadingTip} />;
+	if (!loadedSrc) {
+        if (props.displayEmptyOnLoading === true) {
+            return <></>
+        } else {
+            return <Spin size={'small'} tip={props.loadingTip} />
+        }
+	}
+	
+	return <img src={loadedSrc} alt={props.alt} style={props.style} draggable={props.draggable} />
 };
 
 export default AsyncImage
