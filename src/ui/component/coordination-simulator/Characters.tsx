@@ -31,6 +31,14 @@ const { Title } = Typography;
 const Container = styled.div`
 	width: 100%;
 	height: 100%;
+    border: 1px solid blue;
+    display: flex;
+    flex-direction: row;
+`
+
+const CharacterPlayground = styled.div`
+    border: 1px solid red;
+    flex: 1;
 `
 
 const ImageWrapper = styled.div`
@@ -44,12 +52,11 @@ const ImageWrapper = styled.div`
 `
 
 const CharacterInfoBox = styled.div`
-	position: absolute;
-    bottom: 15px;
-    right: 20px;
+    border: 1px solid yellow;
     display: flex;
     flex-direction: row;
     gap: 1rem;
+    max-height: 50%;
 `
 
 const CustomMixBoxWrapper = styled.div<{ theme: 'light' | 'dark' }>`
@@ -204,231 +211,223 @@ const Characters = (
 	
 	return (
 		<Container ref={containerRef}>
-			{
-				refLoaded && characters.map((character, idx) => (
-					<Rnd
-						key={character.key}
-						default={{
-							x: character.x,
-							y: character.y,
-							width: character.width,
-							height: character.height,
-						}}
-						size={{
-							width: character.width,
-							height: character.height
-						}}
-						bounds={'parent'}
-						enableResizing={{
-							bottomRight: true
-						}}
-						resizeHandleStyles={{
-							bottomRight: {
-								width: '10px',
-								height: '10px',
-								borderRadius: '10px',
-								backgroundColor: BLUE
-							}
-						}}
-						onResizeStop={(e, dir, ref) => doAction('HANDLE_RESIZE', character.key, {
-							width: ref.offsetWidth,
-							height: ref.offsetHeight
-						})}
-						onDragStart={dragControl}
-						onDragStop={(e, data) => dragControl(e, data, character.key)}
-						onDrag={dragControl}
-						minWidth={45}
-						minHeight={70}
-						maxWidth={135}
-						maxHeight={210}
-						style={{
-							zIndex: 999
-						}}
-					>
-						<ImageWrapper onClick={() => isDragging ? undefined : setActiveCharacterIdx(idx)}>
-                            {
-                                isUseHairCustomMixColor(character)
-                                ?
-                                    <>
-                                        <AsyncImage src={getCharacterSrc( character.data, character.hairCustomMix!.baseColor! )}
+            <CharacterPlayground>
+                {
+                    refLoaded && characters.map((character, idx) => (
+                        <Rnd
+                            key={character.key}
+                            default={{
+                                x: character.x,
+                                y: character.y,
+                                width: character.width,
+                                height: character.height,
+                            }}
+                            size={{
+                                width: character.width,
+                                height: character.height
+                            }}
+                            bounds={'parent'}
+                            enableResizing={{
+                                bottomRight: true
+                            }}
+                            resizeHandleStyles={{
+                                bottomRight: {
+                                    width: '10px',
+                                    height: '10px',
+                                    borderRadius: '10px',
+                                    backgroundColor: BLUE
+                                }
+                            }}
+                            onResizeStop={(e, dir, ref) => doAction('HANDLE_RESIZE', character.key, {
+                                width: ref.offsetWidth,
+                                height: ref.offsetHeight
+                            })}
+                            onDragStart={dragControl}
+                            onDragStop={(e, data) => dragControl(e, data, character.key)}
+                            onDrag={dragControl}
+                            minWidth={45}
+                            minHeight={70}
+                            maxWidth={135}
+                            maxHeight={210}
+                            style={{
+                                zIndex: 999
+                            }}
+                        >
+                            <ImageWrapper onClick={() => isDragging ? undefined : setActiveCharacterIdx(idx)}>
+                                {
+                                    isUseHairCustomMixColor(character)
+                                        ?
+                                        <>
+                                            <AsyncImage src={getCharacterSrc( character.data, character.hairCustomMix!.baseColor! )}
+                                                        alt={'캐릭터'}
+                                                        style={{
+                                                            filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none',
+                                                            width: '100%',
+                                                            position: 'absolute'
+                                                        }}
+                                                        draggable={false}
+                                                        loadingTip={'Loading...'}
+                                            />
+                                            <AsyncImage src={getCharacterSrc( character.data, character.hairCustomMix!.mixColor! )}
+                                                        alt={'캐릭터'}
+                                                        style={{
+                                                            width: '100%',
+                                                            position: 'absolute',
+                                                            opacity: (BaseColorMax - character.hairCustomMix!.baseColorRatio!) / 100
+                                                        }}
+                                                        draggable={false}
+                                                        loadingTip={'Loading...'}
+                                                        displayEmptyOnLoading={true}
+                                            />
+                                        </>
+                                        :
+                                        <AsyncImage src={getCharacterSrc(character.data)}
                                                     alt={'캐릭터'}
                                                     style={{
                                                         filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none',
-                                                        width: '100%',
-                                                        position: 'absolute'
+                                                        width: '100%'
                                                     }}
                                                     draggable={false}
                                                     loadingTip={'Loading...'}
                                         />
-                                        <AsyncImage src={getCharacterSrc( character.data, character.hairCustomMix!.mixColor! )}
-                                                    alt={'캐릭터'}
-                                                    style={{
-                                                        width: '100%',
-                                                        position: 'absolute',
-                                                        opacity: (BaseColorMax - character.hairCustomMix!.baseColorRatio!) / 100
-                                                    }}
-                                                    draggable={false}
-                                                    loadingTip={'Loading...'}
-                                                    displayEmptyOnLoading={true}
-                                        />
-                                    </>
-                                :
-                                    <AsyncImage src={getCharacterSrc(character.data)}
-                                                alt={'캐릭터'}
-                                                style={{
-                                                    filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none',
-                                                    width: '100%'
-                                                }}
-                                                draggable={false}
-                                                loadingTip={'Loading...'}
-                                    />
-                            }
-						</ImageWrapper>
-					</Rnd>
-				))
-			}
-			<Button
-				type="primary"
-				shape="circle"
-				icon={<PlusOutlined/>}
-				onClick={() => doAction('ADD')}
-				style={{
-					width: '64px',
-					height: '64px',
-					position: 'absolute',
-					bottom: 15,
-					left: 20
-				}}
-			/>
+                                }
+                            </ImageWrapper>
+                        </Rnd>
+                    ))
+                }
+            </CharacterPlayground>
+            
+            {/* 캐릭터 정보 & 커믹 */}
             <CharacterInfoBox>
                 {
                     activeCharacter.data.some(item => item.value.typeInfo.subCategory === 'Hair')
                     ?
-                        <CustomMixBoxWrapper theme={theme}>
-                            <Title
-                                level={5}
-                                style={{ textAlign: 'center' }}
-                            >
-                                커스텀 믹스염색
-                            </Title>
-                            <CustomMixBox>
-                                
-                                {/* 베이스 컬러 */}
-                                <Card
-                                    title={'베이스 컬러'}
-                                    size={'small'}
-                                    headStyle={{ textAlign: 'center' }}
-                                    style={{ width: '100px' }}
-                                    type={'inner'}
-                                >
-                                    <CustomMixColorBox>
-                                        {
-                                            Object.keys(SortedColorInfo).map((key: string, idx: number) => {
-                                                const ciType: ColorInfoType = ColorInfo[key as Color];
-                                                return (
-                                                    <CustomMixColorWrapper key={key}>
-                                                        <Tooltip placement={ idx % 2 === 0 ? 'left' : 'right' } title={ ciType.kor }>
-                                                            <CustomMixColor
-                                                                color={ ciType.hex }
-                                                                onClick={() => doAction('HAIR_CUSTOM_MIX_SET_COLOR', 'BASE', key as Color)}
-                                                            >
-                                                                {
-                                                                    isHairCustomMixMatch("BASE", key as Color)
-                                                                    ?
-                                                                        <CheckOutlined style={{ color: '#ffffff' }} />
-                                                                    :
-                                                                        <></>
-                                                                }
-                                                            </CustomMixColor>
-                                                        </Tooltip>
-                                                    </CustomMixColorWrapper>
-                                                
-                                                )
-                                            })
-                                        }
-                                    </CustomMixColorBox>
-                                </Card>
-                                
-                                {/* 믹스 컬러 */}
-                                <Card
-                                    title={'믹스 컬러'}
-                                    size={'small'}
-                                    headStyle={{ textAlign: 'center' }}
-                                    style={{ width: '100px' }}
-                                    type={'inner'}
-                                >
-                                    <CustomMixColorBox>
-                                        {
-                                            Object.keys(SortedColorInfo).map((key: string, idx: number) => {
-                                                const ciType: ColorInfoType = ColorInfo[key as Color];
-                                                return (
-                                                    <CustomMixColorWrapper key={key}>
-                                                        <Tooltip placement={ idx % 2 === 0 ? 'left' : 'right' } title={ ciType.kor }>
-                                                            
-                                                            <CustomMixColor
-                                                                color={ ciType.hex }
-                                                                onClick={() => doAction('HAIR_CUSTOM_MIX_SET_COLOR', 'MIX', key as Color)}
-                                                            >
-                                                                {
-                                                                    isHairCustomMixMatch("MIX", key as Color)
-                                                                    ?
-                                                                        <CheckOutlined style={{ color: '#ffffff' }} />
-                                                                    :
-                                                                        <></>
-                                                                }
-                                                            </CustomMixColor>
-                                                        </Tooltip>
-                                                    </CustomMixColorWrapper>
-                                                
-                                                )
-                                            })
-                                        }
-                                    </CustomMixColorBox>
-                                </Card>
-                                
-                            </CustomMixBox>
-                            
-                            {
-                                activeCharacter.hairCustomMix && activeCharacter.hairCustomMix.baseColorRatio
-                                ?
-                                    <>
-                                        <CustomMixColorInputBox>
-                                            <InputNumber
-                                                size="small"
-                                                min={BaseColorMin}
-                                                max={BaseColorMax}
-                                                value={activeCharacter.hairCustomMix.baseColorRatio}
-                                                onChange={(value) => doAction('HAIR_CUSTOM_MIX_BASE_COLOR_RATIO', value)}
-                                            />
-                                            <InputNumber
-                                                size="small"
-                                                min={BaseColorMin}
-                                                max={BaseColorMax}
-                                                value={BaseColorMax - activeCharacter.hairCustomMix.baseColorRatio}
-                                                onChange={(value) => doAction('HAIR_CUSTOM_MIX_BASE_COLOR_RATIO', value ? BaseColorMax - value : null)}
-                                            />
-                                        </CustomMixColorInputBox>
-                                        <Slider
-                                            min={BaseColorMin}
-                                            max={BaseColorMax}
-                                            onChange={(value) => doAction('HAIR_CUSTOM_MIX_BASE_COLOR_RATIO', value)}
-                                            value={activeCharacter.hairCustomMix.baseColorRatio}
-                                        />
-                                        <CustomPopConfirm
-                                            placement={'top'}
-                                            title={'커스텀 믹스염색을 초기화 하시겠습니까?'}
-                                            onConfirm={() => doAction('RESET_HAIR_CUSTOM_MIX')}
-                                        >
-                                            <Button type={'primary'} size={'middle'} style={{ width: '100%' }}>초기화</Button>
-                                        </CustomPopConfirm>
-                                    </>
-                                :
-                                    <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-                                        <Alert message="컬러를 선택해주세요." type="info" />
-                                    </div>
-                            }
-                            
-                        </CustomMixBoxWrapper>
+                        <></>
+                        // <CustomMixBoxWrapper theme={theme}>
+                        //     <Title
+                        //         level={5}
+                        //         style={{ textAlign: 'center' }}
+                        //     >
+                        //         커스텀 믹스염색
+                        //     </Title>
+                        //     <CustomMixBox>
+                        //
+                        //         {/* 베이스 컬러 */}
+                        //         <Card
+                        //             title={'베이스 컬러'}
+                        //             size={'small'}
+                        //             headStyle={{ textAlign: 'center' }}
+                        //             style={{ width: '100px' }}
+                        //             type={'inner'}
+                        //         >
+                        //             <CustomMixColorBox>
+                        //                 {
+                        //                     Object.keys(SortedColorInfo).map((key: string, idx: number) => {
+                        //                         const ciType: ColorInfoType = ColorInfo[key as Color];
+                        //                         return (
+                        //                             <CustomMixColorWrapper key={key}>
+                        //                                 <Tooltip placement={ idx % 2 === 0 ? 'left' : 'right' } title={ ciType.kor }>
+                        //                                     <CustomMixColor
+                        //                                         color={ ciType.hex }
+                        //                                         onClick={() => doAction('HAIR_CUSTOM_MIX_SET_COLOR', 'BASE', key as Color)}
+                        //                                     >
+                        //                                         {
+                        //                                             isHairCustomMixMatch("BASE", key as Color)
+                        //                                             ?
+                        //                                                 <CheckOutlined style={{ color: '#ffffff' }} />
+                        //                                             :
+                        //                                                 <></>
+                        //                                         }
+                        //                                     </CustomMixColor>
+                        //                                 </Tooltip>
+                        //                             </CustomMixColorWrapper>
+                        //
+                        //                         )
+                        //                     })
+                        //                 }
+                        //             </CustomMixColorBox>
+                        //         </Card>
+                        //
+                        //         {/* 믹스 컬러 */}
+                        //         <Card
+                        //             title={'믹스 컬러'}
+                        //             size={'small'}
+                        //             headStyle={{ textAlign: 'center' }}
+                        //             style={{ width: '100px' }}
+                        //             type={'inner'}
+                        //         >
+                        //             <CustomMixColorBox>
+                        //                 {
+                        //                     Object.keys(SortedColorInfo).map((key: string, idx: number) => {
+                        //                         const ciType: ColorInfoType = ColorInfo[key as Color];
+                        //                         return (
+                        //                             <CustomMixColorWrapper key={key}>
+                        //                                 <Tooltip placement={ idx % 2 === 0 ? 'left' : 'right' } title={ ciType.kor }>
+                        //
+                        //                                     <CustomMixColor
+                        //                                         color={ ciType.hex }
+                        //                                         onClick={() => doAction('HAIR_CUSTOM_MIX_SET_COLOR', 'MIX', key as Color)}
+                        //                                     >
+                        //                                         {
+                        //                                             isHairCustomMixMatch("MIX", key as Color)
+                        //                                             ?
+                        //                                                 <CheckOutlined style={{ color: '#ffffff' }} />
+                        //                                             :
+                        //                                                 <></>
+                        //                                         }
+                        //                                     </CustomMixColor>
+                        //                                 </Tooltip>
+                        //                             </CustomMixColorWrapper>
+                        //
+                        //                         )
+                        //                     })
+                        //                 }
+                        //             </CustomMixColorBox>
+                        //         </Card>
+                        //
+                        //     </CustomMixBox>
+                        //
+                        //     {
+                        //         activeCharacter.hairCustomMix && activeCharacter.hairCustomMix.baseColorRatio
+                        //         ?
+                        //             <>
+                        //                 <CustomMixColorInputBox>
+                        //                     <InputNumber
+                        //                         size="small"
+                        //                         min={BaseColorMin}
+                        //                         max={BaseColorMax}
+                        //                         value={activeCharacter.hairCustomMix.baseColorRatio}
+                        //                         onChange={(value) => doAction('HAIR_CUSTOM_MIX_BASE_COLOR_RATIO', value)}
+                        //                     />
+                        //                     <InputNumber
+                        //                         size="small"
+                        //                         min={BaseColorMin}
+                        //                         max={BaseColorMax}
+                        //                         value={BaseColorMax - activeCharacter.hairCustomMix.baseColorRatio}
+                        //                         onChange={(value) => doAction('HAIR_CUSTOM_MIX_BASE_COLOR_RATIO', value ? BaseColorMax - value : null)}
+                        //                     />
+                        //                 </CustomMixColorInputBox>
+                        //                 <Slider
+                        //                     min={BaseColorMin}
+                        //                     max={BaseColorMax}
+                        //                     onChange={(value) => doAction('HAIR_CUSTOM_MIX_BASE_COLOR_RATIO', value)}
+                        //                     value={activeCharacter.hairCustomMix.baseColorRatio}
+                        //                 />
+                        //                 <CustomPopConfirm
+                        //                     placement={'top'}
+                        //                     title={'커스텀 믹스염색을 초기화 하시겠습니까?'}
+                        //                     onConfirm={() => doAction('RESET_HAIR_CUSTOM_MIX')}
+                        //                 >
+                        //                     <Button type={'primary'} size={'middle'} style={{ width: '100%' }}>초기화</Button>
+                        //                 </CustomPopConfirm>
+                        //             </>
+                        //         :
+                        //             <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                        //                 <Alert message="컬러를 선택해주세요." type="info" />
+                        //             </div>
+                        //     }
+                        //
+                        // </CustomMixBoxWrapper>
                     :
                         <></>
                 }
@@ -509,6 +508,21 @@ const Characters = (
                     }}
                 />
             </CharacterInfoBox>
+            
+            {/* 캐릭 추가 버튼 */}
+            <Button
+                type="primary"
+                shape="circle"
+                icon={<PlusOutlined/>}
+                onClick={() => doAction('ADD')}
+                style={{
+                    width: '64px',
+                    height: '64px',
+                    position: 'absolute',
+                    bottom: 15,
+                    left: 20
+                }}
+            />
 		</Container>
 	)
 }
