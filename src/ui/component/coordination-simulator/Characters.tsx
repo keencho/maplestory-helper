@@ -32,13 +32,9 @@ const Container = styled.div`
 	width: 100%;
 	height: 100%;
     border: 1px solid blue;
+    overflow: hidden;
     display: flex;
-    flex-direction: row;
-`
-
-const CharacterPlayground = styled.div`
-    border: 1px solid red;
-    flex: 1;
+    justify-content: end;
 `
 
 const ImageWrapper = styled.div`
@@ -53,10 +49,11 @@ const ImageWrapper = styled.div`
 
 const CharacterInfoBox = styled.div`
     border: 1px solid yellow;
-    display: flex;
-    flex-direction: row;
+    //display: flex;
+    //flex-direction: row;
     gap: 1rem;
-    max-height: 50%;
+    min-height: 40%;
+    max-height: 40%;
 `
 
 const CustomMixBoxWrapper = styled.div<{ theme: 'light' | 'dark' }>`
@@ -211,91 +208,89 @@ const Characters = (
 	
 	return (
 		<Container ref={containerRef}>
-            <CharacterPlayground>
-                {
-                    refLoaded && characters.map((character, idx) => (
-                        <Rnd
-                            key={character.key}
-                            default={{
-                                x: character.x,
-                                y: character.y,
-                                width: character.width,
-                                height: character.height,
-                            }}
-                            size={{
-                                width: character.width,
-                                height: character.height
-                            }}
-                            bounds={'parent'}
-                            enableResizing={{
-                                bottomRight: true
-                            }}
-                            resizeHandleStyles={{
-                                bottomRight: {
-                                    width: '10px',
-                                    height: '10px',
-                                    borderRadius: '10px',
-                                    backgroundColor: BLUE
-                                }
-                            }}
-                            onResizeStop={(e, dir, ref) => doAction('HANDLE_RESIZE', character.key, {
-                                width: ref.offsetWidth,
-                                height: ref.offsetHeight
-                            })}
-                            onDragStart={dragControl}
-                            onDragStop={(e, data) => dragControl(e, data, character.key)}
-                            onDrag={dragControl}
-                            minWidth={45}
-                            minHeight={70}
-                            maxWidth={135}
-                            maxHeight={210}
-                            style={{
-                                zIndex: 999
-                            }}
-                        >
-                            <ImageWrapper onClick={() => isDragging ? undefined : setActiveCharacterIdx(idx)}>
-                                {
-                                    isUseHairCustomMixColor(character)
-                                        ?
-                                        <>
-                                            <AsyncImage src={getCharacterSrc( character.data, character.hairCustomMix!.baseColor! )}
-                                                        alt={'캐릭터'}
-                                                        style={{
-                                                            filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none',
-                                                            width: '100%',
-                                                            position: 'absolute'
-                                                        }}
-                                                        draggable={false}
-                                                        loadingTip={'Loading...'}
-                                            />
-                                            <AsyncImage src={getCharacterSrc( character.data, character.hairCustomMix!.mixColor! )}
-                                                        alt={'캐릭터'}
-                                                        style={{
-                                                            width: '100%',
-                                                            position: 'absolute',
-                                                            opacity: (BaseColorMax - character.hairCustomMix!.baseColorRatio!) / 100
-                                                        }}
-                                                        draggable={false}
-                                                        loadingTip={'Loading...'}
-                                                        displayEmptyOnLoading={true}
-                                            />
-                                        </>
-                                        :
-                                        <AsyncImage src={getCharacterSrc(character.data)}
+            {
+                refLoaded && characters.map((character, idx) => (
+                    <Rnd
+                        key={character.key}
+                        default={{
+                            x: character.x,
+                            y: character.y,
+                            width: character.width,
+                            height: character.height,
+                        }}
+                        size={{
+                            width: character.width,
+                            height: character.height
+                        }}
+                        bounds={'parent'}
+                        enableResizing={{
+                            bottomRight: true
+                        }}
+                        resizeHandleStyles={{
+                            bottomRight: {
+                                width: '10px',
+                                height: '10px',
+                                borderRadius: '10px',
+                                backgroundColor: BLUE
+                            }
+                        }}
+                        onResizeStop={(e, dir, ref) => doAction('HANDLE_RESIZE', character.key, {
+                            width: ref.offsetWidth,
+                            height: ref.offsetHeight
+                        })}
+                        onDragStart={dragControl}
+                        onDragStop={(e, data) => dragControl(e, data, character.key)}
+                        onDrag={dragControl}
+                        minWidth={45}
+                        minHeight={70}
+                        maxWidth={135}
+                        maxHeight={210}
+                        style={{
+                            zIndex: 999
+                        }}
+                    >
+                        <ImageWrapper onClick={() => isDragging ? undefined : setActiveCharacterIdx(idx)}>
+                            {
+                                isUseHairCustomMixColor(character)
+                                    ?
+                                    <>
+                                        <AsyncImage src={getCharacterSrc( character.data, character.hairCustomMix!.baseColor! )}
                                                     alt={'캐릭터'}
                                                     style={{
                                                         filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none',
-                                                        width: '100%'
+                                                        width: '100%',
+                                                        position: 'absolute'
                                                     }}
                                                     draggable={false}
                                                     loadingTip={'Loading...'}
                                         />
-                                }
-                            </ImageWrapper>
-                        </Rnd>
-                    ))
-                }
-            </CharacterPlayground>
+                                        <AsyncImage src={getCharacterSrc( character.data, character.hairCustomMix!.mixColor! )}
+                                                    alt={'캐릭터'}
+                                                    style={{
+                                                        width: '100%',
+                                                        position: 'absolute',
+                                                        opacity: (BaseColorMax - character.hairCustomMix!.baseColorRatio!) / 100
+                                                    }}
+                                                    draggable={false}
+                                                    loadingTip={'Loading...'}
+                                                    displayEmptyOnLoading={true}
+                                        />
+                                    </>
+                                    :
+                                    <AsyncImage src={getCharacterSrc(character.data)}
+                                                alt={'캐릭터'}
+                                                style={{
+                                                    filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none',
+                                                    width: '100%'
+                                                }}
+                                                draggable={false}
+                                                loadingTip={'Loading...'}
+                                    />
+                            }
+                        </ImageWrapper>
+                    </Rnd>
+                ))
+            }
             
             {/* 캐릭터 정보 & 커믹 */}
             <CharacterInfoBox>
