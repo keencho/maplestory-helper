@@ -147,7 +147,7 @@ const Characters = (
     
     const theme = useRecoilValue(ThemeAtom);
     const activeCharacter = characters[activeCharacterIdx];
-	const containerRef = useRef(null)
+	const playGroundRef = useRef<HTMLDivElement>(null);
 	const [isDragging, setIsDragging] = useState<boolean>(false);
 	const [refLoaded, setRefLoaded] = useState<boolean>(false);
     
@@ -196,13 +196,25 @@ const Characters = (
 		if (event.type === 'mousemove') {
 			setIsDragging(true)
 		}
+        
+        // console.log(data);
+        //
+        // if (event.type === 'mousemove') {
+        //     setTimeout(() => {
+        //         if (args && args.length > 0) {
+        //             doAction('HANDLE_POSITION', { x: data.x, y: data.y, key: args[0] })
+        //         }
+        //
+        //     }, 100);
+        // }
 		
 		if (event.type === 'mouseup') {
 			setTimeout(() => {
 				if (args && args.length > 0) {
-					doAction('HANDLE_POSITION', {x: data.x, y: data.y, key: args[0]})
+					doAction('HANDLE_POSITION', { x: data.x, y: data.y, key: args[0] })
 				}
-				setIsDragging(false);
+                
+                setIsDragging(false);
 			}, 100);
 		}
 	}
@@ -230,23 +242,28 @@ const Characters = (
     }
 	
 	useEffect(() => {
-		if (containerRef.current) {
+		if (playGroundRef.current) {
 			setRefLoaded(true)
+
+            const observer = new ResizeObserver(() => doAction('CONTROL_CHARACTERS_POSITION', { width: playGroundRef.current?.clientWidth, height: playGroundRef.current?.clientHeight }));
+            observer.observe(playGroundRef.current);
+
+            return () => {
+                observer.disconnect()
+            }
 		}
-	}, [containerRef])
+	}, [playGroundRef])
 	
 	return (
-		<Container ref={containerRef}>
-            <CharacterPlayGround>
+		<Container>
+            <CharacterPlayGround ref={playGroundRef}>
                 {
                     refLoaded && characters.map((character, idx) => (
                         <Rnd
                             key={character.key}
-                            default={{
+                            position={{
                                 x: character.x,
-                                y: character.y,
-                                width: character.width,
-                                height: character.height,
+                                y: character.y
                             }}
                             size={{
                                 width: character.width,
@@ -268,9 +285,9 @@ const Characters = (
                                 width: ref.offsetWidth,
                                 height: ref.offsetHeight
                             })}
-                            onDragStart={dragControl}
+                            // onDragStart={dragControl}
                             onDragStop={(e, data) => dragControl(e, data, character.key)}
-                            onDrag={dragControl}
+                            // onDrag={(e, data) => dragControl(e, data, character.key)}
                             minWidth={45}
                             minHeight={70}
                             maxWidth={135}
@@ -362,7 +379,7 @@ const Characters = (
                             activeCharacter.data && activeCharacter.data.length > 0
                                 ?
                                 activeCharacter.data.map(item => (
-                                    <CharacterItem theme={theme}>
+                                    <CharacterItem theme={theme}key={item.key}>
                                         <List.Item>
                                             <List.Item.Meta
                                                 avatar={
@@ -402,7 +419,7 @@ const Characters = (
                                 ))
                                 :
                                 <Empty
-                                    style={{ margin: '1rem 0' }}
+                                    style={{ marginTop: '5rem' }}
                                     description={'선택된 아이템이 없습니다.'}
                                 />
                         }
