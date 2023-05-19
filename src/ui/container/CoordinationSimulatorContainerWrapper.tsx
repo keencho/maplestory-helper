@@ -11,7 +11,8 @@ import {FlexBox} from "../component/common/element/FlexBox";
 import {Button, Spin, Switch} from "antd";
 import {CommonStyledSpan} from '../../model/style.model';
 import {
-    ActionType, BaseColorMax,
+    ActionType,
+    BaseColorMax,
     BaseColorMin,
     CharactersModel,
     ColorInfo,
@@ -415,6 +416,31 @@ const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any
                     return { ...it, hairCustomMix: undefined }
                 }))
                 
+                break;
+                
+            // element size 변경등으로 인한 캐릭터 포지션 컨트롤
+            case 'CONTROL_CHARACTERS_POSITION':
+                if (!args || !args[0]) {
+                    return;
+                }
+                const width = args[0].width;
+                const height = args[0].height;
+
+                if (!width || !height) {
+                    return;
+                }
+                
+                setCharacters(pv => pv.map((it) => {
+                    if (it.x + it.width > width) {
+                        it.x = width - it.width;
+                    }
+                    
+                    if (it.y + it.height > height) {
+                        it.y = height - it.height;
+                    }
+
+                    return it;
+                }));
                 break;
 				
 			default:

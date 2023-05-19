@@ -1,5 +1,4 @@
 import {EquipmentSubCategory} from './equipment.model';
-import {IntRange} from './common.model';
 
 export type ActionType =
 	| 'ADD'
@@ -14,6 +13,7 @@ export type ActionType =
     | 'HAIR_CUSTOM_MIX_SET_COLOR'
     | 'HAIR_CUSTOM_MIX_BASE_COLOR_RATIO'
     | 'RESET_HAIR_CUSTOM_MIX'
+    | 'CONTROL_CHARACTERS_POSITION'
 
 export const BaseColorMin = 0;
 export const BaseColorMax = 100;
