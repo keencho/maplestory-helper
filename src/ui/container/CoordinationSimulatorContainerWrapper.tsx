@@ -432,7 +432,11 @@ const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any
                 
                 setCharacters(pv => pv.map((it) => {
                     if (it.x + it.width > width) {
-                        return { ...it, x: width - it.width }
+                        it.x = width - it.width;
+                    }
+                    
+                    if (it.y + it.height > height) {
+                        it.y = height - it.height;
                     }
 
                     return it;

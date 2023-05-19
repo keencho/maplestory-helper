@@ -196,28 +196,21 @@ const Characters = (
 		if (event.type === 'mousemove') {
 			setIsDragging(true)
 		}
-        
-        // console.log(data);
-        //
-        // if (event.type === 'mousemove') {
-        //     setTimeout(() => {
-        //         if (args && args.length > 0) {
-        //             doAction('HANDLE_POSITION', { x: data.x, y: data.y, key: args[0] })
-        //         }
-        //
-        //     }, 100);
-        // }
 		
 		if (event.type === 'mouseup') {
-			setTimeout(() => {
-				if (args && args.length > 0) {
-					doAction('HANDLE_POSITION', { x: data.x, y: data.y, key: args[0] })
-				}
-                
+            if (args && args.length > 0) {
+                doAction('HANDLE_POSITION', { x: data.x, y: data.y, key: args[0] })
+            }
+            
+            setTimeout(() => {
                 setIsDragging(false);
-			}, 100);
+            }, 100);
 		}
 	}
+    
+    useEffect(() => {
+        console.log(isDragging)
+    }, [isDragging])
 	
 	const getDescriptionByKey = (key: string) => {
 		const matchedItem = equipmentSubCategoryInfo.find(info => info[1] === key);
@@ -285,9 +278,8 @@ const Characters = (
                                 width: ref.offsetWidth,
                                 height: ref.offsetHeight
                             })}
-                            // onDragStart={dragControl}
+                            onDrag={dragControl}
                             onDragStop={(e, data) => dragControl(e, data, character.key)}
-                            // onDrag={(e, data) => dragControl(e, data, character.key)}
                             minWidth={45}
                             minHeight={70}
                             maxWidth={135}
@@ -379,7 +371,7 @@ const Characters = (
                             activeCharacter.data && activeCharacter.data.length > 0
                                 ?
                                 activeCharacter.data.map(item => (
-                                    <CharacterItem theme={theme}key={item.key}>
+                                    <CharacterItem theme={theme} key={item.key}>
                                         <List.Item>
                                             <List.Item.Meta
                                                 avatar={
