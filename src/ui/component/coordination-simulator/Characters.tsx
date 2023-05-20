@@ -207,10 +207,6 @@ const Characters = (
             }, 100);
 		}
 	}
-    
-    useEffect(() => {
-        console.log(isDragging)
-    }, [isDragging])
 	
 	const getDescriptionByKey = (key: string) => {
 		const matchedItem = equipmentSubCategoryInfo.find(info => info[1] === key);

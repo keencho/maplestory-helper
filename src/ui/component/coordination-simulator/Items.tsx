@@ -20,7 +20,8 @@ const equipmentCategorySortMap: Map<EquipmentCategory, number> = new Map([
 	['Accessory', 2],
 	['One-Handed Weapon', 3],
 	['Two-Handed Weapon', 4],
-	['Mount', 5]
+	['Mount', 5],
+	['Other', 6]
 ]);
 
 const equipmentCategoryOptions: {
