@@ -276,10 +276,10 @@ const Characters = (
                             })}
                             onDrag={dragControl}
                             onDragStop={(e, data) => dragControl(e, data, character.key)}
-                            minWidth={45}
-                            minHeight={70}
-                            maxWidth={135}
-                            maxHeight={210}
+                            minWidth={'auto'}
+                            minHeight={'auto'}
+                            maxWidth={'auto'}
+                            maxHeight={'auto'}
                             style={{
                                 zIndex: 999
                             }}
