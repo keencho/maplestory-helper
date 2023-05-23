@@ -17,5 +17,5 @@ export const getItemIcon = (region: string, version: string, itemId: string) => 
 }
 
 export const getCharacter = (items: string) => {
-	return `${baseURL}/api/character/${items}/stand1/0?showears=false&showLefEars=false&showHighLefEars=false&resize=1&name=&flipX=false&bgColor=0,0,0,0`
+	return `${baseURL}/api/character/${items}/stand1/0?showears=false&showLefEars=false&showHighLefEars=false&resize=0&name=&flipX=false&bgColor=0,0,0,0`
 }

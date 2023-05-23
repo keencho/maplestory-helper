@@ -465,20 +465,18 @@ const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any
 				title={'코디 시뮬레이터'}
 				marginBottom={'.5rem'}
 				extraContents={
-					<>
-						<FlexBox alignItems={'center'} gap={'.5rem'}>
-							<CommonStyledSpan fontSize={'14px'} fontWeight={600}>자동저장</CommonStyledSpan>
-							<Switch checked={autoSave} onChange={setAutoSave} />
-							<Button type={'primary'} size={'small'} onClick={() => doAction('SHARE_CODI')}>코디 공유하기</Button>
-							<CustomPopConfirm
-								placement={'left'}
-								title={'전체 캐릭터를 초기화 하시겠습니까?'}
-								onConfirm={() => doAction('RESET_ENTIRE_CHARACTERS')}
-							>
-								<Button type={'primary'} size={'small'} danger>전체 캐릭터 초기화</Button>
-							</CustomPopConfirm>
-						</FlexBox>
-					</>
+                    <FlexBox alignItems={'center'} gap={'.5rem'}>
+                        <CommonStyledSpan fontSize={'14px'} fontWeight={600}>자동저장</CommonStyledSpan>
+                        <Switch checked={autoSave} onChange={setAutoSave} />
+                        <Button type={'primary'} size={'small'} onClick={() => doAction('SHARE_CODI')}>코디 공유하기</Button>
+                        <CustomPopConfirm
+                            placement={'left'}
+                            title={'전체 캐릭터를 초기화 하시겠습니까?'}
+                            onConfirm={() => doAction('RESET_ENTIRE_CHARACTERS')}
+                        >
+                            <Button type={'primary'} size={'small'} danger>전체 캐릭터 초기화</Button>
+                        </CustomPopConfirm>
+                    </FlexBox>
 				}
 			/>
 			<CustomRow gutter={16}>
