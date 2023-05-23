@@ -1,34 +1,43 @@
-import {ActionType, CharactersModel, Color, ColorInfo} from "../../../model/coordination-simulator.model";
+import {ActionType, BaseColorMax, CharactersModel, Color, ColorInfo} from "../../../model/coordination-simulator.model";
 import {DraggableData, Rnd} from "react-rnd";
 import {BLUE} from "../../../model/color.model";
 import {DraggableEvent} from "react-draggable";
-import React, {Dispatch, SetStateAction, useState} from "react";
+import React, {useEffect, useState} from "react";
 import styled from "styled-components";
 import {EquipmentSubCategory} from "../../../model/equipment.model";
 import {region, version} from "../../../model/maplestory-io.model";
 import {getCharacter} from "../../../api/maplestory-io.api";
-import AsyncImage from "../common/element/AsyncImage";
+import {Spin} from "antd";
+import {doFetch} from "../../../util/fetch.util";
+
 
 const ImageWrapper = styled.div`
-	position: absolute;
-	cursor: move;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 100%;
-	height: 100%;
+    position: absolute;
+    cursor: move;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
 `
 
 interface Props {
     character: CharactersModel
-    activeCharacter: boolean
+    isActiveCharacter: boolean
     doAction: (type: ActionType, ...args: any) => void
     setActiveCharacterIdx: () => void
+}
+
+interface ImgInfo {
+    src: string
+    width: number
+    height: number
 }
 
 const Character = (props: Props) => {
     const character = props.character;
     const [isDragging, setIsDragging] = useState<boolean>(false);
+    const [imgInfoList, setImgInfoList] = useState<ImgInfo[] | undefined>(undefined);
     
     const dragControl = (event: DraggableEvent, data: DraggableData, ...args: any) => {
         if (event.type === 'mousemove') {
@@ -37,7 +46,7 @@ const Character = (props: Props) => {
         
         if (event.type === 'mouseup') {
             if (args && args.length > 0) {
-                props.doAction('HANDLE_POSITION', { x: data.x, y: data.y, key: args[0] })
+                props.doAction('HANDLE_POSITION', {x: data.x, y: data.y, key: args[0]})
             }
             
             setTimeout(() => {
@@ -76,12 +85,40 @@ const Character = (props: Props) => {
             arr.push(2000);
         }
         
-        arr = arr.map(id => ({ itemId: id, region: region, version: version }));
+        arr = arr.map(id => ({itemId: id, region: region, version: version}));
         
         const str = encodeURIComponent(JSON.stringify(arr).slice(1, -1));
         
         return getCharacter(str)
     }
+    
+    useEffect(() => {
+        setImgInfoList(undefined)
+        
+        const promiseArr = [];
+        
+        if (character.hairCustomMix !== undefined && character.hairCustomMix.baseColor !== undefined && character.hairCustomMix.mixColor !== undefined && character.hairCustomMix.baseColorRatio !== undefined) {
+            promiseArr.push(doFetch(getCharacterSrc(character.data, character.hairCustomMix!.baseColor!), 'IMG'));
+            promiseArr.push(doFetch(getCharacterSrc(character.data, character.hairCustomMix!.mixColor!), 'IMG'));
+        } else {
+            promiseArr.push(doFetch(getCharacterSrc(character.data), 'IMG'));
+        }
+        
+        Promise.all(promiseArr)
+            .then(res => {
+                const img = new Image();
+                img.src = res[0];
+                img.onload = function () {
+                    setImgInfoList(
+                        res.map(src => ({src: src, width: img.width, height: img.height}))
+                    )
+                }
+            })
+        
+    }, [
+        getCharacterSrc(character.data, character.hairCustomMix?.baseColor),
+        getCharacterSrc(character.data, character.hairCustomMix?.mixColor)
+    ])
     
     return (
         <Rnd
@@ -96,7 +133,7 @@ const Character = (props: Props) => {
             }}
             bounds={'parent'}
             enableResizing={{
-                bottomRight: true
+                bottomRight: props.isActiveCharacter
             }}
             resizeHandleStyles={{
                 bottomRight: {
@@ -112,20 +149,30 @@ const Character = (props: Props) => {
             })}
             onDrag={dragControl}
             onDragStop={(e, data) => dragControl(e, data, character.key)}
-            minWidth={'auto'}
-            maxWidth={'auto'}
-            style={{ zIndex: 999 }}
+            maxWidth={imgInfoList === undefined ? 'auto' : imgInfoList[0].width * 2}
+            minWidth={imgInfoList === undefined ? 'auto' : imgInfoList[0].width}
+            maxHeight={imgInfoList === undefined ? 'auto' : imgInfoList[0].height * 2}
+            minHeight={imgInfoList === undefined ? 'auto' : imgInfoList[0].height}
+            style={{zIndex: 999}}
         >
             <ImageWrapper onClick={() => isDragging ? undefined : props.setActiveCharacterIdx()}>
-                <AsyncImage src={getCharacterSrc(character.data)}
-                            alt={'캐릭터'}
-                            style={{
-                                filter: props.activeCharacter ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none',
-                                width: '100%'
-                            }}
-                            draggable={false}
-                            loadingTip={'Loading...'}
-                />
+                {
+                    imgInfoList
+                        ?
+                        imgInfoList.map((img, idx) => (
+                            <img key={idx}
+                                 src={img.src}
+                                 alt={'캐릭터'}
+                                 style={{
+                                     width: '100%',
+                                     position: 'absolute',
+                                     opacity: idx === 0 ? 1 : (BaseColorMax - character.hairCustomMix!.baseColorRatio!) / 100
+                                 }}
+                                 draggable={false}
+                            />
+                        ))
+                        : <Spin size={'small'} tip={'Loading...'}/>
+                }
             </ImageWrapper>
         </Rnd>
     

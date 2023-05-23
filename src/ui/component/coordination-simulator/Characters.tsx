@@ -38,16 +38,6 @@ const CharacterPlayGround = styled.div`
     flex: 1;
 `
 
-const ImageWrapper = styled.div`
-	position: absolute;
-	cursor: move;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 100%;
-	height: 100%;
-`
-
 const CharacterInfoWrapper = styled.div`
     width: 300px;
     max-width: 300px;
@@ -191,84 +181,10 @@ const Characters = (
                     refLoaded && characters.map((character, idx) => (
                         <Character
                             character={character}
-                            activeCharacter={idx === activeCharacterIdx}
+                            isActiveCharacter={idx === activeCharacterIdx}
                             doAction={doAction}
                             setActiveCharacterIdx={() => setActiveCharacterIdx(idx)}
                         />
-                        // <Rnd
-                        //     key={character.key}
-                        //     position={{
-                        //         x: character.x,
-                        //         y: character.y
-                        //     }}
-                        //     size={{
-                        //         width: character.width,
-                        //         height: character.height
-                        //     }}
-                        //     bounds={'parent'}
-                        //     enableResizing={{
-                        //         bottomRight: true
-                        //     }}
-                        //     resizeHandleStyles={{
-                        //         bottomRight: {
-                        //             width: '10px',
-                        //             height: '10px',
-                        //             borderRadius: '10px',
-                        //             backgroundColor: BLUE
-                        //         }
-                        //     }}
-                        //     onResizeStop={(e, dir, ref) => doAction('HANDLE_RESIZE', character.key, {
-                        //         width: ref.offsetWidth,
-                        //         height: ref.offsetHeight
-                        //     })}
-                        //     onDrag={dragControl}
-                        //     onDragStop={(e, data) => dragControl(e, data, character.key)}
-                        //     minWidth={'auto'}
-                        //     minHeight={'auto'}
-                        //     style={{
-                        //         zIndex: 999
-                        //     }}
-                        // >
-                        //     <ImageWrapper onClick={() => isDragging ? undefined : setActiveCharacterIdx(idx)}>
-                        //         {
-                        //             isUseHairCustomMixColor(character)
-                        //                 ?
-                        //                 <>
-                        //                     <AsyncImage src={getCharacterSrc( character.data, character.hairCustomMix!.baseColor! )}
-                        //                                 alt={'캐릭터'}
-                        //                                 style={{
-                        //                                     filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none',
-                        //                                     width: '100%',
-                        //                                     position: 'absolute'
-                        //                                 }}
-                        //                                 draggable={false}
-                        //                                 loadingTip={'Loading...'}
-                        //                     />
-                        //                     <AsyncImage src={getCharacterSrc( character.data, character.hairCustomMix!.mixColor! )}
-                        //                                 alt={'캐릭터'}
-                        //                                 style={{
-                        //                                     width: '100%',
-                        //                                     position: 'absolute',
-                        //                                     opacity: (BaseColorMax - character.hairCustomMix!.baseColorRatio!) / 100
-                        //                                 }}
-                        //                                 draggable={false}
-                        //                                 loadingTip={'Loading...'}
-                        //                                 displayEmptyOnLoading={true}
-                        //                     />
-                        //                 </>
-                        //                 :
-                        //                 <AsyncImage src={getCharacterSrc(character.data)}
-                        //                             alt={'캐릭터'}
-                        //                             style={{
-                        //                                 filter: idx === activeCharacterIdx ? 'drop-shadow(3px 3px 10px rgba(62, 151, 224, .7))' : 'none',
-                        //                                 width: '100%'
-                        //                             }}
-                        //                             draggable={false}
-                        //                             loadingTip={'Loading...'}
-                        //                 />
-                        //         }
-                        //     </ImageWrapper>
-                        // </Rnd>
                     ))
                 }
             </CharacterPlayGround>
@@ -330,7 +246,7 @@ const Characters = (
                                                                     src={getItemIcon(region, version, item.value.id)}
                                                                     cache={{cacheName: cacheName}}
                                                                     alt={item.value.name}
-                                                                    style={{width: '30px'}}
+                                                                    style={{ width: '30px' }}
                                                                 />
                                                         }
                                                     </FlexBox>
