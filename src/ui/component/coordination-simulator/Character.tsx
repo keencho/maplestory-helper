@@ -10,7 +10,6 @@ import {getCharacter} from "../../../api/maplestory-io.api";
 import {Spin} from "antd";
 import {doFetch} from "../../../util/fetch.util";
 
-
 const ImageWrapper = styled.div`
     position: absolute;
     cursor: move;
@@ -133,13 +132,13 @@ const Character = (props: Props) => {
             }}
             bounds={'parent'}
             enableResizing={{
-                bottomRight: props.isActiveCharacter
+                bottomRight: true
             }}
             resizeHandleStyles={{
                 bottomRight: {
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '10px',
+                    width: '7.5px',
+                    height: '7.5px',
+                    borderRadius: '7.5px',
                     backgroundColor: BLUE
                 }
             }}
@@ -164,6 +163,7 @@ const Character = (props: Props) => {
                                  src={img.src}
                                  alt={'캐릭터'}
                                  style={{
+                                     filter: idx === 0 ? (props.isActiveCharacter ? 'drop-shadow(3px 3px 5px gray)' : 'none') : 'none',
                                      width: '100%',
                                      position: 'absolute',
                                      opacity: idx === 0 ? 1 : (BaseColorMax - character.hairCustomMix!.baseColorRatio!) / 100
