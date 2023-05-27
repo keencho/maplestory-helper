@@ -119,6 +119,8 @@ const Character = (props: Props) => {
         getCharacterSrc(character.data, character.hairCustomMix?.mixColor)
     ])
     
+    console.log(character)
+    
     return (
         <Rnd
             key={character.key}
@@ -166,7 +168,10 @@ const Character = (props: Props) => {
                                      filter: idx === 0 ? (props.isActiveCharacter ? 'drop-shadow(3px 3px 5px gray)' : 'none') : 'none',
                                      width: '100%',
                                      position: 'absolute',
-                                     opacity: idx === 0 ? 1 : (BaseColorMax - character.hairCustomMix!.baseColorRatio!) / 100
+                                     opacity: idx === 0
+                                       ? 1
+                                       :
+                                        character.hairCustomMix?.baseColorRatio ? (BaseColorMax - character.hairCustomMix!.baseColorRatio!) / 100 : 1
                                  }}
                                  draggable={false}
                             />
