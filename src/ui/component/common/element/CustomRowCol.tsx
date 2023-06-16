@@ -25,6 +25,7 @@ interface ColProps {
 	children?: ReactNode,
 	span?: number | string
 	height?: number | string
+    hideOverflow?: boolean
 }
 
 export const CustomCol = (props: ColProps) => {
@@ -33,7 +34,7 @@ export const CustomCol = (props: ColProps) => {
 			span={props.span}
 			style={{
 				height: `${props.height ? props.height : '100%'}`,
-				overflow: 'auto',
+				overflow: props.hideOverflow === true ? 'hidden' : 'auto',
 				display: 'flex',
 				flexDirection: 'column',
 			}}

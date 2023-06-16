@@ -119,8 +119,6 @@ const Character = (props: Props) => {
         getCharacterSrc(character.data, character.hairCustomMix?.mixColor)
     ])
     
-    console.log(character)
-    
     return (
         <Rnd
             key={character.key}

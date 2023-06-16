@@ -8,7 +8,7 @@ import Characters from '../component/coordination-simulator/Characters';
 import NotificationUtil from '../../util/notification.util';
 import styled from "styled-components";
 import {FlexBox} from "../component/common/element/FlexBox";
-import {Button, Spin, Switch} from "antd";
+import {Button, Spin, Switch, Typography} from "antd";
 import {CommonStyledSpan} from '../../model/style.model';
 import {
     ActionType,
@@ -22,13 +22,20 @@ import CustomPopConfirm from '../component/common/element/CustomPopConfirm';
 import {compress, deCompress} from '../../util/compress.util';
 import useModal from '../../hooks/useModal';
 import {GREY} from '../../model/color.model';
+import {RecoilLoadable} from "recoil";
+import {deleteOldCache} from "../../util/fetch.util";
+import {cacheName} from "../../model/maplestory-io.model";
 
+const { Title, Text } = Typography;
 
 const LoadingBox = styled(FlexBox)`
 	width: 100%;
 	height: 100%;
 	align-items: center;
 	justify-content: center;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
 `
 
 const QUERY_STRING_COMPRESSED_DATA_KEY = "compressed_data";
@@ -43,6 +50,8 @@ const CoordinationSimulatorContainerWrapper = () => {
 				return !this.has(item.name) && this.add(item.name)
 			}, new Set)
 	});
+    
+    const [showResetButton, setShowResetButton] = useState<boolean>(false);
 	
 	const [characters, setCharacters] = useState<undefined | CharactersModel[]>(undefined);
 	
@@ -57,6 +66,25 @@ const CoordinationSimulatorContainerWrapper = () => {
 		
 		return true;
 	}
+    
+    // 캐시스토리지에 문제가 있다고 가정하고 싹 비우고 페이지 새로고침한다.
+    const reset = () => {
+        deleteOldCache(cacheName, true).then(() => window.location.reload())
+    }
+    
+    useEffect(() => {
+        let timer: any = undefined;
+        
+        if (isLoading) {
+            timer = setTimeout(() => {
+                setShowResetButton(true);
+            }, 10000);
+        }
+        
+        return () => {
+            if (timer) clearTimeout(timer)
+        }
+    }, [isLoading])
 	
 	useEffect(() => {
 		let autoSavedData: string | null | CharactersModel[] = null;
@@ -114,6 +142,17 @@ const CoordinationSimulatorContainerWrapper = () => {
 		return (
 			<LoadingBox>
 				<Spin size={'large'} tip={'로딩중 입니다...'} />
+                { showResetButton 
+                    ? 
+                        <>
+                            <Text type={'warning'} style={{ textAlign: 'center' }}>
+                                로딩시간이 길어지고 있습니다.
+                                <br />
+                                아래 버튼을 눌러 페이지를 초기화 해보세요.
+                            </Text>
+                            <Button type={'primary'} onClick={reset}>초기화</Button>
+                        </>
+                    : <></> }
 			</LoadingBox>
 		)
 	}
@@ -482,7 +521,7 @@ const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any
 			<CustomRow gutter={16}>
 				
 				{/* 왼쪽 캔버스 */}
-				<CustomCol span={18}>
+				<CustomCol span={18} hideOverflow={true}>
 					<Characters
 						characters={characters}
 						activeCharacterIdx={activeCharacterIdx}
