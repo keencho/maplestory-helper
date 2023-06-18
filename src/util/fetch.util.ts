@@ -65,18 +65,19 @@ export const doCacheFetch = async(url: string, cacheName: string): Promise<any> 
 	return data;
 }
 
-const deleteOldCache = async(cacheName: string) => {
+export const deleteOldCache = async(cacheName: string, force?: boolean) => {
 	const confirmedCacheName = getCacheName(cacheName);
 	const keys = await caches.keys();
-	
+ 
 	for (const key of keys) {
 		const isMyCache = key.startsWith(cachePrefix);
-		
-		if (confirmedCacheName === key || !isMyCache) {
+  
+		if (force !== true && (confirmedCacheName === key || !isMyCache)) {
 			continue;
 		}
-		
-		caches.delete(key);
+        
+        await caches.delete(key);
+        
 	}
 }
 
