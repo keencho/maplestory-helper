@@ -7,11 +7,14 @@ import {
 } from '@ant-design/icons';
 import type {MenuProps} from 'antd';
 import {Button, Menu} from 'antd';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Path from '../../../model/path.model';
 import {useLocation, useNavigate} from 'react-router-dom';
 import { Menu as AppMenu, MenuType } from '../../../model/menu.model'
 import {FlexBox} from './element/FlexBox';
+import {useMediaQuery} from "react-responsive";
+import {useRecoilValue} from "recoil";
+import {ResponsiveUIAtom} from "../../../recoil/responsive-ui.atom";
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -41,27 +44,37 @@ const LeftMenu = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const [collapsed, setCollapsed] = useState(false);
+    
+    const ui = useRecoilValue(ResponsiveUIAtom);
 	
 	const toggleCollapsed = () => {
 		setCollapsed(!collapsed);
 	};
+    
+    useEffect(() => {
+        console.log(ui)
+    }, [ui])
 	
 	return (
-		<FlexBox flexDirection={'column'} alignItems={collapsed ? 'center' : 'flex-start'} minWidth={collapsed ? 'inherit' : '256px'}>
-			<Button type="primary" onClick={toggleCollapsed} style={{ marginBottom: '.5rem', width: 'inherit', marginLeft: collapsed ? 'inherit' : '1rem' }}>
-				{collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-			</Button>
-			<Menu
-				mode='inline'
-				inlineCollapsed={collapsed}
-				activeKey={location.pathname}
-				onClick={(e) => navigate(e.key)}
-				items={items}
-				style={{
-					height: '100%'
-				}}
-			/>
-		</FlexBox>
+        ui?.isDesktop
+            ?
+                <FlexBox flexDirection={'column'} alignItems={collapsed ? 'center' : 'flex-start'} minWidth={collapsed ? 'inherit' : '256px'}>
+                    <Button type="primary" onClick={toggleCollapsed} style={{ marginBottom: '.5rem', width: 'inherit', marginLeft: collapsed ? 'inherit' : '1rem' }}>
+                        {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                    </Button>
+                    <Menu
+                        mode='inline'
+                        inlineCollapsed={collapsed}
+                        activeKey={location.pathname}
+                        onClick={(e) => navigate(e.key)}
+                        items={items}
+                        style={{
+                            height: '100%'
+                        }}
+                    />
+                </FlexBox>
+            :
+            <></>
 	);
 }
 

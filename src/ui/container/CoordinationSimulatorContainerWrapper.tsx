@@ -524,7 +524,7 @@ const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any
 				<CustomCol span={18} hideOverflow={true}>
 					<Characters
 						characters={characters}
-						activeCharacterIdx={activeCharacterIdx}
+                        activeCharacterIdx={activeCharacterIdx}
 						setActiveCharacterIdx={setActiveCharacterIdx}
 						doAction={doAction}
 					/>
