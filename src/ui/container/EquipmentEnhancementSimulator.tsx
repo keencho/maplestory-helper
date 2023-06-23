@@ -477,12 +477,13 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 											event={event}
 										/>
 									:
-									<Simulation
-										simulationNumber={starForceSimulationNumber}
-										progressRate={starForceSimulationPercentage}
-										simulationResult={starForceSimulationResult}
-										running={starForceSimulationRunning}
-									/>
+                                    <></>
+									// <Simulation
+									// 	simulationNumber={starForceSimulationNumber}
+									// 	progressRate={starForceSimulationPercentage}
+									// 	simulationResult={starForceSimulationResult}
+									// 	running={starForceSimulationRunning}
+									// />
 						}
 					</FlexBox>
 				</CustomCol>
