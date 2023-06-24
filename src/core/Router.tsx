@@ -5,10 +5,15 @@ import Header from '../ui/component/common/Header';
 import Modal from '../ui/component/common/Modal';
 import {Menu, MenuType} from '../model/menu.model';
 import {FlexBox} from '../ui/component/common/element/FlexBox';
+import {useRecoilValue} from "recoil";
+import {ThemeAtom} from "../recoil/theme.atom";
 
 const Router = () => {
+    
+    const theme = useRecoilValue(ThemeAtom);
+    
 	return (
-		<FlexBox flexDirection={'column'} height={'100%'}>
+		<FlexBox flexDirection={'column'} height={'100%'} backgroundColor={theme === 'light' ? 'inherit' : '#303030'}>
 			<Header />
 			<Modal />
 			<BrowserRouter>

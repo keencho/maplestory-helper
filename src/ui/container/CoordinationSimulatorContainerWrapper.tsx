@@ -22,11 +22,11 @@ import CustomPopConfirm from '../component/common/element/CustomPopConfirm';
 import {compress, deCompress} from '../../util/compress.util';
 import useModal from '../../hooks/useModal';
 import {GREY} from '../../model/color.model';
-import {RecoilLoadable} from "recoil";
 import {deleteOldCache} from "../../util/fetch.util";
 import {cacheName} from "../../model/maplestory-io.model";
+import CommonText from "../component/common/CommonText";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const LoadingBox = styled(FlexBox)`
 	width: 100%;
@@ -505,7 +505,9 @@ const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any
 				marginBottom={'.5rem'}
 				extraContents={
                     <FlexBox alignItems={'center'} gap={'.5rem'}>
-                        <CommonStyledSpan fontSize={'14px'} fontWeight={600}>자동저장</CommonStyledSpan>
+                        <CommonStyledSpan fontSize={'14px'} fontWeight={600}>
+                            <CommonText>자동저장</CommonText>
+                        </CommonStyledSpan>
                         <Switch checked={autoSave} onChange={setAutoSave} />
                         <Button type={'primary'} size={'small'} onClick={() => doAction('SHARE_CODI')}>코디 공유하기</Button>
                         <CustomPopConfirm

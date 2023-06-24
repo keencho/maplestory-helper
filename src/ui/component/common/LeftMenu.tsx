@@ -50,10 +50,6 @@ const LeftMenu = () => {
 	const toggleCollapsed = () => {
 		setCollapsed(!collapsed);
 	};
-    
-    useEffect(() => {
-        console.log(ui)
-    }, [ui])
 	
 	return (
         ui?.isDesktop

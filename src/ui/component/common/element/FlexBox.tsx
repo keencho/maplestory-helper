@@ -13,6 +13,7 @@ interface Props extends CommonStyle {
 	flexDirection?: Property.FlexDirection
 	flexGrow?: Property.FlexGrow
 	width?: Property.Width
+    backgroundColor?: Property.BackgroundColor
 }
 
 const FlexBoxContainer = styled(CommonStyledDiv)<Props>`

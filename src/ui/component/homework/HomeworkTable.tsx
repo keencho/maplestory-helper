@@ -106,7 +106,7 @@ const HomeworkTable = (props: Props): JSX.Element => {
 							<thead>
 								<tr>
 									<td colSpan={table && table.data.length - 1}>
-										<NoMarginHeading size={3}>{table.title}</NoMarginHeading>
+										<NoMarginHeading size={5}>{table.title}</NoMarginHeading>
 									</td>
 									<td style={{ textAlign: 'right' }}><Button size={'small'} type={'primary'} danger onClick={() => props.reset(table.title)}>초기화</Button></td>
 								</tr>

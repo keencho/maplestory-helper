@@ -24,6 +24,7 @@ import {ResetButton} from "../common/element/ResetButton";
 import {useRecoilValue} from "recoil";
 import {ThemeAtom} from "../../../recoil/theme.atom";
 import Character from "./Character";
+import CommonText from "../common/CommonText";
 
 const {Title} = Typography;
 
@@ -57,7 +58,7 @@ const CharacterItemBox = styled.div<{ theme: 'light' | 'dark' }>`
 `
 
 const CharacterItemHeader = styled.div`
-  padding: .5rem .75rem;
+    padding: .5rem .75rem;
 `
 
 const CharacterItemList = styled.div<{ theme: 'light' | 'dark' }>`
@@ -199,8 +200,10 @@ const Characters = (
 				{/* 캐릭터 정보 */}
 				<CharacterItemBox theme={theme}>
 					<CharacterItemHeader>
-						<FlexBox>
-							캐릭터 정보
+						<FlexBox alignItems={'center'}>
+                            <CommonText>
+							    캐릭터 정보
+                            </CommonText>
 							<FlexBox margin={'0 0 0 auto'} gap={'.5rem'}>
 								<Button
 									size={'small'}

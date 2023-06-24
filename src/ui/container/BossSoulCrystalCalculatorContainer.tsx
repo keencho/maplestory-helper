@@ -19,6 +19,7 @@ import BossTable from '../component/boss-soul-crystal-calculator/BossTable';
 import BossSoulCrystalCalculatorHelp from '../component/boss-soul-crystal-calculator/BossSoulCrystalCalculatorHelp';
 import {FlexBox} from '../component/common/element/FlexBox';
 import { CommonStyledSpan } from '../../model/style.model';
+import CommonText from "../component/common/CommonText";
 
 const { Title } = Typography;
 const { Column } = Table;
@@ -257,7 +258,11 @@ export const BossSoulCrystalCalculatorContainer = () => {
 				extraContents={
 				<FlexBox gap={'.5rem'}>
 					<FlexBox alignItems={'center'} gap={'.5rem'}>
-						<CommonStyledSpan fontSize={'14px'} fontWeight={600}>자동저장</CommonStyledSpan>
+						<CommonStyledSpan fontSize={'14px'} fontWeight={600}>
+                            <CommonText>
+                                자동저장
+                            </CommonText>
+                        </CommonStyledSpan>
 						<Switch checked={autoSave} onChange={setAutoSave} />
 					</FlexBox>
 					<Button type={'primary'} onClick={openHelpModal}>도움말</Button>
@@ -308,7 +313,7 @@ export const BossSoulCrystalCalculatorContainer = () => {
 						<Descriptions.Item label="수입 총합" span={2}>{calculateData().priceTotal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</Descriptions.Item>
 					</Descriptions>
 					
-					<Title level={5} style={{ marginTop: '2rem' }}>결정석 가격표</Title>
+					<Title level={5} style={{ marginTop: '1rem' }}>결정석 가격표</Title>
 					<Table dataSource={getBossPriceTable()} pagination={false} sticky={true} size={'small'} style={{ overflow: 'auto' }}>
 						<Column
 							width={'10%'}

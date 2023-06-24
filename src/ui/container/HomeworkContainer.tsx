@@ -9,9 +9,9 @@ import Textarea from '../component/common/element/Textarea';
 import NotificationUtil from '../../util/notification.util';
 import HomeworkTable from '../component/homework/HomeworkTable';
 import styled from 'styled-components';
-import moment from 'moment';
-import DateTimeUtils from '../../util/date-time.util';
+import {getTodayDate, isSameOrAfter} from '../../util/date-time.util';
 import {FlexBox} from '../component/common/element/FlexBox';
+import dayjs from "dayjs";
 
 const HOMEWORK_KEY = "HOMEWORK_V2"
 const MY_ROUTINE_KEY = 'MY_ROUTINE';
@@ -49,19 +49,19 @@ interface LocalStorageSavedForm {
 
 const getResetDateByDay = (day: 'mon' | 'thu') => {
 	const dayNeed = day === 'thu' ? 4 : 1;
-	const today = moment().isoWeekday();
+	const today = dayjs().day();
 	
-	let momentDay;
+	let ret;
 	// 오늘의 요일이 초기화 요일 이전이라면
 	if (today < dayNeed) {
-		momentDay = moment().isoWeekday(dayNeed);
+		ret = dayjs().day(dayNeed)
 	}
 	// 오늘이 초기화 날짜이거나 그 이후 요일이라면
 	else {
-		momentDay = moment().add(1, 'weeks').isoWeekday(dayNeed);
+		ret = dayjs().add(1, 'week').day(dayNeed);
 	}
 	
-	return momentDay.format('YYYY-MM-DD');
+	return ret.format('YYYY-MM-DD');
 }
 
 const initDefaultHomeworkDataSet = (): Table[] => {
@@ -116,7 +116,7 @@ export const HomeworkContainer = () => {
 	let defaultData: LocalStorageSavedForm | null = null;
 	if (savedTabData !== null) {
 		defaultData = JSON.parse(savedTabData) as LocalStorageSavedForm
-		const today = DateTimeUtils.getTodayDate();
+		const today = getTodayDate();
 		
 		// 데이터가 오늘 저장된게 아니라면
 		if (defaultData.date !== today) {
@@ -125,7 +125,7 @@ export const HomeworkContainer = () => {
 					// 일일 숙제의 경우 수행 여부를 초기화 한다.
 					// 주간 숙제의 경우 리셋날짜 당일 or 리셋날짜 이후라면 수행 여부를 초기화 한다
 					const daily = table.weeklyTypeResetProperties === undefined
-					const weekly = table.weeklyTypeResetProperties !== undefined && moment(today).isSameOrAfter(table.weeklyTypeResetProperties.resetDate);
+					const weekly = table.weeklyTypeResetProperties !== undefined && isSameOrAfter(today, table.weeklyTypeResetProperties.resetDate);
 					if (daily || weekly) {
 						table.data.forEach((data: Data) => {
 							data.doWork = false;
@@ -152,7 +152,7 @@ export const HomeworkContainer = () => {
 	
 	useEffect(() => {
 		const savedForm: LocalStorageSavedForm = {
-			date: DateTimeUtils.getTodayDate(),
+			date: getTodayDate(),
 			tabData: tabData
 		}
 		window.localStorage.setItem(HOMEWORK_KEY, JSON.stringify(savedForm))
@@ -314,7 +314,7 @@ export const HomeworkContainer = () => {
 			<CustomRow gutter={32}>
 				<CustomCol span={9}>
 					<FlexBox alignItems={'center'} justifyContent={'space-between'} margin={'0 0 .25rem 0'}>
-						<NoMarginHeading size={2}>나만의 루틴</NoMarginHeading>
+						<NoMarginHeading size={5}>나만의 루틴</NoMarginHeading>
 						<Button size={'small'} type={'primary'} onClick={saveMyRoutine}>저장</Button>
 					</FlexBox>
 					<Textarea

@@ -1,21 +1,23 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
-import 'antd/dist/antd.css';
+
+
 import {RecoilRoot} from 'recoil';
 import Router from './core/Router';
-import ThemeProvider from './core/ThemeProvider';
+import AppConfigProvider from './core/AppConfigProvider';
 import {Analytics} from '@vercel/analytics/react';
 import ResponsiveUIHandler from "./core/ResponsiveUIHandler";
+import {Layout} from "antd";
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  // <React.StrictMode>
+    // <React.StrictMode>
     <RecoilRoot>
-      <ThemeProvider>
-        <Router />
-        <ResponsiveUIHandler />
-        <Analytics />
-      </ThemeProvider>
+        <AppConfigProvider>
+            <ResponsiveUIHandler/>
+            <Analytics/>
+            <Router/>
+        </AppConfigProvider>
     </RecoilRoot>
-  // </React.StrictMode>
+    // </React.StrictMode>
 )

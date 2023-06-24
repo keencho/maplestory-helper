@@ -1,4 +1,4 @@
-import DateTimeUtils from './date-time.util';
+import {getNow} from './date-time.util';
 
 export const cachePrefix = 'keencho-maplestory';
 
@@ -41,7 +41,7 @@ export const doCacheFetch = async(url: string, cacheName: string): Promise<any> 
 	if (!cachedRes || !cachedRes.ok) {
 		const res = await fetch(url);
 		const newHeaders = new Headers(res.headers);
-		newHeaders.set(cachedTimeKey, DateTimeUtils.getNow());
+		newHeaders.set(cachedTimeKey, getNow());
 		const newResponse = new Response(res.body, { headers: newHeaders });
 		
 		await cacheStorage.put(url, newResponse.clone());

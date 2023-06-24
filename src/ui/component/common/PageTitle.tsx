@@ -1,5 +1,6 @@
 import styled, {css} from 'styled-components';
 import NoMarginHeading from './element/NoMarginHeading';
+import {Typography} from "antd";
 
 const Wrapper = styled.div<{ marginBottom?: string | number }>`
 	display: flex;
@@ -11,10 +12,7 @@ const Wrapper = styled.div<{ marginBottom?: string | number }>`
 	`}
 `
 
-const Title = styled.span`
-	font-size: 24px;
-	font-weight: 600;
-`
+const { Title } = Typography;
 
 interface Props {
 	title: string,
@@ -25,7 +23,7 @@ interface Props {
 const PageTitle = (props: Props) => {
 	return (
 		<Wrapper marginBottom={props.marginBottom}>
-			<Title>{props.title}</Title>
+			<Title level={3}>{props.title}</Title>
 			{
 				props.extraContents && <div>{props.extraContents}</div>
 			}
