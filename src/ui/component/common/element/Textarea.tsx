@@ -16,7 +16,9 @@ const StyledTextarea = styled.textarea<StyledProps>`
 	width: ${props => props.fullWidth === true ? '100%' : 'inherit'};
 	height: ${props => props.height === undefined ? 'inherit' : `${props.height}px`};
 	background-color: inherit;
+    color: inherit;
 	resize: ${props => props.resize};
+    outline: none;
 `
 
 const Textarea = (props: Props) => {

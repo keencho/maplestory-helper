@@ -14,11 +14,10 @@ import {buildStats, isAvailableStarForce} from '../../util/equipment.util';
 import {Equipment, StarForceEventType} from '../../model/equipment.model';
 import Item from '../component/equipment-enhancement-simulator/Item';
 import {numberComma} from '../../util/common.util';
-import NotificationUtil from '../../util/notification.util';
 import {doStarForce} from '../../util/starforce-util';
-import Simulation from '../component/equipment-enhancement-simulator/Simulation';
 import StarForceSimulationWorker from '../../workers/starforce-simulation.worker.ts?worker';
 import AsyncImage from "../component/common/element/AsyncImage";
+import useNotification from "../../hooks/useNotification";
 
 const { Title } = Typography;
 
@@ -78,6 +77,7 @@ let worker: Worker = new StarForceSimulationWorker();
 
 export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	
+    const notification = useNotification();
 	const theme = useRecoilValue(ThemeAtom);
 	const starForceSimulationNumber = 10000;
 	
@@ -160,7 +160,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 		setRightComponentType('ITEM')
 		
 		initItem()
-		NotificationUtil.fire('success', '아이템이 초기화 되었습니다.');
+		notification('success', '아이템이 초기화 되었습니다.');
 	}
 	
 	const stopAutoStarForceRunning = () => {
@@ -176,7 +176,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 	const onClickStarForce = () => {
 		if (autoStarForce) {
 			if (item!.starForce >= autoStarForceTargetStar) {
-				NotificationUtil.fire('error', '자동강화 불가', { description: '목표 스타포스를 조정하거나 아이템을 초기화 해 주세요.' })
+				notification('error', '목표 스타포스를 조정하거나 아이템을 초기화 해 주세요.', { title: '자동강화 불가' })
 				return;
 			}
 			
@@ -200,7 +200,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 		}
 		
 		if (simulationStartStarForce >= autoStarForceTargetStar) {
-			NotificationUtil.fire('error', '시뮬레이션 불가', { description: '시뮬레이션 시작 스타포스는 목표 스타포스보다 작아야 합니다.' });
+			notification('error', '시뮬레이션 시작 스타포스는 목표 스타포스보다 작아야 합니다.', { title: '시뮬레이션 불가' });
 			return;
 		}
 
@@ -269,7 +269,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
 			if (item.starForce < autoStarForceTargetStar) {
 				autoStarForceRef.current = setTimeout(doStarForceOnCurrentItem, 25);
 			} else {
-				NotificationUtil.fire('success', '강화 완료', { description: `${autoStarForceTargetStar}성 강화가 완료되었습니다.` })
+                notification('success', `${autoStarForceTargetStar}성 강화가 완료되었습니다.`, { title: '강화 완료' })
 				stopAutoStarForceRunning();
 			}
 		}

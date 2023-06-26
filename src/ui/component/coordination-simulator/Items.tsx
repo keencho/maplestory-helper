@@ -13,7 +13,6 @@ import {BLUE} from '../../../model/color.model';
 import AsyncImage from "../common/element/AsyncImage";
 import {FlexBox} from '../common/element/FlexBox';
 import SkinDefault from '../../../assets/icon/items/skin_default.png'
-import CommonText from "../common/CommonText";
 
 const { Text, Link } = Typography;
 
@@ -221,7 +220,7 @@ const Item = styled.div`
 
 `
 
-const ItemName = styled(CommonText)`
+const ItemName = styled.div`
 	margin-left: auto;
 	word-break: keep-all;
 	max-width: 75%;

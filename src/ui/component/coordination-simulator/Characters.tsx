@@ -1,5 +1,5 @@
 import React, {Dispatch, SetStateAction, useEffect, useRef, useState} from 'react';
-import {Alert, Button, Card, Empty, InputNumber, List, Slider, Tooltip, Typography} from 'antd';
+import {Alert, Button, Card, InputNumber, List, Slider, Tooltip, Typography} from 'antd';
 import styled from 'styled-components';
 import {CheckOutlined, CloseOutlined, PlusOutlined} from '@ant-design/icons';
 import {getItemIcon} from '../../../api/maplestory-io.api';
@@ -10,21 +10,20 @@ import AsyncImage from "../common/element/AsyncImage";
 import {BORDER} from "../../../model/color.model";
 import SkinDefault from '../../../assets/icon/items/skin_default.png';
 import {
-	ActionType,
-	BaseColorMax,
-	BaseColorMin,
-	CharactersModel,
-	Color,
-	ColorInfo,
-	ColorInfoType,
-	SortedColorInfo
+    ActionType,
+    BaseColorMax,
+    BaseColorMin,
+    CharactersModel,
+    Color,
+    ColorInfo,
+    ColorInfoType,
+    SortedColorInfo
 } from '../../../model/coordination-simulator.model';
 import CustomPopConfirm from '../common/element/CustomPopConfirm';
 import {ResetButton} from "../common/element/ResetButton";
 import {useRecoilValue} from "recoil";
 import {ThemeAtom} from "../../../recoil/theme.atom";
 import Character from "./Character";
-import CommonText from "../common/CommonText";
 
 const {Title} = Typography;
 
@@ -63,7 +62,7 @@ const CharacterItemHeader = styled.div`
 
 const CharacterItemList = styled.div<{ theme: 'light' | 'dark' }>`
   border-top: 1px solid ${props => BORDER(props.theme)};
-  overflow-y: scroll;
+  overflow-y: auto;
 `
 
 const CharacterItem = styled.div<{ theme: 'light' | 'dark' }>`
@@ -201,9 +200,7 @@ const Characters = (
 				<CharacterItemBox theme={theme}>
 					<CharacterItemHeader>
 						<FlexBox alignItems={'center'}>
-                            <CommonText>
-							    캐릭터 정보
-                            </CommonText>
+                            캐릭터 정보
 							<FlexBox margin={'0 0 0 auto'} gap={'.5rem'}>
 								<Button
 									size={'small'}
@@ -231,54 +228,49 @@ const Characters = (
 					</CharacterItemHeader>
 					
 					<CharacterItemList theme={theme}>
-						{
-							activeCharacter.data && activeCharacter.data.length > 0
-								?
-								activeCharacter.data.map(item => (
-									<CharacterItem theme={theme} key={item.key}>
-										<List.Item>
-											<List.Item.Meta
-												avatar={
-													<FlexBox alignItems={'center'} justifyContent={'center'} height={'100%'}>
-														{
-															item.value.typeInfo.subCategory === 'Head'
-																?
-																<img
-																	src={SkinDefault}
-																	style={{width: '30px'}}
-																	alt={'피부'}
-																/>
-																:
-																<AsyncImage
-																	src={getItemIcon(region, version, item.value.id)}
-																	cache={{cacheName: cacheName}}
-																	alt={item.value.name}
-																	style={{width: '30px'}}
-																/>
-														}
-													</FlexBox>
-												}
-												title={item.value.name}
-												description={getDescriptionByKey(item.key)}
-											/>
-											<Button
-												size={'small'}
-												shape={'circle'}
-												type={'primary'}
-												danger
-												onClick={() => doAction('DELETE_ITEM', item.key)}
-											>
-												<CloseOutlined/>
-											</Button>
-										</List.Item>
-									</CharacterItem>
-								))
-								:
-								<Empty
-									style={{marginTop: '5rem'}}
-									description={'선택된 아이템이 없습니다.'}
-								/>
-						}
+                        <List
+                            itemLayout="horizontal"
+                            dataSource={activeCharacter.data}
+                            renderItem={(item, index) => (
+                                <List.Item
+                                    style={{ padding: '.5rem' }}
+                                >
+                                    <List.Item.Meta
+                                        avatar={
+                                            <FlexBox alignItems={'center'} justifyContent={'center'} height={'100%'}>
+                                                {
+                                                    item.value.typeInfo.subCategory === 'Head'
+                                                        ?
+                                                        <img
+                                                            src={SkinDefault}
+                                                            style={{width: '30px'}}
+                                                            alt={'피부'}
+                                                        />
+                                                        :
+                                                        <AsyncImage
+                                                            src={getItemIcon(region, version, item.value.id)}
+                                                            cache={{cacheName: cacheName}}
+                                                            alt={item.value.name}
+                                                            style={{width: '30px'}}
+                                                        />
+                                                }
+                                            </FlexBox>
+                                        }
+                                        title={item.value.name}
+                                        description={getDescriptionByKey(item.key)}
+                                    />
+                                    <Button
+                                        size={'small'}
+                                        shape={'circle'}
+                                        type={'primary'}
+                                        danger
+                                        onClick={() => doAction('DELETE_ITEM', item.key)}
+                                    >
+                                        <CloseOutlined/>
+                                    </Button>
+                                </List.Item>
+                            )}
+                        />
 					</CharacterItemList>
 				
 				</CharacterItemBox>
@@ -290,7 +282,7 @@ const Characters = (
 						<CustomMixBoxWrapper theme={theme}>
 							<Title
 								level={5}
-								style={{textAlign: 'center'}}
+								style={{textAlign: 'center', marginTop: 0}}
 							>
 								커스텀 믹스염색
 							</Title>
