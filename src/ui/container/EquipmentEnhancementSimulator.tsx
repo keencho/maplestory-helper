@@ -43,7 +43,9 @@ export const EquipmentEnhancementSimulatorWrapper = () => {
 	if (isLoading) {
 		return (
 			<LoadingBox>
-				<Spin size={'large'} tip={'로딩중 입니다...'} />
+				<Spin size={'large'} tip={'로딩중 입니다...'}>
+                    <div/>
+                </Spin>
 			</LoadingBox>
 		)
 	}
@@ -468,7 +470,9 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
                                     isLoadingSelectedItem
                                     ?
                                         <FlexBox alignItems={'center'} justifyContent={'center'} flex={1}>
-                                            <Spin tip="아이템을 불러오는 중입니다..." size={'large'} />
+                                            <Spin tip="아이템을 불러오는 중입니다..." size={'large'}>
+                                                <div/>
+                                            </Spin>
                                         </FlexBox>
                                     :
                                     <Item

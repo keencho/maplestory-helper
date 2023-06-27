@@ -141,7 +141,7 @@ const CoordinationSimulatorContainerWrapper = () => {
 	if ((!items || items.length === 0) || isLoading || !characters) {
 		return (
 			<LoadingBox>
-				<Spin size={'large'} tip={'로딩중 입니다...'} />
+				<Spin size={'large'} tip={'로딩중 입니다...'}><div/></Spin>
                 { showResetButton 
                     ? 
                         <>
