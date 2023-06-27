@@ -4,23 +4,25 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ant-design/charts": "^1.4.2",
+    "@ant-design/codemod-v5": "^1.1.4",
     "@ant-design/icons": "^4.7.0",
+    "@ant-design/pro-layout": "^7.15.2",
     "@types/antd": "^1.0.0",
     "@types/pako": "^2.0.0",
     "@vercel/analytics": "^0.1.6",
-    "antd": "^4.24.5",
+    "antd": "^5.6.2",
     "pako": "^2.1.0",
     "react": "^18.2.0",
-    "react-css-theme-switcher": "^0.3.0",
     "react-dom": "^18.2.0",
+    "react-responsive": "^9.0.2",
     "react-rnd": "^10.4.1",
     "react-router-dom": "^6.4.3",
+    "recharts": "^2.7.2",
     "recoil": "^0.7.6",
     "styled-components": "^5.3.6"
   },
@@ -30,15 +32,8 @@
     "@types/react-dom": "^18.2.0",
     "@types/styled-components": "^5.1.26",
     "@vitejs/plugin-react": "^4.0.0",
-    "autoprefixer": "^10.4.13",
-    "gulp": "^4.0.2",
-    "gulp-csso": "^4.0.1",
-    "gulp-debug": "^4.0.0",
-    "gulp-less": "^5.0.0",
-    "gulp-postcss": "^9.0.1",
-    "less-plugin-npm-import": "^2.1.0",
     "sass": "^1.56.0",
     "typescript": "^5.0.4",
-    "vite": "^4.3.3"
+    "vite": "^4.3.9"
   }
 }

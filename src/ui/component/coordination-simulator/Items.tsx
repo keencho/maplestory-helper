@@ -1,10 +1,10 @@
-import {Button, Checkbox, Input, Select} from "antd";
+import {Button, Checkbox, Input, Select, Typography} from "antd";
 import React, {useEffect, useState} from "react";
 import {
-	EquipmentCategory,
-	equipmentCategoryName,
-	EquipmentSubCategory,
-	equipmentSubCategoryInfo
+    EquipmentCategory,
+    equipmentCategoryName,
+    EquipmentSubCategory,
+    equipmentSubCategoryInfo
 } from "../../../model/equipment.model";
 import {getItemIcon} from "../../../api/maplestory-io.api";
 import {cacheName, region, version} from "../../../model/maplestory-io.model";
@@ -13,6 +13,8 @@ import {BLUE} from '../../../model/color.model';
 import AsyncImage from "../common/element/AsyncImage";
 import {FlexBox} from '../common/element/FlexBox';
 import SkinDefault from '../../../assets/icon/items/skin_default.png'
+
+const { Text, Link } = Typography;
 
 const equipmentCategorySortMap: Map<EquipmentCategory, number> = new Map([
 	['Character', 0],
@@ -134,20 +136,22 @@ const Items = ({items, onClickItem}: { items: any, onClickItem: (item: any) => v
 							{
 								item.typeInfo.subCategory === 'Head'
 									?
-									<img src={SkinDefault} alt={'피부'} />
+									    <img src={SkinDefault} alt={'피부'} />
 									:
-									<AsyncImage
-										src={getItemIcon(region, version, item.id)}
-										cache={{cacheName: cacheName}}
-										alt={item.name}
-										style={{
-											width: 'auto',
-											height: 'auto',
-											maxWidth: '35px'
-										}}
-									/>
+                                        <AsyncImage
+                                            src={getItemIcon(region, version, item.id)}
+                                            cache={{cacheName: cacheName}}
+                                            alt={item.name}
+                                            style={{
+                                                width: 'auto',
+                                                height: 'auto',
+                                                maxWidth: '35px'
+                                            }}
+                                        />
 							}
-							<ItemName>{item.name}</ItemName>
+							<ItemName>
+                                {item.name}
+                            </ItemName>
 						</Item>
 					))
 				}
@@ -184,15 +188,14 @@ const SearchBox = styled.div`
 
 const ItemBox = styled.div`
 	overflow-y: auto;
-	width: 100%;
-	display: flex;
-	flex-wrap: wrap;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
 `
 
 const Item = styled.div`
 	cursor: pointer;
-	flex: 0 0 50%;
-	text-align: center;
+	width: 45%;
 	display: flex;
 	align-items: center;
 
@@ -217,7 +220,7 @@ const Item = styled.div`
 
 `
 
-const ItemName = styled.span`
+const ItemName = styled.div`
 	margin-left: auto;
 	word-break: keep-all;
 	max-width: 75%;

@@ -5,7 +5,6 @@ import {getAllItems} from '../../api/maplestory-io.api';
 import {CustomCol, CustomRow} from "../component/common/element/CustomRowCol";
 import Items from "../component/coordination-simulator/Items";
 import Characters from '../component/coordination-simulator/Characters';
-import NotificationUtil from '../../util/notification.util';
 import styled from "styled-components";
 import {FlexBox} from "../component/common/element/FlexBox";
 import {Button, Spin, Switch, Typography} from "antd";
@@ -22,11 +21,11 @@ import CustomPopConfirm from '../component/common/element/CustomPopConfirm';
 import {compress, deCompress} from '../../util/compress.util';
 import useModal from '../../hooks/useModal';
 import {GREY} from '../../model/color.model';
-import {RecoilLoadable} from "recoil";
 import {deleteOldCache} from "../../util/fetch.util";
 import {cacheName} from "../../model/maplestory-io.model";
+import useNotification from "../../hooks/useNotification";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const LoadingBox = styled(FlexBox)`
 	width: 100%;
@@ -41,7 +40,8 @@ const LoadingBox = styled(FlexBox)`
 const QUERY_STRING_COMPRESSED_DATA_KEY = "compressed_data";
 
 const CoordinationSimulatorContainerWrapper = () => {
-
+    
+    const notification = useNotification();
 	const [items, errors, isLoading] = useMapleFetch({
 		apiURL: getAllItems,
 		filter: (data: any) => data
@@ -101,9 +101,9 @@ const CoordinationSimulatorContainerWrapper = () => {
 				}
 				isAccessByCodiSharedData = true;
 				autoSavedData = deCompressedData;
-				NotificationUtil.fire('success', '코디 불러오기에 성공하였습니다.', { duration: 3 } );
+				notification('success', '코디 불러오기에 성공하였습니다.', { duration: 3 } );
 			} catch (e) {
-				NotificationUtil.fire('warning', '코디 불러오기에 실패하였습니다. URL을 다시 공유받아 보세요.', { duration: 5 } );
+				notification('warning', '코디 불러오기에 실패하였습니다. URL을 다시 공유받아 보세요.', { duration: 5 } );
 				isAccessByCodiSharedData = false;
 			}
 		}
@@ -122,7 +122,7 @@ const CoordinationSimulatorContainerWrapper = () => {
 					}
 				}
 			} catch (e) {
-				NotificationUtil.fire('warning', '저장된 데이터를 불러올수 없어 새로운 캐릭터 셋을 불러옵니다.', { duration: 5 } );
+				notification('warning', '저장된 데이터를 불러올수 없어 새로운 캐릭터 셋을 불러옵니다.', { duration: 5 } );
 				autoSavedData = initDefaultCharacters();
 			}
 		}
@@ -141,7 +141,7 @@ const CoordinationSimulatorContainerWrapper = () => {
 	if ((!items || items.length === 0) || isLoading || !characters) {
 		return (
 			<LoadingBox>
-				<Spin size={'large'} tip={'로딩중 입니다...'} />
+				<Spin size={'large'} tip={'로딩중 입니다...'}><div/></Spin>
                 { showResetButton 
                     ? 
                         <>
@@ -171,7 +171,9 @@ const initDefaultCharacters = (): CharactersModel[] => {
 }
 
 const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any, charactersModel: CharactersModel[] }) => {
-	
+    
+    const notification = useNotification();
+ 
 	const [characters, setCharacters] = useState<CharactersModel[]>(charactersModel);
 	const [activeCharacterIdx, setActiveCharacterIdx] = useState<number>(0);
 	
@@ -195,7 +197,7 @@ const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any
 	
 	const validateCharacters = (): boolean => {
 		if (characters.length >= MAX_CHARACTER) {
-			NotificationUtil.fire('error', `최대 ${MAX_CHARACTER}개의 캐릭터만 생성할 수 있습니다.`);
+            notification('error', `최대 ${MAX_CHARACTER}개의 캐릭터만 생성할 수 있습니다.`)
 			return false;
 		}
 		
@@ -251,7 +253,7 @@ const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any
 			// 캐릭터 삭제
 			case 'DELETE':
 				if (characters.length === 1) {
-					NotificationUtil.fire('error', `최소 1개의 캐릭터가 존재해야 합니다.`);
+                    notification('error', '최소 1개의 캐릭터가 존재해야 합니다.')
 					return;
 				}
 				
@@ -262,7 +264,7 @@ const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any
 			// 캐릭터 아이템 삭제
 			case 'DELETE_ITEM':
 				if (!args || !args[0] || args[0].length === 0) {
-					NotificationUtil.fire('error', `시스템 에러가 발생하였습니다.`);
+                    notification('error', '시스템 에러가 발생하였습니다.')
 					return;
 				}
 				
@@ -329,14 +331,14 @@ const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any
 				const url = window.location.origin + window.location.pathname + '?' + QUERY_STRING_COMPRESSED_DATA_KEY + '=' + encodeURIComponent(compressed)
 				
 				if (url.length > 2000) {
-					NotificationUtil.fire('error', '캐릭터가 많아 URL을 생성할 수 없습니다. 캐릭터 수를 줄이고 다시 시도해 주세요.', { duration: 5 })
+					notification('error', '캐릭터가 많아 URL을 생성할 수 없습니다. 캐릭터 수를 줄이고 다시 시도해 주세요.', { duration: 5 })
 					return;
 				}
 				
 				const copy = () => {
 					navigator.clipboard.writeText(url)
-						.then(() => NotificationUtil.fire('success', 'URL이 복사되었습니다.'))
-						.catch(() => NotificationUtil.fire('error', 'URL 복사에 실패하였습니다. 직접 텍스트를 드래그하여 복사해 주세요.', { duration: 5 }))
+						.then(() => notification('success', 'URL이 복사되었습니다.'))
+						.catch(() => notification('error', 'URL 복사에 실패하였습니다. 직접 텍스트를 드래그하여 복사해 주세요.', { duration: 5 }))
 				}
 				
 				showModal({
@@ -370,7 +372,8 @@ const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any
 								<pre
 									style={{
 										marginTop: '.5rem',
-										padding: '.25rem 1rem'
+										padding: '.25rem 1rem',
+                                        overflow: 'auto'
 									}}
 								>
 									{url}
@@ -408,7 +411,7 @@ const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any
                     
                     if (oColor) {
                         if (color === oColor) {
-                            NotificationUtil.fire('error', '베이스 컬러와 믹스 컬러는 서로 달라야 합니다.');
+                            notification('error', '베이스 컬러와 믹스 컬러는 서로 달라야 합니다.');
                             return;
                         }
                     }
@@ -483,7 +486,7 @@ const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any
                 break;
 				
 			default:
-				NotificationUtil.fire('error', `구현되지 않은 액션입니다.`);
+                notification('error', '구현되지 않은 액션입니다.')
 				throw Error('not implemented action')
 		}
 	}
@@ -505,7 +508,9 @@ const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any
 				marginBottom={'.5rem'}
 				extraContents={
                     <FlexBox alignItems={'center'} gap={'.5rem'}>
-                        <CommonStyledSpan fontSize={'14px'} fontWeight={600}>자동저장</CommonStyledSpan>
+                        <CommonStyledSpan fontSize={'14px'} fontWeight={600}>
+                            자동저장
+                        </CommonStyledSpan>
                         <Switch checked={autoSave} onChange={setAutoSave} />
                         <Button type={'primary'} size={'small'} onClick={() => doAction('SHARE_CODI')}>코디 공유하기</Button>
                         <CustomPopConfirm
@@ -524,7 +529,7 @@ const CoordinationSimulatorContainer = ({ items, charactersModel }: { items: any
 				<CustomCol span={18} hideOverflow={true}>
 					<Characters
 						characters={characters}
-						activeCharacterIdx={activeCharacterIdx}
+                        activeCharacterIdx={activeCharacterIdx}
 						setActiveCharacterIdx={setActiveCharacterIdx}
 						doAction={doAction}
 					/>

@@ -43,7 +43,11 @@ const AsyncImage = (props: Props) => {
         if (props.displayEmptyOnLoading === true) {
             return <></>
         } else {
-            return <Spin size={'small'} tip={props.loadingTip} />
+            return (
+                <Spin size={'small'} tip={props.loadingTip}>
+                    <div/>
+                </Spin>
+            )
         }
 	}
 	

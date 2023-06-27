@@ -2,23 +2,23 @@ import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {Button, Descriptions, Switch, Table, Tabs, Tag, Typography} from 'antd';
 import {
-	Boss,
-	BossColumn,
-	BossInformation,
-	DailyBossMap,
-	Difficulty,
-	DifficultyKor,
-	getBossPriceTable,
-	WeeklyBossMap
+    Boss,
+    BossColumn,
+    BossInformation,
+    DailyBossMap,
+    Difficulty,
+    DifficultyKor,
+    getBossPriceTable,
+    WeeklyBossMap
 } from '../../model/boss.model';
 import {CustomCol, CustomRow} from '../component/common/element/CustomRowCol';
-import NotificationUtil from '../../util/notification.util';
 import PageTitle from '../component/common/PageTitle';
 import useModal from '../../hooks/useModal';
 import BossTable from '../component/boss-soul-crystal-calculator/BossTable';
 import BossSoulCrystalCalculatorHelp from '../component/boss-soul-crystal-calculator/BossSoulCrystalCalculatorHelp';
 import {FlexBox} from '../component/common/element/FlexBox';
-import { CommonStyledSpan } from '../../model/style.model';
+import {CommonStyledSpan} from '../../model/style.model';
+import useNotification from "../../hooks/useNotification";
 
 const { Title } = Typography;
 const { Column } = Table;
@@ -55,13 +55,18 @@ export const BossSoulCrystalCalculatorContainer = () => {
 	const localStorageAutoSave = window.localStorage.getItem(AUTO_SAVE_KEY);
 	const localStorageTabData = window.localStorage.getItem(TAB_DATA_KEY);
 	
-	const [activeTabKey, setActiveTabKey] = useState<string>('1');
+    const notification = useNotification();
 	const [autoSave, setAutoSave] = useState<boolean>(localStorageAutoSave !== null && (localStorageAutoSave === 'true' || localStorageAutoSave === 'false') ? localStorageAutoSave === 'true' : true);
 	const [tabData, setTabData] = useState<BossSoulCrystalCalculatorTabData[]>(
-		(autoSave && localStorageTabData !== null)
+        autoSave && localStorageTabData !== null
 		? JSON.parse(localStorageTabData)
 		: [{ label: '캐릭터1', key: '1', dailyBossData: DailyBossMap.map(mappingBoss), weeklyBossData: WeeklyBossMap.map(mappingBoss) }]
 	);
+    const [activeTabKey, setActiveTabKey] = useState<string>(
+        autoSave && localStorageTabData !== null
+        ? Math.min(...JSON.parse(localStorageTabData).map((td: any) => Number(td.key))).toString()
+        : '1'
+    );
 	const [showModal] = useModal();
 	
 	const onChange = (tabKey: string, type: 'daily' | 'weekly', column: BossColumn, key: 'difficulty' | 'numberOfPeople' | 'defeatCount', value: any) => {
@@ -112,21 +117,33 @@ export const BossSoulCrystalCalculatorContainer = () => {
 			return td;
 		}))
 	}
+    
+    // 1 ~ infinite 범위까지 배열내에 존재하지 않는 수중 가장 작은 수.
+    const buildKey = () => {
+        let ret = 1;
+        
+        for (let i = 0; i < tabData.length; i ++) {
+            if (Number(tabData[i].key) === ret) {
+                ret ++;
+            }
+        }
+        
+        return ret.toString();
+    }
 	
 	const onEdit = (e: React.MouseEvent | React.KeyboardEvent | string, action: 'add' | 'remove') => {
 		if (action === 'add') {
 			if (tabData.length >= 5) {
-				NotificationUtil.fire('error', '추가 실패', { description: '최대 5개의 캐릭터 탭을 만들 수 있습니다.' });
+                notification('error', '최대 5개의 캐릭터 탭을 만들 수 있습니다.')
 				return;
 			}
-			
-			// 키를 단순히 배열길이 + 1 로 하면 난리나기 때문에 max key 뽑아서 + 1 처리함.
-			const activeKey = (Math.max(...tabData.map(v => Number(v.key))) + 1).toString();
-			setTabData((pv: BossSoulCrystalCalculatorTabData[]) => [ ...pv, { key: (Math.max(...tabData.map(v => Number(v.key))) + 1).toString(), label: `캐릭터${pv.length + 1}`, dailyBossData: DailyBossMap.map(mappingBoss), weeklyBossData: WeeklyBossMap.map(mappingBoss) } ] )
+   
+			const activeKey = buildKey();
+			setTabData((pv: BossSoulCrystalCalculatorTabData[]) => [ ...pv, { key: activeKey, label: `캐릭터${pv.length + 1}`, dailyBossData: DailyBossMap.map(mappingBoss), weeklyBossData: WeeklyBossMap.map(mappingBoss) } ] )
 			setActiveTabKey(activeKey)
 		} else {
 			if (tabData.length === 1) {
-				NotificationUtil.fire('error', '삭제 실패', { description: '최소 1개의 캐릭터 탭이 존재해야 합니다.' });
+                notification('error', '최소 1개의 캐릭터 탭이 존재해야 합니다.')
 				return;
 			}
 			
@@ -165,20 +182,20 @@ export const BossSoulCrystalCalculatorContainer = () => {
 				})
 		})
 		
-		NotificationUtil.fire('success', '초기화 완료', { description: '현재 탭이 초기화 되었습니다.' })
+        notification('success', '현재 탭이 초기화 되었습니다.');
 	}
 	
 	const copyCurrentTab = () => {
 		if (tabData.length >= 5) {
-			NotificationUtil.fire('error', '복사 실패', { description: '최대 5개의 캐릭터 탭을 만들 수 있습니다.' });
+            notification('error', '최대 5개의 캐릭터 탭을 만들 수 있습니다.')
 			return;
 		}
 		
-		const activeKey = (Math.max(...tabData.map(v => Number(v.key))) + 1).toString();
+		const activeKey = buildKey();
 		const currentActiveData = tabData.find(data => data.key === activeTabKey)!;
 		
 		setTabData((pv: BossSoulCrystalCalculatorTabData[]) => [ ...pv, {
-			key: (Math.max(...tabData.map(v => Number(v.key))) + 1).toString(),
+			key: activeKey,
 			label: `캐릭터${pv.length + 1}`,
 			dailyBossData: currentActiveData.dailyBossData,
 			weeklyBossData: currentActiveData.weeklyBossData
@@ -257,7 +274,9 @@ export const BossSoulCrystalCalculatorContainer = () => {
 				extraContents={
 				<FlexBox gap={'.5rem'}>
 					<FlexBox alignItems={'center'} gap={'.5rem'}>
-						<CommonStyledSpan fontSize={'14px'} fontWeight={600}>자동저장</CommonStyledSpan>
+						<CommonStyledSpan fontSize={'14px'} fontWeight={600}>
+                            자동저장
+                        </CommonStyledSpan>
 						<Switch checked={autoSave} onChange={setAutoSave} />
 					</FlexBox>
 					<Button type={'primary'} onClick={openHelpModal}>도움말</Button>
@@ -308,7 +327,7 @@ export const BossSoulCrystalCalculatorContainer = () => {
 						<Descriptions.Item label="수입 총합" span={2}>{calculateData().priceTotal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</Descriptions.Item>
 					</Descriptions>
 					
-					<Title level={5} style={{ marginTop: '2rem' }}>결정석 가격표</Title>
+					<Title level={5} style={{ marginTop: '1rem' }}>결정석 가격표</Title>
 					<Table dataSource={getBossPriceTable()} pagination={false} sticky={true} size={'small'} style={{ overflow: 'auto' }}>
 						<Column
 							width={'10%'}

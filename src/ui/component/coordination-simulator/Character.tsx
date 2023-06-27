@@ -174,7 +174,7 @@ const Character = (props: Props) => {
                                  draggable={false}
                             />
                         ))
-                        : <Spin size={'small'} tip={'Loading...'}/>
+                        : <Spin size={'small'} tip={'Loading...'}><div/></Spin>
                 }
             </ImageWrapper>
         </Rnd>
