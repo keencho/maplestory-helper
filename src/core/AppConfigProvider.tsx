@@ -1,8 +1,7 @@
-import {ThemeSwitcherProvider} from 'react-css-theme-switcher';
 import {useRecoilValue} from 'recoil';
 import {ThemeAtom} from '../recoil/theme.atom';
 import React from 'react';
-import {ConfigProvider, theme, Button, Card, notification} from "antd";
+import {ConfigProvider, theme} from "antd";
 import {AliasToken} from "antd/es/theme/interface";
 
 interface Props {

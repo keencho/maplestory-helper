@@ -1,5 +1,5 @@
 import PageTitle from '../component/common/PageTitle';
-import {Button, Checkbox, Drawer, Input, InputNumber, Radio, Result, Spin, Typography} from 'antd';
+import {Alert, Button, Checkbox, Drawer, Input, InputNumber, Radio, Result, Spin, Typography} from 'antd';
 import {CustomCol, CustomRow} from '../component/common/element/CustomRowCol';
 import React, {useEffect, useRef, useState} from 'react';
 import {FlexBox} from '../component/common/element/FlexBox';
@@ -18,8 +18,9 @@ import {doStarForce} from '../../util/starforce-util';
 import StarForceSimulationWorker from '../../workers/starforce-simulation.worker.ts?worker';
 import AsyncImage from "../component/common/element/AsyncImage";
 import useNotification from "../../hooks/useNotification";
+import SimulationV2 from "../component/equipment-enhancement-simulator/SimulationV2";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 const LoadingBox = styled(FlexBox)`
 	width: 100%;
@@ -385,7 +386,7 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
                                                 : '강화'
                                     }
                                 </Button>
-                                <Button type={'primary'} style={{ flex: 1 }} onClick={doStarForceSimulating} disabled={autoStarForceRunning}>
+                                <Button type={'primary'} style={{ flex: 1 }} onClick={doStarForceSimulating} disabled={!(item && item.isAvailableStarForce)}>
                                     {
                                         starForceSimulationRunning
                                         ? '시뮬레이션 멈추기'
@@ -437,8 +438,8 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
                                                                 alt={item.name}
                                                                 style={{ width: '30px' }}
                                                             />
-                                                            <span>{item.name}</span>
-                                                            <span style={{ marginLeft: 'auto' }}>{item.requiredLevel} lv</span>
+                                                            <Text>{item.name}</Text>
+                                                            <Text style={{ marginLeft: 'auto' }}>{item.requiredLevel} lv</Text>
                                                         </FlexBox>
                                                     </SearchBoxItem>
                                                 )
@@ -476,7 +477,12 @@ export const EquipmentEnhancementSimulator = ({ items } : { items: any }) => {
                                         event={event}
                                     />
                                 :
-                                <></>
+                                <SimulationV2
+                                    simulationNumber={starForceSimulationNumber}
+                                    progressRate={starForceSimulationPercentage}
+                                    simulationResult={starForceSimulationResult}
+                                    running={starForceSimulationRunning}
+                                />
                                 // <Simulation
                                 // 	simulationNumber={starForceSimulationNumber}
                                 // 	progressRate={starForceSimulationPercentage}

@@ -44,33 +44,27 @@ const LeftMenu = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const [collapsed, setCollapsed] = useState(false);
-    
-    const ui = useRecoilValue(ResponsiveUIAtom);
 	
 	const toggleCollapsed = () => {
 		setCollapsed(!collapsed);
 	};
 	
 	return (
-        ui?.isDesktop
-            ?
-                <FlexBox flexDirection={'column'} alignItems={collapsed ? 'center' : 'flex-start'} minWidth={collapsed ? 'inherit' : '256px'}>
-                    <Button type="primary" onClick={toggleCollapsed} style={{ marginBottom: '.5rem', width: 'inherit', marginLeft: collapsed ? 'inherit' : '1rem' }}>
-                        {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-                    </Button>
-                    <Menu
-                        mode='inline'
-                        inlineCollapsed={collapsed}
-                        activeKey={location.pathname}
-                        onClick={(e) => navigate(e.key)}
-                        items={items}
-                        style={{
-                            height: '100%'
-                        }}
-                    />
-                </FlexBox>
-            :
-            <></>
+        <FlexBox flexDirection={'column'} alignItems={collapsed ? 'center' : 'flex-start'} minWidth={collapsed ? 'inherit' : '256px'}>
+            <Button type="primary" onClick={toggleCollapsed} style={{ marginBottom: '.5rem', width: 'inherit', marginLeft: collapsed ? 'inherit' : '1rem' }}>
+                {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+            </Button>
+            <Menu
+                mode='inline'
+                inlineCollapsed={collapsed}
+                activeKey={location.pathname}
+                onClick={(e) => navigate(e.key)}
+                items={items}
+                style={{
+                    height: '100%'
+                }}
+            />
+        </FlexBox>
 	);
 }
 
