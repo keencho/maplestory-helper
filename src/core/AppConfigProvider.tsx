@@ -11,7 +11,7 @@ interface Props {
 const { defaultAlgorithm, darkAlgorithm } = theme;
 
 const AppConfigProvider: React.FC<Props> = ({ children }) => {
-	
+ 
 	const theme = useRecoilValue(ThemeAtom);
     
     const getThemeToken = (): Partial<AliasToken> => {

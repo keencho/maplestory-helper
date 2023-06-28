@@ -5,9 +5,11 @@ import NoMarginHeading from '../common/element/NoMarginHeading';
 import {Button, Progress} from 'antd';
 import {BLUE, RED} from '../../../model/color.model';
 import {ResetButton} from '../common/element/ResetButton';
+import {screenSizeConfig} from "../../../model/ui.model";
 
 const Table = styled.table`
 	border-collapse: collapse;
+    white-space: nowrap;
 	
 	&:not(:last-child) {
 		margin-bottom: 16px;
@@ -18,6 +20,9 @@ const Table = styled.table`
 		
 		th, tr, td {
 			border: 1px solid;
+            @media screen and (max-width: ${screenSizeConfig.mobileMax}px) {
+                padding: 0 .5rem;
+            }
 		}
 		
 		&:before {

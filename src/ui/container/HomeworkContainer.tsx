@@ -14,6 +14,9 @@ import dayjs from "dayjs";
 import useNotification from "../../hooks/useNotification";
 import CustomPopConfirm from "../component/common/element/CustomPopConfirm";
 import {build} from "vite";
+import useUIRenderer from "../../hooks/useUIRenderer";
+import {useRecoilValue} from "recoil";
+import {ResponsiveUIAtom} from "../../recoil/responsive-ui.atom";
 
 const HOMEWORK_KEY = "HOMEWORK_V2"
 const MY_ROUTINE_KEY = 'MY_ROUTINE';
@@ -207,7 +210,7 @@ export const HomeworkContainer = () => {
 	const openHelpModal = () => {
 		showModal({
 			title: '도움말',
-			size: 'middle',
+			size: ui?.isDesktop ? 'middle' : undefined,
 			contents: <HomeworkHelp />
 		})
 	}
@@ -237,8 +240,7 @@ export const HomeworkContainer = () => {
                 notification('error', '최대 5개의 캐릭터 탭을 만들 수 있습니다.', { title: '추가 실패' });
 				return;
 			}
-			
-			// 키를 단순히 배열길이 + 1 로 하면 난리나기 때문에 max key 뽑아서 + 1 처리함.
+   
 			const activeKey = buildKey();
 			setTabData((pv: HomeworkTabData[]) =>
 				[
@@ -363,29 +365,36 @@ export const HomeworkContainer = () => {
   
 		notification('success', `${tabData.find(td => td.key === activeTabKey)!.label} 탭이 초기화 되었습니다.`, { title: '초기화 완료' })
 	}
+    
+    const ui = useRecoilValue(ResponsiveUIAtom);
+    const renderer = useUIRenderer();
 	
 	return (
 		<>
 			<PageTitle
 				title={'숙제표'}
-				extraContents={<Button type={'primary'} onClick={openHelpModal}>도움말</Button>}
+				extraContents={<Button size='small' type={'primary'} onClick={openHelpModal}>도움말</Button>}
 				marginBottom={'.5rem'}
 			/>
 			<CustomRow gutter={32}>
-				<CustomCol span={9} hideOverflow={true}>
-					<FlexBox alignItems={'center'} justifyContent={'space-between'} margin={'0 0 .25rem 0'}>
-						<NoMarginHeading size={5}>나만의 루틴</NoMarginHeading>
-						<Button size={'small'} type={'primary'} onClick={saveMyRoutine}>저장</Button>
-					</FlexBox>
-					<Textarea
-						value={myRoutine}
-						setValue={setMyRoutine}
-						fullWidth={true}
-						resize={'none'}
-						height={300}
-					/>
-				</CustomCol>
-				<CustomCol span={15}>
+                {
+                    renderer({ desktop:
+                            <CustomCol span={9} hideOverflow={true}>
+                                <FlexBox alignItems={'center'} justifyContent={'space-between'} margin={'0 0 .25rem 0'}>
+                                    <NoMarginHeading size={5}>나만의 루틴</NoMarginHeading>
+                                    <Button size={'small'} type={'primary'} onClick={saveMyRoutine}>저장</Button>
+                                </FlexBox>
+                                <Textarea
+                                    value={myRoutine}
+                                    setValue={setMyRoutine}
+                                    fullWidth={true}
+                                    resize={'none'}
+                                    height={300}
+                                />
+                            </CustomCol>
+                    })
+                }
+				<CustomCol span={ui?.isDesktop ? 15 : 24}>
 					<Tabs
 						activeKey={activeTabKey}
 						onChange={setActiveTabKey}
@@ -398,7 +407,7 @@ export const HomeworkContainer = () => {
                                 title={`${tabData.find(td => td.key === activeTabKey)!.label} 탭의 전체 달성 여부를 초기화 하시겠습니까?`}
                                 onConfirm={resetCurrentTab}
                             >
-							    <Button type={'primary'}>{tabData.find(td => td.key === activeTabKey)!.label} 탭 초기화</Button>
+							    <Button size='small' type={'primary'}>{tabData.find(td => td.key === activeTabKey)!.label} 탭 초기화</Button>
                             </CustomPopConfirm>
 						}
 						items={tabData.map((data: HomeworkTabData) => {

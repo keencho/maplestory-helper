@@ -1,20 +1,11 @@
-import {
-	DollarCircleOutlined,
-	HomeOutlined,
-	LinkOutlined,
-	MenuFoldOutlined,
-	MenuUnfoldOutlined,
-} from '@ant-design/icons';
+import {MenuFoldOutlined, MenuUnfoldOutlined,} from '@ant-design/icons';
 import type {MenuProps} from 'antd';
 import {Button, Menu} from 'antd';
-import React, {useEffect, useState} from 'react';
-import Path from '../../../model/path.model';
+import React, {useState} from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
-import { Menu as AppMenu, MenuType } from '../../../model/menu.model'
+import {Menu as AppMenu, MenuType} from '../../../model/menu.model'
 import {FlexBox} from './element/FlexBox';
-import {useMediaQuery} from "react-responsive";
-import {useRecoilValue} from "recoil";
-import {ResponsiveUIAtom} from "../../../recoil/responsive-ui.atom";
+import useUIRenderer from "../../../hooks/useUIRenderer";
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -40,25 +31,39 @@ const items: MenuItem[] = AppMenu
 		return getItem(data.label, data.path, data.menuIcon)
 	});
 
-const LeftMenu = () => {
+interface Props {
+    callback?: () => any
+}
+
+const Menus = (props: Props) => {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const [collapsed, setCollapsed] = useState(false);
+    const uiRenderer = useUIRenderer();
 	
 	const toggleCollapsed = () => {
 		setCollapsed(!collapsed);
 	};
-	
+ 
 	return (
         <FlexBox flexDirection={'column'} alignItems={collapsed ? 'center' : 'flex-start'} minWidth={collapsed ? 'inherit' : '256px'}>
-            <Button type="primary" onClick={toggleCollapsed} style={{ marginBottom: '.5rem', width: 'inherit', marginLeft: collapsed ? 'inherit' : '1rem' }}>
-                {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            </Button>
+            {
+                uiRenderer({ desktop:
+                        <Button type="primary" onClick={toggleCollapsed} style={{ marginBottom: '.5rem', width: 'inherit', marginLeft: collapsed ? 'inherit' : '1rem' }}>
+                            {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                        </Button>
+                })
+            }
             <Menu
                 mode='inline'
                 inlineCollapsed={collapsed}
                 activeKey={location.pathname}
-                onClick={(e) => navigate(e.key)}
+                onClick={(e) => {
+                    navigate(e.key)
+                    if (props.callback) {
+                        props.callback();
+                    }
+                }}
                 items={items}
                 style={{
                     height: '100%'
@@ -68,4 +73,4 @@ const LeftMenu = () => {
 	);
 }
 
-export default LeftMenu
+export default Menus

@@ -2,12 +2,15 @@ import {useMediaQuery} from "react-responsive";
 import {useEffect} from "react";
 import {useSetRecoilState} from "recoil";
 import {ResponsiveUIAtom} from "../recoil/responsive-ui.atom";
+import {screenSizeConfig} from "../model/ui.model";
 
 const ResponsiveUIHandler = () => {
     
-    const isDesktop = useMediaQuery({ minWidth: 992 });
-    const isTablet = useMediaQuery({ minWidth: 768, maxWidth: 991 });
-    const isMobile = useMediaQuery({ maxWidth: 767 });
+    const config = screenSizeConfig;
+    
+    const isDesktop = useMediaQuery({ minWidth: config.desktopMin });
+    const isTablet = useMediaQuery({ minWidth: config.tabletMin, maxWidth: config.tabletMax });
+    const isMobile = useMediaQuery({ maxWidth: config.mobileMax });
     
     const setter = useSetRecoilState(ResponsiveUIAtom);
     
