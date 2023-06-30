@@ -1,4 +1,4 @@
-import { PageHeader } from '@ant-design/pro-layout';
+import {PageHeader} from '@ant-design/pro-layout';
 import {Button, Drawer, Switch} from 'antd';
 import React, {useState} from 'react';
 import {useRecoilState} from 'recoil';

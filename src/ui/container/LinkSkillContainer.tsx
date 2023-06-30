@@ -1,9 +1,9 @@
 import PageTitle from '../component/common/PageTitle';
 import React, {useEffect, useState} from 'react';
 import {
-	LinkSkillTable,
-	LinkSkillTableDisplayData,
-	LinkSkillTableDisplayDataLinkType
+    LinkSkillTable,
+    LinkSkillTableDisplayData,
+    LinkSkillTableDisplayDataLinkType
 } from '../component/link/LinkSkillTable';
 import {LinkMap, LinkModel, LinkType} from '../../model/link.model';
 import {Class, ClassLine, ClassMap, ClassModel, JobLine} from '../../model/class.model';

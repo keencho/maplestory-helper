@@ -13,7 +13,6 @@ import {FlexBox} from '../component/common/element/FlexBox';
 import dayjs from "dayjs";
 import useNotification from "../../hooks/useNotification";
 import CustomPopConfirm from "../component/common/element/CustomPopConfirm";
-import {build} from "vite";
 import useUIRenderer from "../../hooks/useUIRenderer";
 import {useRecoilValue} from "recoil";
 import {ResponsiveUIAtom} from "../../recoil/responsive-ui.atom";

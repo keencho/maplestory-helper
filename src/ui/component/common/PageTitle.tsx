@@ -1,5 +1,4 @@
 import styled, {css} from 'styled-components';
-import NoMarginHeading from './element/NoMarginHeading';
 import {Typography} from "antd";
 
 const Wrapper = styled.div<{ marginBottom?: string | number }>`

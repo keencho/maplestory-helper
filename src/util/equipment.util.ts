@@ -1,12 +1,12 @@
 import {
-	Equipment,
-	EquipmentCategory,
-	EquipmentSubCategory,
-	equipmentSubCategoryInfo,
-	metaInfoEquipmentOptionMap,
-	MetaInfoStats,
-	StarForceEventType,
-	Stats
+    Equipment,
+    EquipmentCategory,
+    EquipmentSubCategory,
+    equipmentSubCategoryInfo,
+    metaInfoEquipmentOptionMap,
+    MetaInfoStats,
+    StarForceEventType,
+    Stats
 } from '../model/equipment.model';
 
 export const getMaxStarForce = (level: number, isSuperiorItem = false): number => {

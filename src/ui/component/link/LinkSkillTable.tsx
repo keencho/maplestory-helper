@@ -1,7 +1,6 @@
 import Column from 'antd/lib/table/Column';
 import {Table} from 'antd';
 import React from 'react';
-import NoMarginHeading from '../common/element/NoMarginHeading';
 
 export interface LinkSkillTableDisplayDataLinkType {
 	key: string

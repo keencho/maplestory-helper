@@ -1,19 +1,19 @@
 import {FlexBox} from '../common/element/FlexBox';
-import {Alert, Button, Spin, Typography} from 'antd';
+import {Alert, Spin, Typography} from 'antd';
 import {
-	getMaxStarForce,
-	getStarForceUpgradeInfo,
-	getSubCategoryName,
-	isSubWeapon,
-	isWeapon
+    getMaxStarForce,
+    getStarForceUpgradeInfo,
+    getSubCategoryName,
+    isSubWeapon,
+    isWeapon
 } from '../../../util/equipment.util';
 import {
-	Equipment,
-	equipmentCategoryName,
-	equipmentOptionName,
-	StarForceEventType
+    Equipment,
+    equipmentCategoryName,
+    equipmentOptionName,
+    StarForceEventType
 } from '../../../model/equipment.model';
-import React, {useEffect} from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import {StarFilled, StarOutlined} from '@ant-design/icons';
 import {numberComma} from '../../../util/common.util';
